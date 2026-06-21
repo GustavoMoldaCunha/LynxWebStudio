@@ -21,7 +21,7 @@ const body = stars
     const twinkle = star.twinkle
       ? `, twinkle: true, twinkleDuration: ${star.twinkleDuration}, twinkleDelay: ${star.twinkleDelay}`
       : ''
-    return `  { x: ${star.x}, y: ${star.y}, r: ${star.r}, opacity: ${star.opacity}${twinkle} },`
+    return `  { x: ${star.x}, y: ${star.y}, r: ${star.r}${twinkle} },`
   })
   .join('\n')
 

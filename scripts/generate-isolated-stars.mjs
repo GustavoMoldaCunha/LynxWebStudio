@@ -11,7 +11,7 @@ if (stars.length < COUNT) {
 }
 
 const body = stars
-  .map((star) => `  { x: ${star.x}, y: ${star.y}, r: ${star.r}, opacity: ${star.opacity} },`)
+  .map((star) => `  { x: ${star.x}, y: ${star.y}, r: ${star.r} },`)
   .join('\n')
 
 const file = `export const isolatedStars = [

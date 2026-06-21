@@ -6,10 +6,10 @@
       <div class="section-deco hero-deco">
         <SectionDecoDraw orientation="horizontal" observe-target=".hero">
           <template #star>
-            <Sparkle class="section-deco-sparkle" />
+            <DecoSparkle class="section-deco-sparkle" />
           </template>
           <template #line>
-            <span class="section-deco-line"></span>
+            <SectionDecoLine class="section-deco-line" />
           </template>
         </SectionDecoDraw>
         <span class="section-deco-label">Documentação legal</span>
@@ -53,8 +53,9 @@
 </template>
 
 <script setup>
-import { Sparkle } from 'lucide-vue-next'
+import DecoSparkle from './DecoSparkle.vue'
 import SectionDecoDraw from './SectionDecoDraw.vue'
+import SectionDecoLine from './SectionDecoLine.vue'
 
 const sections = [
   {
@@ -185,7 +186,7 @@ const contactItems = [
 }
 .logo span { color: var(--yellow); }
 .badge {
-  font-size: 0.7rem; font-weight: 600; letter-spacing: 0.12em;
+  font-size: var(--text-sm); font-weight: 600; letter-spacing: 0.12em;
   text-transform: uppercase; color: var(--dark);
   background: var(--yellow); padding: 4px 12px;
   border-radius: var(--r-pill);
@@ -206,7 +207,7 @@ h1 {
 }
 .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .meta-tag {
-  font-size: 0.8rem; color: rgba(232,230,255,0.5);
+  font-size: var(--text-sm); color: rgba(232,230,255,0.5);
   border: 1px solid var(--border); border-radius: var(--r-pill); padding: 4px 12px;
 }
 
@@ -226,7 +227,7 @@ main {
 .section:hover { border-color: rgba(56,15,233,0.38); }
 
 .section-number {
-  font-family: 'Syne', sans-serif; font-size: 0.7rem; font-weight: 700;
+  font-family: 'Syne', sans-serif; font-size: var(--text-sm); font-weight: 700;
   letter-spacing: 0.16em; text-transform: uppercase;
   color: var(--blue); margin-bottom: 12px;
 }
@@ -267,7 +268,7 @@ h2 {
   background: rgba(240,255,31,0.08);
   border: 1px solid rgba(240,255,31,0.25);
   border-radius: var(--r-pill); padding: 8px 16px;
-  font-size: 0.85rem; font-weight: 500; color: var(--yellow); margin-top: 12px;
+  font-size: var(--text-sm); font-weight: 500; color: var(--yellow); margin-top: 12px;
 }
 
 /* ── CONTACT CARD ── */
@@ -288,7 +289,7 @@ h2 {
 }
 .contact-item:last-child { border-bottom: none; }
 .contact-label {
-  font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em;
+  font-size: var(--text-sm); font-weight: 600; letter-spacing: 0.1em;
   text-transform: uppercase; color: rgba(232,230,255,0.4);
   min-width: 72px; flex-shrink: 0; padding-top: 1px;
 }
@@ -308,7 +309,7 @@ footer {
   border-top: 1px solid var(--border);
   padding: 32px 24px; text-align: center;
 }
-footer p { font-size: 0.8rem; color: rgba(232,230,255,0.3); margin: 0; }
+footer p { font-size: var(--text-sm); color: rgba(232,230,255,0.3); margin: 0; }
 footer strong { color: rgba(232,230,255,0.5); }
 
 

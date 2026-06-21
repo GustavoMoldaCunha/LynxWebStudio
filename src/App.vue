@@ -1,12 +1,19 @@
 <template>
 
+<!---------------------- GLOBAL GRAIN --------------------->
+  <GlobalGrain />
+
 <!---------------------- NAVBAR --------------------->  
   <MenuBtn />
+  <ScrollSparkle />
 
 <!---------------------- HERO --------------------->  
   <section class="banner hero" id="top">
-    <ConstellationBackground />
-    <StarMapDecor />
+    <div class="hero-sky" aria-hidden="true">
+      <HeroStarfield />
+      <HeroConstellations />
+    </div>
+    <HeroTerrain />
     <div class="banner-copy">
       <h1 class="banner-title">{{ typedTitle }}</h1>
       <p class="banner-description">
@@ -15,7 +22,6 @@
       <div class="banner-footer">
         <div class="banner-footer-buttons">
           <div class="banner-footer-side banner-footer-side--left">
-            <HeroButtonConstellations side="left" />
             <a class="scroll-btn scroll-btn--outline btn-link banner-footer-link" href="#servicos">
               <span>Veja mais</span>
               <ArrowDown :size="12" stroke-width="2.5" />
@@ -23,7 +29,6 @@
           </div>
           <div class="banner-footer-side banner-footer-side--right">
             <button class="scroll-btn banner-footer-cta" @click="scrollToNext">Peça agora</button>
-            <HeroButtonConstellations side="right" />
           </div>
         </div>
       </div>
@@ -39,10 +44,10 @@
         <span class="secao-label">[ vantagens ]</span>
         <SectionDecoDraw observe-target=".intro-wrapper">
           <template #line>
-            <div class="barra-lateral"></div>
+            <SectionDecoLine class="barra-lateral" orientation="vertical" />
           </template>
           <template #star>
-            <Sparkle class="deco-angulo deco-sparkle" />
+            <DecoSparkle class="deco-angulo deco-sparkle" />
           </template>
         </SectionDecoDraw>
       </div>
@@ -60,15 +65,20 @@
         />
         <p class="intro-sub">Investir em site responsivo, design atraente e velocidade gera vantagem competitiva</p>
 
-        <div class="vantagens">
-          <div class="vantagem-bar"
-            v-for="item in vantagens"
-            :key="item.title">
-            <div class="icon-box">
-              <component :is="item.icon" />
-            </div>
-            <div class="text">
-              <h3>{{ item.title }}</h3>
+        <div class="vantagens-wrap">
+          <div class="vantagens">
+            <div class="vantagem-bar"
+              v-for="item in vantagens"
+              :key="item.title">
+              <div class="vantagem-header">
+                <div class="icon-box">
+                  <component :is="item.icon" />
+                </div>
+                <h3>{{ item.title }}</h3>
+                <span class="vantagem-chevron" aria-hidden="true">
+                  <ChevronDown />
+                </span>
+              </div>
               <p>{{ item.desc }}</p>
             </div>
           </div>
@@ -78,10 +88,10 @@
       <div class="intro-decoracao direita">
         <SectionDecoDraw observe-target=".intro-wrapper" reverse>
           <template #star>
-            <Sparkle class="deco-angulo deco-sparkle" />
+            <DecoSparkle class="deco-angulo deco-sparkle" />
           </template>
           <template #line>
-            <div class="barra-lateral"></div>
+            <SectionDecoLine class="barra-lateral" orientation="vertical" reverse />
           </template>
         </SectionDecoDraw>
       </div>
@@ -93,10 +103,10 @@
         <div class="section-deco services-panel-deco">
           <SectionDecoDraw orientation="horizontal" observe-target=".services-panel">
             <template #star>
-              <Sparkle class="section-deco-sparkle" />
+              <DecoSparkle class="section-deco-sparkle" />
             </template>
             <template #line>
-              <span class="section-deco-line"></span>
+              <SectionDecoLine class="section-deco-line" />
             </template>
           </SectionDecoDraw>
           <span class="section-deco-label">[ serviços ]</span>
@@ -104,14 +114,16 @@
       </div>
 
       <div class="services-list">
-        <div 
-          v-for="(service, index) in listaServicos" 
+        <div
+          v-for="(service, index) in listaServicos"
           :key="index"
           class="service-row"
-          :class="{ 
+          :class="{
             'service-row--active': activeService === index,
-            'service-row--last': index === listaServicos.length - 1 
+            'service-row--last': index === listaServicos.length - 1
           }"
+          :data-service-card="index"
+          :style="serviceRowEnterStyle(index)"
           @mouseenter="activeService = index"
         >
           <div class="service-row-top">
@@ -119,45 +131,45 @@
               {{ service.num }}
             </span>
           </div>
-    
+
           <div class="service-row-body">
             <h3 class="service-title" :class="{ 'service-title--dim': activeService !== index }">
               {{ service.title }}
             </h3>
-      
-      <div class="service-content-wrapper">
-        <div class="service-row-detail">
-          <div class="service-row-left">
-            <div class="service-tags">
-              <span v-for="tag in service.tags" :key="tag" class="service-tag">
-                {{ tag }}
-              </span>
-            </div>
-            <p class="service-desc">{{ service.desc }}</p>
-          </div>
-          
-          <div class="service-row-images">
-            <div class="service-img-card">
-              <div class="service-img-placeholder" :class="service.imgClass1"></div>
-            </div>
-            <div class="service-img-card">
-              <div class="service-img-placeholder" :class="service.imgClass2"></div>
+
+            <div class="service-content-wrapper">
+              <div class="service-row-detail">
+                <div class="service-row-left">
+                  <div class="service-tags">
+                    <span v-for="tag in service.tags" :key="tag" class="service-tag">
+                      {{ tag }}
+                    </span>
+                  </div>
+                  <p class="service-desc">{{ service.desc }}</p>
+                </div>
+
+                <div class="service-row-images">
+                  <div class="service-img-card">
+                    <div class="service-img-placeholder" :class="service.imgClass1"></div>
+                  </div>
+                  <div class="service-img-card">
+                    <div class="service-img-placeholder" :class="service.imgClass2"></div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
-</div>
 
       <div class="services-panel-footer">
         <div class="services-footer-left section-deco">
           <SectionDecoDraw orientation="horizontal" observe-target=".services-panel">
             <template #star>
-              <Sparkle class="section-deco-sparkle" />
+              <DecoSparkle class="section-deco-sparkle" />
             </template>
             <template #line>
-              <span class="section-deco-line"></span>
+              <SectionDecoLine class="section-deco-line" />
             </template>
           </SectionDecoDraw>
           <p class="services-footer-text">Para pedidos específicos, por favor nos contate.</p>
@@ -185,6 +197,21 @@
 
     <div class="outros-block">
       <div class="outros-top">
+        <p class="outros-sub">
+          [ outros serviços ]
+          <SectionDecoDraw
+            orientation="horizontal"
+            observe-target=".outros-block"
+            class="outros-sub-deco"
+          >
+            <template #star>
+              <DecoSparkle class="outros-sub-sparkle" />
+            </template>
+            <template #line>
+              <SectionDecoLine class="outros-sub-line" />
+            </template>
+          </SectionDecoDraw>
+        </p>
         <TypingTitle
           class="outros-headline"
           :lines="[
@@ -192,17 +219,6 @@
             [{ text: 'Sem problema.', accentClass: 'accent' }]
           ]"
         />
-        <p class="outros-sub">
-          <SectionDecoDraw orientation="horizontal" observe-target=".outros-block">
-            <template #star>
-              <Sparkle class="outros-sub-sparkle" />
-            </template>
-            <template #line>
-              <span class="outros-sub-line"></span>
-            </template>
-          </SectionDecoDraw>
-          [ outros serviços ]
-        </p>
       </div>
 
       <div class="outros-cards">
@@ -235,10 +251,10 @@
         <div class="section-deco portfolio-deco">
           <SectionDecoDraw orientation="horizontal" observe-target=".portfolio-header">
             <template #star>
-              <Sparkle class="section-deco-sparkle" />
+              <DecoSparkle class="section-deco-sparkle" />
             </template>
             <template #line>
-              <span class="section-deco-line"></span>
+              <SectionDecoLine class="section-deco-line" />
             </template>
           </SectionDecoDraw>
           <span class="section-deco-label">[ Sites em Destaque ]</span>
@@ -307,12 +323,12 @@
   <div class="processo-wrapper">
     <div class="processo-header">
       <div class="processo-deco-line">
-        <SectionDecoDraw orientation="horizontal" observe-target="#processo">
+        <SectionDecoDraw orientation="horizontal" observe-target=".processo">
           <template #star>
-            <Sparkle class="processo-deco-sparkle" />
+            <DecoSparkle class="processo-deco-sparkle" />
           </template>
           <template #line>
-            <span class="processo-deco-bar"></span>
+            <SectionDecoLine class="processo-deco-bar" />
           </template>
         </SectionDecoDraw>
         <span class="processo-label">[ processo ]</span>
@@ -328,35 +344,34 @@
     <div class="processo-grid">
           <div class="processo-card processo-card-lg">
             <span class="processo-numero">01</span>
-            <h3>Criação de Estratégia</h3>
+            <h3>Estratégia e Briefing</h3>
             <p>
-              Entendemos seu negócio, público e objetivos para construir uma base estratégica sólida.
-              Definimos a estrutura do site, posicionamento e direcionamento visual para garantir clareza e impacto desde o início.
+              Começamos com uma conversa para entender seu negócio, seu público e o que o site precisa resolver.
+              A partir disso, definimos a estrutura de páginas, o tom visual e as prioridades do projeto — tudo documentado antes de qualquer linha ser desenhada.
             </p>
           </div>
 
           <div class="processo-card processo-card-sm">
             <span class="processo-numero">02</span>
-            <h3>Design e Prototipação</h3>
+            <h3>Design da Interface</h3>
             <p>
-              Criamos interfaces modernas que equilibram estética e usabilidade.
+              Criamos o layout completo do site com base na estratégia definida. Você recebe uma prévia visual para aprovar antes do desenvolvimento começar, evitando retrabalho e ajustando o que for preciso ainda nessa fase.
             </p>
           </div>
 
           <div class="processo-card processo-card-wide">
             <span class="processo-numero">03</span>
-            <h3>Desenvolvimento do Site</h3>
+            <h3>Desenvolvimento</h3>
             <p>
-              Desenvolvimento com performance, responsividade e integrações bem
-              estruturadas.
+              Com o design aprovado, desenvolvemos o site com foco em performance, responsividade (funciona bem em celular, tablet e desktop) e nas integrações necessárias, como formulários, WhatsApp, pagamento ou áreas administrativas.
             </p>
           </div>
 
           <div class="processo-card processo-card-cta">
             <span class="processo-numero">04</span>
-            <h3>Lançamento e Suporte</h3>
+            <h3>Testes, Lançamento e Suporte</h3>
             <p>
-              Publicamos o site e garantimos que tudo funcione perfeitamente.
+              Antes de publicar, testamos o site em diferentes dispositivos e navegadores. Após o lançamento, oferecemos um período de suporte para pequenos ajustes e garantimos que tudo continue funcionando como deveria.
             </p>
             <button class="processo-cta-btn" @click="scrollToContato">Solicite um orçamento</button>
           </div>
@@ -370,12 +385,12 @@
 
       <div class="pricing-header">
         <div class="section-deco pricing-deco">
-          <SectionDecoDraw orientation="horizontal" observe-target="#pricing">
+          <SectionDecoDraw orientation="horizontal" observe-target=".pricing">
             <template #star>
-              <Sparkle class="section-deco-sparkle" />
+              <DecoSparkle class="section-deco-sparkle" />
             </template>
             <template #line>
-              <span class="section-deco-line"></span>
+              <SectionDecoLine class="section-deco-line" />
             </template>
           </SectionDecoDraw>
           <span class="section-deco-label">[ preços ]</span>
@@ -523,16 +538,21 @@
 
 <script setup>
     import MenuBtn from './components/Navbar.vue'
-    import ConstellationBackground from './components/ConstellationBackground.vue'
-    import StarMapDecor from './components/StarMapDecor.vue'
-    import HeroButtonConstellations from './components/HeroButtonConstellations.vue'
+    import HeroStarfield from './components/HeroStarfield.vue'
+    import HeroConstellations from './components/HeroConstellations.vue'
+    import HeroTerrain from './components/HeroTerrain.vue'
+    import ScrollSparkle from './components/ScrollSparkle.vue'
+    import DecoSparkle from './components/DecoSparkle.vue'
     import TypingTitle from './components/TypingTitle.vue'
     import SectionDecoDraw from './components/SectionDecoDraw.vue'
-    import { ref, onMounted } from 'vue'
+    import SectionDecoLine from './components/SectionDecoLine.vue'
+    import GlobalGrain from './components/GlobalGrain.vue'
+    import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+    import { initLenis, destroyLenis, scrollTo } from './composables/useLenis'
     import LynxLogo from './assets/LynxLogoLetras.png'
     import { SlidersHorizontal, Globe, ShieldCheck, Eye, Search, 
              Smartphone, MessageCircle, Zap, Shield, Settings, Palette, 
-             BarChart2, FileText, ArrowUpRight, ArrowDown, Sparkle} from 'lucide-vue-next'
+             BarChart2, FileText, ArrowUpRight, ArrowDown, ChevronDown } from 'lucide-vue-next'
 
     const typedTitle = ref('')
 
@@ -652,6 +672,9 @@
       }
     ]
 
+    const SERVICE_CARD_ANIMATION_DELAYS = [0.1, 0.3, 0.5]
+    const serviceCardsEntered = ref(listaServicos.map(() => false))
+
     const projetos = ref([
       {
         num: '01',
@@ -705,14 +728,42 @@
 
     function scrollToContato() {
       const el = document.querySelector('.contato, #contato, [data-section="contato"]')
-      if (el) el.scrollIntoView({ behavior: 'smooth' })
+      if (el) scrollTo(el)
     }
 
     function scrollToNext() {
-      document.querySelector('#servicos')?.scrollIntoView({ behavior: 'smooth' })
+      const el = document.querySelector('#servicos')
+      if (el) scrollTo(el)
     }
 
-    onMounted(() => {
+    initLenis()
+
+    onUnmounted(() => {
+      destroyLenis()
+    })
+
+    function revealServiceCard(index) {
+      if (serviceCardsEntered.value[index]) return
+
+      const next = [...serviceCardsEntered.value]
+      next[index] = true
+      serviceCardsEntered.value = next
+    }
+
+    function serviceRowEnterStyle(index) {
+      if (!serviceCardsEntered.value[index]) {
+        return {
+          opacity: '0',
+          transform: 'translateY(40px)',
+        }
+      }
+
+      return {
+        animation: `service-card-enter 0.7s ease ${SERVICE_CARD_ANIMATION_DELAYS[index]}s forwards`,
+      }
+    }
+
+    onMounted(async () => {
       let i = 0
       const typeTitle = setInterval(() => {
         typedTitle.value += heroTitle[i]
@@ -720,19 +771,43 @@
         if (i === heroTitle.length) clearInterval(typeTitle)
       }, speed)
 
-      const items = document.querySelectorAll('.vantagem-bar')
+      await nextTick()
 
-      const observer = new IntersectionObserver((entries) => {
+      const revealObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             entry.target.classList.add('show')
+            revealObserver.unobserve(entry.target)
           }
         })
       }, {
         threshold: 0.2
       })
 
-      items.forEach(item => observer.observe(item))
+      document.querySelectorAll('.vantagem-bar').forEach(item => revealObserver.observe(item))
+
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        serviceCardsEntered.value = listaServicos.map(() => true)
+        return
+      }
+
+      const serviceCardObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return
+
+          const index = Number(entry.target.dataset.serviceCard)
+          if (!Number.isNaN(index)) revealServiceCard(index)
+
+          serviceCardObserver.unobserve(entry.target)
+        })
+      }, {
+        threshold: 0.12,
+        rootMargin: '0px 0px -8% 0px',
+      })
+
+      document
+        .querySelectorAll('#servicos .services-list .service-row')
+        .forEach(item => serviceCardObserver.observe(item))
     })
     
 </script>
@@ -760,6 +835,18 @@
 
 /* ------------------------------- BANNER ---------------------------------------------------- */
 
+.banner.hero {
+  overflow: hidden;
+}
+
+.hero-sky {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
 .banner {
   position: relative;
   display: flex;
@@ -773,72 +860,27 @@
   padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   overflow: hidden;
+  isolation: isolate;
   color: #E8E6FF;
   user-select: none;
-  background: #0A0A14;
-  --hero-title: clamp(5vw, 6vw, 7vw);
+  background: linear-gradient(to bottom, #0A0A14 0%, #14102E 100%);
+  --hero-title: clamp(2.75rem, 4.8vw, 5rem);
   --hero-title-shadow:
     0 0 56px rgba(8, 8, 18, 0.48),
     0 0 112px rgba(8, 8, 18, 0.28),
     0 2px 24px rgba(8, 8, 18, 0.38);
-  --hero-desc: clamp(0.9375rem, 1.35vw, 1.125rem);
-  --hero-btn-font: clamp(0.6875rem, 0.85vw, 0.8125rem);
-  --hero-btn-secondary-font: clamp(0.6875rem, 0.82vw, 0.8125rem);
-  --hero-btn-pad-y: clamp(10px, 1.2vw, 14px);
-  --hero-btn-pad-x: clamp(22px, 2.8vw, 36px);
-  --hero-btn-secondary-pad-x: clamp(18px, 2.4vw, 30px);
-  --hero-btn-min-h: clamp(38px, 4vw, 46px);
-  --hero-btn-secondary-min-h: clamp(36px, 3.8vw, 44px);
-}
-
-.banner::before {
-  content: '';
-  position: absolute;
-  top: -10%;
-  left: -10%;
-  width: 120%;
-  height: 120%;
-  pointer-events: none;
-  z-index: 2;
-  opacity: 0.12;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='heroGrain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch' seed='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23heroGrain)'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 200px 200px;
-  animation: hero-grain 0.48s steps(6) infinite;
-}
-
-@keyframes hero-grain {
-  0%, 100% {
-    transform: translate(0, 0);
-    background-position: 0 0;
-  }
-  16.67% {
-    transform: translate(-4%, -2%);
-    background-position: -40px 20px;
-  }
-  33.33% {
-    transform: translate(2%, -5%);
-    background-position: 30px -50px;
-  }
-  50% {
-    transform: translate(-3%, 4%);
-    background-position: -20px 40px;
-  }
-  66.67% {
-    transform: translate(5%, 2%);
-    background-position: 50px 10px;
-  }
-  83.33% {
-    transform: translate(-2%, 5%);
-    background-position: -30px -30px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .banner::before {
-    animation: none;
-  }
+  --hero-desc: clamp(1rem, 1.15vw, 1.2rem);
+  --hero-copy-left: clamp(48px, 12vw, 180px);
+  --hero-copy-width: min(50vw, 600px);
+  --hero-gap-title-desc: clamp(1.25rem, 2vh, 1.75rem);
+  --hero-gap-desc-btn: clamp(2.5rem, 5vh, 4rem);
+  --hero-btn-font: clamp(0.9rem, 1vw, 0.9375rem);
+  --hero-btn-secondary-font: clamp(0.9rem, 0.95vw, 0.9375rem);
+  --hero-btn-pad-y: clamp(14px, 1.6vw, 18px);
+  --hero-btn-pad-x: clamp(28px, 3.4vw, 44px);
+  --hero-btn-secondary-pad-x: clamp(24px, 3vw, 38px);
+  --hero-btn-min-h: clamp(48px, 5vw, 56px);
+  --hero-btn-secondary-min-h: clamp(46px, 4.8vw, 54px);
 }
 
 .banner::after {
@@ -848,7 +890,7 @@
   right: 0;
   bottom: 0;
   height: clamp(120px, 22vh, 280px);
-  background: linear-gradient(to bottom, transparent 0%, rgba(10, 10, 20, 0.45) 42%, #0A0A14 100%);
+  background: linear-gradient(to bottom, transparent 0%, rgba(10, 10, 20, 0.25) 35%, rgba(10, 10, 20, 0.72) 68%, #0A0A14 100%);
   pointer-events: none;
   z-index: 0;
 }
@@ -881,16 +923,17 @@
 
 .banner-copy {
   position: absolute;
-  left: 50%;
-  bottom: clamp(48px, 8vh, 96px);
-  z-index: 3;
+  left: var(--hero-copy-left);
+  top: 50%;
+  z-index: 4;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: clamp(2px, 0.5vh, 6px);
-  width: min(760px, calc(100vw - clamp(40px, 8vw, 96px)));
-  transform: translateX(-50%);
-  text-align: center;
+  align-items: flex-start;
+  gap: 0;
+  width: var(--hero-copy-width);
+  max-width: calc(100vw - var(--hero-copy-left) - clamp(24px, 4vw, 48px));
+  transform: translateY(-50%);
+  text-align: left;
   pointer-events: none;
 }
 
@@ -899,91 +942,53 @@
 }
 
 .banner-title {
-  position: relative;
-  isolation: isolate;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: block;
   width: 100%;
   margin: 0;
-  padding: clamp(10px, 1.8vw, 18px) 0 clamp(2px, 0.4vw, 6px);
+  padding: 0;
   box-sizing: border-box;
-  text-align: center;
-  white-space: nowrap;
+  text-align: left;
+  white-space: normal;
   font-size: var(--hero-title);
   font-weight: 800;
-  letter-spacing: -0.028em;
+  letter-spacing: -0.025em;
   color: #E8E6FF;
-  line-height: 0.94;
+  line-height: 1.2;
   text-shadow: var(--hero-title-shadow);
 }
 
-.banner-title::before {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  left: 50%;
-  top: 50%;
-  width: 112%;
-  height: 200%;
-  transform: translate(-50%, -50%);
-  border-radius: 999px;
-  background: rgba(10, 10, 20, 0.32);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  -webkit-mask-image: radial-gradient(ellipse 88% 78% at 50% 50%, #000 18%, transparent 72%);
-  mask-image: radial-gradient(ellipse 88% 78% at 50% 50%, #000 18%, transparent 72%);
-}
-
 .banner-description {
-  position: relative;
-  isolation: isolate;
-  width: min(520px, 100%);
-  margin: 0;
-  padding: clamp(2px, 0.4vw, 6px) 0 clamp(4px, 0.8vw, 10px);
-  text-align: center;
+  width: 100%;
+  max-width: 100%;
+  margin: var(--hero-gap-title-desc) 0 0;
+  padding: 0;
+  text-align: left;
   font-size: var(--hero-desc);
   line-height: 1.65;
   letter-spacing: 0.01em;
-  color: rgba(232, 230, 255, 0.62);
-}
-
-.banner-description::before {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  left: 50%;
-  top: 50%;
-  width: 108%;
-  height: 130%;
-  transform: translate(-50%, -50%);
-  border-radius: 999px;
-  background: rgba(10, 10, 20, 0.28);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  -webkit-mask-image: radial-gradient(ellipse 92% 85% at 50% 50%, #000 22%, transparent 75%);
-  mask-image: radial-gradient(ellipse 92% 85% at 50% 50%, #000 22%, transparent 75%);
+  color: rgba(232, 230, 255, 0.88);
 }
 
 .banner-footer {
   position: relative;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: flex-start;
+  align-items: flex-start;
   width: 100%;
-  min-height: clamp(56px, 7vh, 84px);
+  min-height: 0;
   flex-shrink: 0;
-  padding-top: clamp(10px, 1.8vh, 18px);
+  margin-top: var(--hero-gap-desc-btn);
+  padding-top: 0;
 }
 
 .banner-footer-buttons {
   position: relative;
   z-index: 1;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   flex-wrap: wrap;
-  gap: clamp(24px, 4vw, 48px);
+  gap: clamp(16px, 2vw, 24px);
 }
 
 .banner-footer-side {
@@ -998,30 +1003,18 @@
   z-index: 1;
 }
 
-.banner-footer-side--left:has(.banner-footer-link:hover) :deep(.hero-btn-constellation__line),
-.banner-footer-side--left:has(.banner-footer-link:focus-visible) :deep(.hero-btn-constellation__line) {
-  stroke-dashoffset: 0;
-  opacity: 0.92;
-}
-
-.banner-footer-side--right:has(.banner-footer-cta:hover) :deep(.hero-btn-constellation__line),
-.banner-footer-side--right:has(.banner-footer-cta:focus-visible) :deep(.hero-btn-constellation__line) {
-  stroke-dashoffset: 0;
-  opacity: 0.92;
-}
-
 .banner-footer-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: clamp(6px, 0.8vw, 10px);
   flex-shrink: 0;
-  min-width: clamp(128px, 12vw, 168px);
+  min-width: clamp(152px, 14vw, 200px);
 }
 
 .banner-footer-link :deep(svg) {
-  width: clamp(14px, 1.1vw, 16px);
-  height: clamp(14px, 1.1vw, 16px);
+  width: clamp(16px, 1.3vw, 18px);
+  height: clamp(16px, 1.3vw, 18px);
 }
 
 .banner-footer-cta {
@@ -1029,7 +1022,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  min-width: clamp(128px, 12vw, 168px);
+  min-width: clamp(152px, 14vw, 200px);
 }
 
 .btn-link { text-decoration: none; }
@@ -1055,7 +1048,7 @@
   border: 1.5px solid #F0FF1F;
   border-radius: 999px;
   cursor: pointer;
-  font-size: 0.75rem;
+  font-size: var(--text-sm);
   font-family: inherit;
   font-weight: 700;
   letter-spacing: 0.16em;
@@ -1071,24 +1064,16 @@
 .scroll-btn:active { transform: scale(0.97); }
 
 .scroll-btn--outline {
-  background: rgba(10, 10, 20, 0.32);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(12px);
+  background: #0A0A14;
   color: #F0FF1F;
   border-color: rgba(240, 255, 31, 0.45);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 .scroll-btn--outline:hover {
-  background: rgba(10, 10, 20, 0.48);
+  background: #111128;
   border-color: #F0FF1F;
   transform: translateY(-2px);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    0 0 24px rgba(240, 255, 31, 0.38),
-    0 8px 28px rgba(240, 255, 31, 0.32);
+  box-shadow: 0 0 24px rgba(240, 255, 31, 0.38), 0 8px 28px rgba(240, 255, 31, 0.32);
 }
 
 
@@ -1134,7 +1119,7 @@
 }
 
 .secao-label {
-  font-size: 0.65rem;
+  font-size: var(--text-deco);
   font-weight: 600;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -1158,20 +1143,16 @@
 .intro-decoracao.direita  { align-items: center; justify-content: flex-end; padding-bottom: 4px; }
 
 .barra-lateral {
-  width: 2px;
   flex: 1;
-  background: linear-gradient(to top, #380FE9 0%, transparent 100%);
+  display: block;
   margin: 0 auto;
-}
-.intro-decoracao.direita .barra-lateral {
-  background: linear-gradient(to top, #380FE9 0%, transparent 100%);
 }
 
 .deco-sparkle {
-  width: 24px;
-  height: 24px;
+  display: block;
+  width: 28px;
+  height: 28px;
   color: #380FE9;
-  opacity: 0.4;
   flex-shrink: 0;
 }
 
@@ -1197,33 +1178,76 @@
   margin-bottom: 48px;
 }
 
+.vantagens-wrap {
+  position: relative;
+  --vantagem-compact-h: 68px;
+  --vantagem-expand-h: 84px;
+  --vantagem-gap: 8px;
+  --vantagem-count: 4;
+  height: calc(
+    var(--vantagem-count) * var(--vantagem-compact-h) +
+    (var(--vantagem-count) - 1) * var(--vantagem-gap) +
+    var(--vantagem-expand-h)
+  );
+}
+
 .vantagens {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--vantagem-gap);
   width: 100%;
 }
 
 .vantagem-bar {
   position: relative;
   display: flex;
-  align-items: center;
-  gap: 16px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
   padding: 16px 20px;
-  border-radius: 12px;
+  border-radius: 14px;
   width: 100%;
-  background: rgba(56,15,233,0.08);
-  border: 1px solid rgba(56,15,233,0.14);
+  min-height: var(--vantagem-compact-h);
   opacity: 0;
   transform: translateY(16px);
-  transition: opacity 0.55s ease, transform 0.55s ease, background 0.2s ease;
+  z-index: 1;
+  cursor: pointer;
+}
+
+.vantagem-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.vantagem-chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  flex-shrink: 0;
+  color: #380FE9;
+  transition: transform 0.3s ease;
+}
+
+.vantagem-chevron svg {
+  width: 22px;
+  height: 22px;
+}
+
+.vantagem-bar:hover .vantagem-chevron {
+  transform: rotate(180deg);
 }
 
 .vantagem-bar.show { opacity: 1; transform: translateY(0); }
 
-.vantagem-bar:hover {
+.vantagem-bar.show:hover {
   transform: translateY(-2px);
-  background: rgba(56,15,233,0.12);
+  z-index: 2;
 }
 
 /* Staggered reveal */
@@ -1233,33 +1257,43 @@
 .vantagem-bar:nth-child(4) { transition-delay: 0.28s; }
 
 .icon-box {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  position: relative;
+  z-index: 1;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #380FE9;
-  color: #F0FF1F;
+  color: #380FE9;
   flex-shrink: 0;
+}
+
+.icon-box svg {
+  width: 24px;
+  height: 24px;
 }
 
 .vantagem-bar h3 {
   margin: 0;
+  flex: 1;
+  min-width: 0;
   font-size: 0.95rem;
   font-weight: 600;
   color: #E8E6FF;
   letter-spacing: -0.01em;
 }
 
-/* Expand description on hover */
+/* Expand description on hover — expansion stays within reserved wrap height */
 .vantagem-bar p {
+  position: relative;
+  z-index: 1;
   max-height: 0;
   opacity: 0;
   overflow: hidden;
   margin: 0;
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   color: #9090B0;
+  line-height: 1.72;
   transition: max-height 0.3s ease 0.05s, opacity 0.3s ease 0.05s, margin 0.3s ease;
 }
 
@@ -1309,7 +1343,7 @@
 }
 
 .services-footer-text {
-  font-size: 0.72rem;
+  font-size: var(--text-sm);
   color: rgba(10,10,20,0.5);
   line-height: 1.5;
   margin: 0;
@@ -1336,7 +1370,7 @@
 .service-row-top { margin-bottom: 2px; }
 
 .service-num {
-  font-size: 0.75rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   color: rgba(10,10,20,0.55);
   letter-spacing: 0.04em;
@@ -1398,7 +1432,7 @@
 }
 
 .service-tag {
-  font-size: 0.7rem;
+  font-size: var(--text-sm);
   font-weight: 500;
   color: rgba(10,10,20,0.65);
   border: 1px solid rgba(10,10,20,0.22);
@@ -1410,7 +1444,7 @@
 }
 
 .service-desc {
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
   color: rgba(10,10,20,0.6);
   line-height: 1.7;
   margin: 0;
@@ -1472,7 +1506,7 @@
   border: 1px solid rgba(56,15,233,0.14);
   border-radius: 999px;
   padding: 12px 20px 12px 24px;
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   font-family: inherit;
   letter-spacing: 0.01em;
@@ -1510,6 +1544,84 @@
   align-items: stretch;
 }
 
+.extra-card,
+.outro-card,
+.vantagem-bar {
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 90% 80% at 0% 0%, rgba(138, 138, 255, 0.08) 0%, transparent 58%),
+    radial-gradient(ellipse 90% 80% at 100% 100%, rgba(138, 138, 255, 0.08) 0%, transparent 58%),
+    #0D0A24;
+  backdrop-filter: blur(12px) saturate(120%);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
+  border: none;
+  transition: transform 0.22s ease, background 0.22s ease;
+}
+
+.extra-card::before,
+.outro-card::before,
+.vantagem-bar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background:
+    linear-gradient(135deg, rgba(138, 138, 255, 0.38) 0%, rgba(138, 138, 255, 0) 42%),
+    linear-gradient(315deg, rgba(138, 138, 255, 0.38) 0%, rgba(138, 138, 255, 0) 42%);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.extra-card:hover,
+.outro-card:hover {
+  background:
+    radial-gradient(ellipse 90% 80% at 0% 0%, rgba(138, 138, 255, 0.12) 0%, transparent 58%),
+    radial-gradient(ellipse 90% 80% at 100% 100%, rgba(138, 138, 255, 0.12) 0%, transparent 58%),
+    #0D0A24;
+}
+
+.vantagem-bar.show:hover {
+  background:
+    radial-gradient(ellipse 90% 80% at 0% 0%, rgba(91, 58, 255, 0.1) 0%, transparent 58%),
+    radial-gradient(ellipse 90% 80% at 100% 100%, rgba(91, 58, 255, 0.1) 0%, transparent 58%),
+    #100D2A;
+}
+
+.vantagem-bar.show:hover {
+  box-shadow: 0 6px 28px rgba(8, 8, 22, 0.38);
+}
+
+.extra-card:hover::before,
+.outro-card:hover::before {
+  background:
+    linear-gradient(135deg, rgba(138, 138, 255, 0.52) 0%, rgba(138, 138, 255, 0) 42%),
+    linear-gradient(315deg, rgba(138, 138, 255, 0.52) 0%, rgba(138, 138, 255, 0) 42%);
+}
+
+.vantagem-bar.show:hover::before {
+  background:
+    linear-gradient(135deg, rgba(91, 58, 255, 0.62) 0%, rgba(138, 138, 255, 0) 42%),
+    linear-gradient(315deg, rgba(91, 58, 255, 0.62) 0%, rgba(138, 138, 255, 0) 42%);
+}
+
+.vantagem-bar {
+  transition: opacity 0.55s ease, transform 0.55s ease, background 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 0 0 transparent;
+}
+
+.vantagem-bar::before {
+  transition: background 0.2s ease;
+}
+
 .extra-card {
   position: relative;
   display: flex;
@@ -1518,13 +1630,16 @@
   height: 100%;
   min-height: 0;
   padding: 20px 20px 20px 16px;
-  border-radius: 12px;
-  background: #111128;
-  border: 1px solid rgba(56,15,233,0.14);
-  transition: transform 0.22s ease, border-color 0.22s ease;
+  border-radius: 14px;
+}
+
+.extra-card:hover {
+  transform: translateY(-2px);
 }
 
 .icon-box-extra {
+  position: relative;
+  z-index: 1;
   flex-shrink: 0;
   align-self: flex-start;
   width: 36px;
@@ -1532,26 +1647,26 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
   color: #380FE9;
-  background: rgba(56,15,233,0.1);
 }
 
 .extra-card-body {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex: 1;
   flex-direction: column;
   gap: 4px;
   min-width: 0;
-  min-height: calc(2 * 0.875rem * 1.2 + 4px + 2 * 0.78rem * 1.55);
+  min-height: calc(2 * var(--text-sm) * 1.2 + 4px + 2 * var(--text-sm) * 1.55);
 }
 
 .extra-card h4 {
-  min-height: calc(2 * 0.875rem * 1.2);
+  min-height: calc(2 * var(--text-sm) * 1.2);
   display: flex;
   align-items: flex-start;
   margin: 0;
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   color: #E8E6FF;
   letter-spacing: -0.01em;
@@ -1560,7 +1675,7 @@
 .extra-card p {
   flex: 1;
   margin: 0;
-  font-size: 0.78rem;
+  font-size: var(--text-sm);
   color: #9090B0;
   line-height: 1.55;
 }
@@ -1585,19 +1700,25 @@
   color: #E8E6FF;
   letter-spacing: -0.02em;
   margin: 0;
+  flex-shrink: 0;
+  text-align: right;
 }
 
 .outros-sub {
   flex: 1;
   min-width: 0;
-  justify-content: flex-end;
-  font-size: 0.65rem;
+  justify-content: flex-start;
+  font-size: var(--text-deco);
   font-weight: 600;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: #380FE9;
   white-space: nowrap;
   padding-bottom: 6px;
+}
+
+.outros-sub-deco.section-deco-draw--horizontal {
+  flex: 1;
 }
 
 /* Cards grid */
@@ -1611,55 +1732,63 @@
   position: relative;
   border-radius: 16px;
   padding: 32px 24px;
-  background: #111128;
-  border: 1px solid rgba(56,15,233,0.14);
-  transition: transform 0.22s ease, border-color 0.22s ease;
   display: flex;
   flex-direction: column;
 }
 
 .outro-card:hover {
   transform: translateY(-4px);
-  border-color: rgba(56,15,233,0.35);
+}
+
+.outro-card > * {
+  position: relative;
+  z-index: 1;
 }
 
 
-.outro-cta {/* CTA */
-  display: flex;
-  justify-content: flex-end;
+.outro-cta {
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  align-self: flex-end;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #380FE9;
   margin-top: auto;
-  padding-top: 20px;
   opacity: 0.45;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .outro-arrow {
-  width: 16px;
-  height: 16px;
-  stroke: #380FE9;
+  width: 18px;
+  height: 18px;
+  stroke: #0D0A24;
+  fill: none;
   transition: transform 0.2s ease;
 }
 
-.outro-card:hover .outro-cta { opacity: 1; }
-.outro-card:hover .outro-arrow { transform: translateX(3px) translateY(-3px); }
+.outro-card:hover .outro-cta {
+  opacity: 1;
+  transform: translateX(3px) translateY(-3px);
+}
+
+.outro-card:hover .outro-arrow { transform: none; }
 
 .outro-icon-wrap {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: rgba(56,15,233,0.1);
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 20px;
+  color: #380FE9;
 }
 
 .outro-icon-wrap svg {
-  width: 18px;
-  height: 18px;
-  stroke: #380FE9;
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
   stroke-width: 1.5;
   fill: none;
   stroke-linecap: round;
@@ -1675,10 +1804,10 @@
 }
 
 .outro-card p {
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
   color: #9090B0;
   line-height: 1.72;
-  margin: 0;
+  margin: 0 0 20px;
 }
 
 .outros-inner {
@@ -1750,7 +1879,7 @@
 
 .browser-url {
   margin-left: 10px;
-  font-size: 0.7rem;
+  font-size: var(--text-sm);
   color: rgba(232, 230, 255, 0.3);
   letter-spacing: 0.04em;
 }
@@ -1821,7 +1950,7 @@
 }
 
 .portfolio-num {
-  font-size: 0.7rem;
+  font-size: var(--text-sm);
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -1837,7 +1966,7 @@
 }
 
 .portfolio-desc {
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   color: rgba(232, 230, 255, 0.55);
   line-height: 1.6;
 }
@@ -1851,7 +1980,7 @@
   border: 1.5px solid #F0FF1F;
   background: transparent;
   color: #F0FF1F;
-  font-size: 0.78rem;
+  font-size: var(--text-sm);
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -1998,7 +2127,7 @@
 
 .processo-card p {
   color: #9090B0;
-  font-size: 0.9rem;
+  font-size: var(--text-sm);
   line-height: 1.72;
   position: relative;
 }
@@ -2010,7 +2139,7 @@
   margin-top: 24px;
   padding: 10px 20px;
   border-radius: 999px;
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   font-family: inherit;
   font-weight: 600;
   letter-spacing: 0.01em;
@@ -2093,7 +2222,7 @@
   transform: translateX(-50%);
   background: #F0FF1F;
   color: #0A0A00;
-  font-size: 0.65rem;
+  font-size: var(--text-sm);
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -2104,7 +2233,7 @@
 
 .pricing-tier {
   display: block;
-  font-size: 0.75rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -2128,13 +2257,13 @@
 }
 
 .pricing-old {
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   color: rgba(232, 230, 255, 0.38);
   text-decoration: line-through;
 }
 
 .pricing-desc {
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   color: rgba(232, 230, 255, 0.55);
   margin-bottom: 24px;
 }
@@ -2159,7 +2288,7 @@
 .pricing-features li {
   position: relative;
   padding-left: 20px;
-  font-size: 0.88rem;
+  font-size: var(--text-sm);
   color: rgba(232, 230, 255, 0.75);
   line-height: 1.4;
 }
@@ -2243,7 +2372,7 @@
 }
 
 .contato-info-label {
-  font-size: 0.7rem;
+  font-size: var(--text-sm);
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -2270,7 +2399,7 @@
 }
 
 .contato-label {
-  font-size: 0.7rem;
+  font-size: var(--text-sm);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -2364,7 +2493,7 @@
 }
 
 .footer-copy {
-  font-size: 0.72rem;
+  font-size: var(--text-sm);
   color: rgba(232, 230, 255, 0.4);
   letter-spacing: 0.04em;
 }
@@ -2375,7 +2504,7 @@
 }
 
 .footer-nav a {
-  font-size: 0.72rem;
+  font-size: var(--text-sm);
   color: rgba(232, 230, 255, 0.4);
   text-decoration: none;
   letter-spacing: 0.04em;
@@ -2452,7 +2581,7 @@
 
   .outros-top {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     gap: 16px;
   }
 
@@ -2538,15 +2667,25 @@
   .outros-cards { grid-template-columns: repeat(2, 1fr); }
 
   .banner {
-    --hero-title: clamp(4.5vw, 5.5vw, 6.5vw);
-    --hero-desc: clamp(0.875rem, 1.2vw, 1.0625rem);
-    --hero-btn-font: clamp(0.6875rem, 1.8vw, 0.8125rem);
-    --hero-btn-secondary-font: clamp(0.6875rem, 1.7vw, 0.8125rem);
-    --hero-btn-pad-y: clamp(10px, 2.4vw, 14px);
-    --hero-btn-pad-x: clamp(20px, 4.5vw, 28px);
-    --hero-btn-secondary-pad-x: clamp(18px, 4vw, 26px);
-    --hero-btn-min-h: clamp(38px, 9vw, 44px);
-    --hero-btn-secondary-min-h: clamp(36px, 8.5vw, 42px);
+    --hero-title: clamp(2.25rem, 7vw, 3.25rem);
+    --hero-desc: clamp(0.9rem, 2.8vw, 1.0625rem);
+    --hero-copy-left: clamp(24px, 6vw, 40px);
+    --hero-copy-width: min(80vw, 520px);
+    --hero-gap-title-desc: clamp(1rem, 2.5vh, 1.5rem);
+    --hero-gap-desc-btn: clamp(2rem, 4.5vh, 3rem);
+    --hero-btn-font: clamp(0.9rem, 2.2vw, 0.9375rem);
+    --hero-btn-secondary-font: clamp(0.9rem, 2.1vw, 0.9375rem);
+    --hero-btn-pad-y: clamp(14px, 3vw, 18px);
+    --hero-btn-pad-x: clamp(26px, 5.5vw, 36px);
+    --hero-btn-secondary-pad-x: clamp(24px, 5vw, 32px);
+    --hero-btn-min-h: clamp(46px, 11vw, 52px);
+    --hero-btn-secondary-min-h: clamp(44px, 10.5vw, 50px);
+  }
+
+  .banner-copy {
+    top: clamp(96px, 14vh, 128px);
+    transform: none;
+    max-width: calc(100% - var(--hero-copy-left) - clamp(16px, 4vw, 24px));
   }
 
   .extras-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -2570,41 +2709,41 @@
   }
 
   .banner {
-    --hero-title: clamp(4vw, 5vw, 6vw);
-    --hero-desc: clamp(0.8125rem, 3.2vw, 1rem);
-    --hero-btn-font: 0.75rem;
-    --hero-btn-secondary-font: 0.75rem;
-    --hero-btn-pad-y: 10px;
-    --hero-btn-pad-x: 22px;
-    --hero-btn-secondary-pad-x: 20px;
-    --hero-btn-min-h: 40px;
-    --hero-btn-secondary-min-h: 38px;
+    --hero-title: clamp(2rem, 8.5vw, 2.75rem);
+    --hero-desc: clamp(0.9rem, 3.5vw, 1rem);
+    --hero-copy-left: clamp(20px, 5vw, 32px);
+    --hero-copy-width: min(85vw, 340px);
+    --hero-gap-title-desc: 1rem;
+    --hero-gap-desc-btn: 2rem;
+    --hero-btn-font: 0.9rem;
+    --hero-btn-secondary-font: 0.9rem;
+    --hero-btn-pad-y: 14px;
+    --hero-btn-pad-x: 28px;
+    --hero-btn-secondary-pad-x: 26px;
+    --hero-btn-min-h: 48px;
+    --hero-btn-secondary-min-h: 46px;
   }
 
   .banner-copy {
-    bottom: clamp(28px, 6vh, 48px);
-  }
-
-  .banner-footer {
-    min-height: clamp(120px, 16vh, 160px);
-    padding-top: clamp(12px, 2.5vh, 16px);
+    top: clamp(88px, 13vh, 112px);
+    transform: none;
   }
 
   .banner-footer-buttons {
     flex-direction: column;
-    align-items: center;
-    gap: clamp(16px, 3.5vh, 24px);
+    align-items: flex-start;
+    gap: clamp(12px, 2.5vh, 16px);
   }
 
   .banner-footer-side {
-    width: 100%;
-    justify-content: center;
+    width: auto;
+    justify-content: flex-start;
   }
 
   .banner-footer-link,
   .banner-footer-cta {
     width: auto;
-    min-width: clamp(140px, 42vw, 200px);
+    min-width: clamp(160px, 48vw, 220px);
     justify-content: center;
   }
 

@@ -16,9 +16,12 @@
   --font-display: 'Recoleta', serif;
   --font-body: 'Lexend Deca', sans-serif;
   --accent-yellow: #F0FF1F;
-  --section-max-width: 1280px;
+  --section-max-width: 1600px;
   --section-pad-x: 48px;
   --section-pad-y: 96px;
+  --text-sm: 0.9rem;
+  --text-deco: 0.72rem;
+  --deco-trail-thickness: 6px;
 }
 
 *, *::before, *::after {
@@ -26,8 +29,28 @@
 }
 
 html {
-  scroll-behavior: smooth;
   overflow-x: clip;
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
 }
 
 body {
@@ -45,8 +68,30 @@ body {
   overflow-x: clip;
 }
 
+.global-grain {
+  position: fixed;
+  inset: 0;
+  top: 0;
+  left: 0;
+  z-index: 9990;
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  pointer-events: none;
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+}
+
+.global-grain__pattern {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+}
+
 img,
-svg,
+svg:not(.global-grain__pattern),
 video {
   max-width: 100%;
   height: auto;
@@ -69,6 +114,26 @@ video {
   :root {
     --section-pad-y: 64px;
     --section-pad-x: 20px;
+  }
+}
+
+@keyframes service-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #servicos .services-list .service-row {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
 }
 
@@ -99,33 +164,24 @@ h3 em {
 .section-deco-sparkle,
 .processo-deco-sparkle,
 .outros-sub-sparkle {
-  width: 20px;
-  height: 20px;
+  display: block;
+  width: 24px;
+  height: 24px;
   color: #380FE9;
-  opacity: 0.5;
   flex-shrink: 0;
 }
 
 .section-deco-line,
-.processo-deco-bar {
-  flex: 1;
-  min-width: 24px;
-  height: 2px;
-  border-radius: 2px;
-  background: linear-gradient(to right, #380FE9 0%, transparent 100%);
-}
-
+.processo-deco-bar,
 .outros-sub-line {
   flex: 1;
   min-width: 24px;
-  height: 2px;
-  border-radius: 2px;
-  background: linear-gradient(to left, #380FE9 0%, transparent 100%);
+  display: block;
 }
 
 .section-deco-label,
 .processo-label {
-  font-size: 0.65rem;
+  font-size: var(--text-deco);
   font-weight: 600;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -175,6 +231,12 @@ h3 em {
   display: flex;
   align-items: center;
   min-width: 0;
+}
+
+.section-deco-draw--vertical .section-deco-draw__line > * {
+  flex: 1;
+  height: 100%;
+  min-height: 24px;
 }
 
 .section-deco-draw--horizontal .section-deco-draw__line > * {

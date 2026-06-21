@@ -143,14 +143,12 @@ function isInViewBox(x, y) {
 }
 
 function buildStarCandidate(x, y, tier, rand) {
-  const opacity = +(0.3 + rand() * 0.7).toFixed(2)
   const twinkle = rand() < TWINKLE_SHARE
 
   return {
     x: +x.toFixed(1),
     y: +y.toFixed(1),
     r: radiusForTier(tier, rand),
-    opacity,
     tier,
     twinkle,
     twinkleDuration: twinkle ? +(2 + rand() * 4).toFixed(2) : undefined,

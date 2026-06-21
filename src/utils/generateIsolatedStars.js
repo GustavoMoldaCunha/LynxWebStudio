@@ -82,37 +82,25 @@ function sampleOutsideCircle(rand) {
   return null
 }
 
-function starVisuals(x, y, rand, mode) {
+function starRadius(x, y, rand, mode) {
   const blend = heroCircleBlend(x, y)
 
   if (mode === 'inside') {
-    return {
-      r: +(0.05 + rand() * 0.05).toFixed(2),
-      opacity: +(0.3 + rand() * 0.2).toFixed(2),
-    }
+    return +(0.05 + rand() * 0.05).toFixed(2)
   }
 
   const outsideWeight = Math.max(blend, mode === 'outside' ? 0.72 : 0.45)
   const roll = rand()
 
   if (outsideWeight > 0.55 && roll > 0.42) {
-    return {
-      r: +(0.11 + rand() * 0.07).toFixed(2),
-      opacity: +(0.68 + rand() * 0.22).toFixed(2),
-    }
+    return +(0.11 + rand() * 0.07).toFixed(2)
   }
 
   if (outsideWeight > 0.72 && roll > 0.78) {
-    return {
-      r: +(ISOLATED_STAR_TIERS.large.rMin + rand() * (ISOLATED_STAR_TIERS.large.rMax - ISOLATED_STAR_TIERS.large.rMin)).toFixed(2),
-      opacity: +(0.84 + rand() * 0.16).toFixed(2),
-    }
+    return +(ISOLATED_STAR_TIERS.large.rMin + rand() * (ISOLATED_STAR_TIERS.large.rMax - ISOLATED_STAR_TIERS.large.rMin)).toFixed(2)
   }
 
-  return {
-    r: +(0.08 + rand() * 0.04).toFixed(2),
-    opacity: +(0.58 + rand() * 0.24).toFixed(2),
-  }
+  return +(0.08 + rand() * 0.04).toFixed(2)
 }
 
 function violatesSpacing(stars, candidate) {
@@ -136,12 +124,10 @@ function placeCornerSeeds(rand, clusters) {
           continue
         }
 
-        const visuals = starVisuals(x, y, rand, 'outside')
         const candidate = {
           x: +x.toFixed(1),
           y: +y.toFixed(1),
-          r: visuals.r,
-          opacity: visuals.opacity,
+          r: starRadius(x, y, rand, 'outside'),
           zone: 'outside',
         }
 
@@ -181,12 +167,10 @@ export function generateIsolatedStars(count, options = {}) {
     }
 
     const { x, y } = point
-    const visuals = starVisuals(x, y, rand, mode)
     const candidate = {
       x: +x.toFixed(1),
       y: +y.toFixed(1),
-      r: visuals.r,
-      opacity: visuals.opacity,
+      r: starRadius(x, y, rand, mode),
       zone: mode,
     }
 

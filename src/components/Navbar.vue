@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar" :class="{ scrolled: isScrolled, ready: isReady }">
+  <nav class="navbar">
     <div class="container">
       <a href="#top">
        <img src="../assets/LynxLogoLetras.png" alt="Logo Lynx" class="logo">
@@ -7,26 +7,28 @@
 
       <!-- MENU DESKTOP -->
       <div class="nav-left">
-        <a href="#servicos">Serviços</a>
-        <a href="#processo">Processo</a>
-        <a href="#contato">Contato</a>
+        <a href="#servicos">serviços</a>
+        <a href="#processo">processo</a>
+        <a href="#contato">contato</a>
       </div>
 
-      <a href="https://wa.me/5522981069554?text=Olá, gostaria de mais informações." 
-        target="_blank"  
-      class="cta desktop-cta">Fale Conosco
-      </a>
+      <div class="nav-right">
+        <a href="https://wa.me/5522981069554?text=Olá, gostaria de mais informações." 
+          target="_blank"  
+          class="cta desktop-cta">Fale Conosco
+        </a>
 
-      <div class="hamburger" @click="toggleMenu">
-        <span :class="{ open: isOpen }"></span>
+        <div class="hamburger" @click="toggleMenu">
+          <span :class="{ open: isOpen }"></span>
+        </div>
       </div>
+    </div>
 
-      <div :class="['menu-mobile', { open: isOpen }]">
-        <a href="#">Serviços</a>
-        <a href="#">Processo</a>
-        <a href="#">Sobre</a>
-        <a href="#">Contato</a>
-      </div>
+    <div :class="['menu-mobile', { open: isOpen }]">
+      <a href="#">serviços</a>
+      <a href="#">processo</a>
+      <a href="#">sobre</a>
+      <a href="#">contato</a>
     </div>
   </nav>
 </template>
@@ -35,14 +37,9 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 
 const isOpen = ref(false)
-const isScrolled = ref(false)
 
 const toggleMenu = () => {
   isOpen.value = !isOpen.value
-}
-
-const handleScroll = () => {
-  isScrolled.value = window.scrollY > 50
 }
 
 const handleClickOutside = (e) => {
@@ -53,21 +50,12 @@ const handleClickOutside = (e) => {
   }
 }
 
-const isReady = ref(false)
-onMounted(() => { 
-  isScrolled.value = window.scrollY > 50
-
-  requestAnimationFrame(() => {
-    isReady.value = true
-  })
-
+onMounted(() => {
   document.addEventListener('click', handleClickOutside)
-  window.addEventListener('scroll', handleScroll)
 })
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
-  window.removeEventListener('scroll', handleScroll)
 })
 </script>
 
@@ -75,100 +63,87 @@ onUnmounted(() => {
 
 .navbar {
   position: fixed;
-  top: 1rem;
+  top: 0;
   left: 0;
   right: 0;
-  display: flex;
-  justify-content: center;
+  width: 100%;
   z-index: 100;
-  max-width: 100%;
   box-sizing: border-box;
-  padding-left: var(--section-pad-x);
-  padding-right: var(--section-pad-x);
+  padding: 0 2rem 10px;
+  min-height: 5rem;
+  display: flex;
+  align-items: flex-end;
+
+  background: rgba(10, 10, 20, 0.4);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28);
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.3);
 }
 
 .container {
   width: 100%;
-  max-width: var(--section-max-width);
   min-width: 0;
-  margin: 0 auto;
-  padding: 0.6rem 1.2rem;
-  border-radius: 999px;
   display: flex;
   justify-content: space-between;
   position: relative;
-  align-items: center;
+  align-items: flex-end;
   gap: 1rem;
-
-  background: transparent;
-  backdrop-filter: none;
-  box-shadow: none;
-  border: 1px solid transparent;
-}
-.navbar.ready .container {
-  transition:
-    background 0.4s ease,
-    backdrop-filter 0.4s ease,
-    box-shadow 0.4s ease,
-    border-color 0.4s ease;
-}
-
-.navbar.scrolled .container {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .logo {
-  max-width: 15rem;
-  max-height: 15rem;
-  width: clamp(6rem, 28vw, 15rem);
+  display: block;
+  max-width: 13rem;
+  max-height: 13rem;
+  width: clamp(5.5rem, 24vw, 13rem);
 }
-.navbar.scrolled .logo { color: #333; }
 
 .nav-left {
   display: flex;
-  gap: 1.5rem;
-  position: absolute;       
+  align-items: flex-end;
+  gap: clamp(2rem, 1.5rem + 3vw, 5.5rem);
+  position: absolute;
   left: 50%;
-  transform: translateX(-50%); 
+  bottom: 0;
+  transform: translateX(-50%);
 }
 
 .nav-left a {
   position: relative;
   text-decoration: none;
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 0.9rem;
-  transition: color 0.4s ease;
+  color: rgba(232, 230, 255, 0.92);
+  font-size: 1rem;
+  text-transform: none;
+  transition: color 0.35s ease, text-shadow 0.35s ease;
 }
-.navbar.scrolled .nav-left a { color: #1A1560; }
 
-.nav-left a::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: -3px;
-  width: 0%;
-  height: 2px;
-  background: #CEE121;
-  transition: width 0.25s ease;
+.nav-left a:hover {
+  color: #fff;
+  text-shadow:
+    0 0 8px rgba(220, 218, 255, 0.45),
+    0 0 18px rgba(120, 100, 255, 0.22);
 }
-.nav-left a:hover::after { width: 100%; }
 
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-left: auto;
+  flex-shrink: 0;
+}
 
 .cta {
   text-decoration: none;
   padding: 0.5rem 1rem;
   border-radius: 999px;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
 
   background: #3D40FF;
   color: #E5FF00 !important;
   border-color: transparent;
 
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease;
 }
 .cta:hover {
   transform: translateY(-2px);
@@ -178,28 +153,26 @@ onUnmounted(() => {
 .hamburger {
   display: none;
   cursor: pointer;
-  margin-left: 1rem;
+  padding: 0.45rem;
+  flex-shrink: 0;
 }
 
 .hamburger span {
   display: block;
-  width: 25px;
+  width: 28px;
   height: 2px;
-  background: white;
+  background: rgba(232, 230, 255, 0.92);
   position: relative;
   transition: all 0.3s ease;
 }
-.navbar.scrolled .hamburger span { background: black; }
-.navbar.scrolled .hamburger span::before,
-.navbar.scrolled .hamburger span::after { background: black; }
 
 .hamburger span::before,
 .hamburger span::after {
   content: '';
   position: absolute;
-  width: 25px;
+  width: 28px;
   height: 2px;
-  background: white;
+  background: rgba(232, 230, 255, 0.92);
   transition: all 0.3s ease;
 }
 .hamburger span::before { top: -8px; }
@@ -214,21 +187,22 @@ onUnmounted(() => {
 
 /* ── MOBILE ── */
 @media (max-width: 990px) {
-  .container { padding: 0.6rem 1rem; }
+  .navbar { padding: 0 1.5rem 8px; min-height: 4.5rem; }
   .nav-left { display: none; }
-  .hamburger { margin-left: 0; display: block; }
+  .nav-right { gap: 1rem; }
+  .hamburger { display: flex; align-items: center; }
   .cta {
-    margin-left: auto;
     white-space: nowrap;
-    font-size: 0.78rem;
-    padding: 0.45rem 0.85rem;
+    font-size: 0.875rem;
+    padding: 0.45rem 0.875rem;
   }
 
   .menu-mobile {
     position: absolute;
-    top: 120%;
-    right: 0;
-    background: white;
+    top: 100%;
+    right: 1.5rem;
+    margin-top: 0.5rem;
+    background: #E8E6FF;
     border-radius: 16px;
     padding: 1rem;
     width: 200px;
@@ -238,24 +212,35 @@ onUnmounted(() => {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     opacity: 0;
     pointer-events: none;
-    transform: translateY(-10px);
-    transition: all 0.25s ease;
+    transform: translateY(8px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
   }
   .menu-mobile.open {
     opacity: 1;
     pointer-events: auto;
     transform: translateY(0);
   }
-  .menu-mobile a { color: #555; text-decoration: none; }
+  .menu-mobile a {
+    color: #555;
+    text-decoration: none;
+    text-transform: none;
+    transition: color 0.35s ease, text-shadow 0.35s ease;
+  }
+  .menu-mobile a:hover {
+    color: #3D40FF;
+    text-shadow: 0 0 10px rgba(61, 64, 255, 0.25);
+  }
 }
 
 @media (max-width: 480px) {
-  .navbar { top: 0.75rem; }
-  .container { padding: 0.5rem 0.75rem; gap: 0.5rem; }
-  .logo { width: clamp(4.75rem, 24vw, 7rem); }
+  .navbar { padding: 0 1.25rem 8px; min-height: 4rem; }
+  .container { gap: 0.625rem; }
+  .nav-right { gap: 0.625rem; }
+  .menu-mobile { right: 1.25rem; }
+  .logo { width: clamp(4.5rem, 22vw, 6.5rem); }
   .cta {
-    font-size: 0.7rem;
-    padding: 0.4rem 0.65rem;
+    font-size: 0.8125rem;
+    padding: 0.4rem 0.7rem;
   }
 }
 </style>
