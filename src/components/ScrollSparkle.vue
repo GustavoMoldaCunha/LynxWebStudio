@@ -5,10 +5,10 @@
       class="scroll-sparkle__line"
       :style="lineStyle"
     >
-      <SectionDecoLine class="scroll-sparkle__trail" orientation="vertical" />
+      <div class="scroll-sparkle__trail" />
     </div>
     <div
-      v-show="lineHeightPx > 0"
+      v-show="lineHeightPx > 0 && fadeOpacity > 0"
       class="scroll-sparkle__star"
       :style="starStyle"
     >
@@ -20,16 +20,18 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import DecoSparkle from './DecoSparkle.vue'
-import SectionDecoLine from './SectionDecoLine.vue'
 import { getLenis } from '../composables/useLenis'
 
 const STAR_SIZE_PX = 92
 const STAR_LINE_GAP_PX = -8
-const BOTTOM_INSET_PX = 32
+const BOTTOM_INSET_PX = 45
+const FADE_START_PROGRESS = 0.95
+const FADE_END_PROGRESS = 0.98
 const LERP_FACTOR = 0.08
 const SNAP_THRESHOLD_PX = 0.5
 
 const lineHeightPx = ref(0)
+const fadeOpacity = ref(1)
 
 let currentLineHeightPx = 0
 let currentScrollY = 0
@@ -42,7 +44,23 @@ const lineStyle = computed(() => ({
 
 const starStyle = computed(() => ({
   top: `${lineHeightPx.value + STAR_LINE_GAP_PX}px`,
+  opacity: fadeOpacity.value,
 }))
+
+function getScrollProgress() {
+  const lenis = getLenis()
+  const maxScroll = lenis ? lenis.limit : document.body.scrollHeight - window.innerHeight
+  if (maxScroll <= 0) return 0
+
+  const scrollY = lenis ? currentScrollY : window.scrollY
+  return Math.min(1, Math.max(0, scrollY / maxScroll))
+}
+
+function getFadeOpacity(progress) {
+  if (progress <= FADE_START_PROGRESS) return 1
+  if (progress >= FADE_END_PROGRESS) return 0
+  return 1 - (progress - FADE_START_PROGRESS) / (FADE_END_PROGRESS - FADE_START_PROGRESS)
+}
 
 function getMaxLineHeight() {
   return Math.max(
@@ -55,17 +73,14 @@ function getTargetLineHeight() {
   const maxLineHeight = getMaxLineHeight()
   if (maxLineHeight <= 0) return 0
 
-  const lenis = getLenis()
-  const maxScroll = lenis ? lenis.limit : document.body.scrollHeight - window.innerHeight
-  if (maxScroll <= 0) return 0
-
-  const scrollY = lenis ? currentScrollY : window.scrollY
-  const progress = Math.min(1, Math.max(0, scrollY / maxScroll))
+  const progress = getScrollProgress()
   return progress * maxLineHeight
 }
 
 function tick() {
-  const targetLineHeight = getTargetLineHeight()
+  const progress = getScrollProgress()
+  const targetLineHeight = progress * getMaxLineHeight()
+  fadeOpacity.value = getFadeOpacity(progress)
   const diff = targetLineHeight - currentLineHeightPx
 
   if (Math.abs(diff) < SNAP_THRESHOLD_PX) {
@@ -93,6 +108,7 @@ onMounted(() => {
 
   currentLineHeightPx = getTargetLineHeight()
   lineHeightPx.value = currentLineHeightPx
+  fadeOpacity.value = getFadeOpacity(getScrollProgress())
   rafId = requestAnimationFrame(tick)
 })
 
@@ -114,12 +130,19 @@ onUnmounted(() => {
 .scroll-sparkle {
   position: fixed;
   top: 0;
-  right: clamp(16px, 3vw, 40px);
-  width: 92px;
+  right: calc(var(--scroll-sparkle-edge) + var(--scroll-sparkle-line-offset));
+  width: var(--scroll-sparkle-size);
   height: 100vh;
   height: 100dvh;
   z-index: 5;
   pointer-events: none;
+}
+
+.scroll-sparkle__star {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: opacity 0.18s ease;
 }
 
 .scroll-sparkle__line {
@@ -132,22 +155,22 @@ onUnmounted(() => {
 
 .scroll-sparkle__trail {
   display: block;
-}
-
-.scroll-sparkle__star {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+  width: 100%;
+  height: 100%;
+  background: #380FE9;
+  opacity: var(--scroll-sparkle-trail-opacity, 1);
+  border-bottom-left-radius: var(--deco-trail-thickness, 6px);
+  border-bottom-right-radius: var(--deco-trail-thickness, 6px);
 }
 
 .scroll-sparkle__icon {
   display: block;
-  width: 92px;
-  height: 92px;
+  width: var(--scroll-sparkle-size);
+  height: var(--scroll-sparkle-size);
   color: #380FE9;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1399px) {
   .scroll-sparkle {
     display: none;
   }

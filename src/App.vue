@@ -1,36 +1,58 @@
 <template>
 
-<!---------------------- GLOBAL GRAIN --------------------->
-  <GlobalGrain />
-
 <!---------------------- NAVBAR --------------------->  
   <MenuBtn />
   <ScrollSparkle />
 
 <!---------------------- HERO --------------------->  
-  <section class="banner hero" id="top">
+  <section ref="heroRef" class="banner hero" id="top">
     <div class="hero-sky" aria-hidden="true">
-      <HeroStarfield />
-      <HeroConstellations />
+      <HeroStarfield
+        :parallax-back="heroParallax.offsets.starsBack"
+        :parallax-mid="heroParallax.offsets.starsMid"
+      />
     </div>
-    <HeroTerrain />
-    <div class="banner-copy">
-      <h1 class="banner-title">{{ typedTitle }}</h1>
-      <p class="banner-description">
-        LYNX é um estúdio de DESIGN e DESENVOLVIMENTO WEB que ajuda negócios a crescerem com PRESENÇA DIGITAL DE ALTO PADRÃO.
-      </p>
-      <div class="banner-footer">
-        <div class="banner-footer-buttons">
-          <div class="banner-footer-side banner-footer-side--left">
-            <a class="scroll-btn scroll-btn--outline btn-link banner-footer-link" href="#servicos">
-              <span>Veja mais</span>
-              <ArrowDown :size="12" stroke-width="2.5" />
-            </a>
-          </div>
-          <div class="banner-footer-side banner-footer-side--right">
-            <button class="scroll-btn banner-footer-cta" @click="scrollToNext">Peça agora</button>
-          </div>
+    <HeroTerrain :style="heroParallax.layers.terrain" />
+    <div class="hero-front">
+      <div class="banner-copy" :style="heroParallax.layers.copy">
+        <div class="banner-copy-head">
+          <TypingTitle
+            tag="h1"
+            class="banner-title"
+            :threshold="0"
+            :delay="0"
+            :lines="[
+              [
+                { text: 'Conectando sua empresa ao ' },
+                { text: 'digital', accentClass: 'accent' }
+              ]
+            ]"
+          />
+          <ScrollReveal
+            tag="p"
+            class="banner-description"
+            :threshold="0"
+            :delay="120"
+          >
+            LYNX é um estúdio de DESIGN e DESENVOLVIMENTO WEB que ajuda negócios a crescerem com PRESENÇA DIGITAL DE ALTO PADRÃO.
+          </ScrollReveal>
         </div>
+        <ScrollReveal tag="div" class="banner-footer" :threshold="0" :delay="220">
+          <div class="banner-footer-buttons">
+            <div class="banner-footer-side banner-footer-side--left">
+              <a class="scroll-btn scroll-btn--outline btn-link banner-footer-link" href="#servicos">
+                <span>Veja mais</span>
+                <ArrowDown :size="12" stroke-width="2.5" />
+              </a>
+            </div>
+            <div class="banner-footer-side banner-footer-side--right">
+              <button class="scroll-btn banner-footer-cta" @click="scrollToContato">Peça agora</button>
+            </div>
+          </div>
+        </ScrollReveal>
+      </div>
+      <div class="hero-constellation-band" aria-hidden="true" :style="heroParallax.layers.constellation">
+        <HeroConstellations />
       </div>
     </div>
   </section>
@@ -122,8 +144,6 @@
             'service-row--active': activeService === index,
             'service-row--last': index === listaServicos.length - 1
           }"
-          :data-service-card="index"
-          :style="serviceRowEnterStyle(index)"
           @mouseenter="activeService = index"
         >
           <div class="service-row-top">
@@ -149,12 +169,12 @@
                 </div>
 
                 <div class="service-row-images">
-                  <div class="service-img-card">
-                    <div class="service-img-placeholder" :class="service.imgClass1"></div>
-                  </div>
-                  <div class="service-img-card">
-                    <div class="service-img-placeholder" :class="service.imgClass2"></div>
-                  </div>
+                  <img
+                    class="service-illustration"
+                    :src="service.image"
+                    :alt="`Ilustração de ${service.title}`"
+                    loading="lazy"
+                  />
                 </div>
               </div>
             </div>
@@ -184,7 +204,12 @@
     </div>
     
     <div class="extras-grid">
-      <div class="extra-card" v-for="item in extras" :key="item.title">
+      <ScrollReveal
+        v-for="(item, index) in extras"
+        :key="item.title"
+        class="extra-card"
+        :delay="index * 120"
+      >
         <div class="icon-box-extra">
           <component :is="item.icon" />
         </div>
@@ -192,7 +217,7 @@
           <h4>{{ item.title }}</h4>
           <p>{{ item.desc }}</p>
         </div>
-      </div>
+      </ScrollReveal>
     </div>
 
     <div class="outros-block">
@@ -222,14 +247,19 @@
       </div>
 
       <div class="outros-cards">
-        <div class="outro-card" v-for="item in outrosServicos" :key="item.title">
+        <ScrollReveal
+          v-for="(item, index) in outrosServicos"
+          :key="item.title"
+          class="outro-card"
+          :delay="index * 120"
+        >
           <div class="outro-icon-wrap">
             <component :is="item.icon" />
           </div>
           <h4>{{ item.title }}</h4>
           <p>{{ item.desc }}</p>
           <span class="outro-cta"><component :is="ArrowUpRight" class="outro-arrow" /></span>
-        </div>
+        </ScrollReveal>
       </div>
     </div>
   </section>
@@ -242,13 +272,14 @@
         <div class="portfolio-header-left">
           <TypingTitle
             class="portfolio-headline"
+            :delay="0"
             :lines="[
               [{ text: 'O que nós' }],
               [{ text: 'Construímos', accentClass: 'portfolio-accent' }]
             ]"
           />
         </div>
-        <div class="section-deco portfolio-deco">
+        <ScrollReveal class="section-deco portfolio-deco" :delay="120">
           <SectionDecoDraw orientation="horizontal" observe-target=".portfolio-header">
             <template #star>
               <DecoSparkle class="section-deco-sparkle" />
@@ -258,52 +289,62 @@
             </template>
           </SectionDecoDraw>
           <span class="section-deco-label">[ Sites em Destaque ]</span>
-        </div>
+        </ScrollReveal>
       </div>
 
       <div class="portfolio-stage">
-        <!-- Browser mockup -->
-        <div class="portfolio-browser">
-          <div class="browser-bar">
-            <span class="browser-dot"></span>
-            <span class="browser-dot"></span>
-            <span class="browser-dot"></span>
-            <span class="browser-url">{{ projetos[activeProject].url }}</span>
-          </div>
-          <a
-            :href="projetos[activeProject].link"
-            :target="projetos[activeProject].link !== '#' ? '_blank' : null"
-            :rel="projetos[activeProject].link !== '#' ? 'noopener noreferrer' : null"
-            class="browser-screen-link"
-            @click="projetos[activeProject].link === '#' && $event.preventDefault()"
-          >
-            <div class="browser-screen">
-              <div class="browser-placeholder" :style="{ background: projetos[activeProject].gradient }">
-                <span class="browser-placeholder-label">{{ projetos[activeProject].title }}</span>
-              </div>
+        <ScrollReveal class="portfolio-browser-reveal" :delay="240">
+          <div class="portfolio-browser">
+            <div class="browser-bar">
+              <span class="browser-dot"></span>
+              <span class="browser-dot"></span>
+              <span class="browser-dot"></span>
+              <span class="browser-url">{{ projetos[activeProject].url }}</span>
             </div>
-          </a>
+            <a
+              :href="projetos[activeProject].link"
+              :target="projetos[activeProject].link !== '#' ? '_blank' : null"
+              :rel="projetos[activeProject].link !== '#' ? 'noopener noreferrer' : null"
+              class="browser-screen-link"
+              @click="projetos[activeProject].link === '#' && $event.preventDefault()"
+            >
+              <div class="browser-screen">
+                <div class="browser-placeholder" :style="{ background: projetos[activeProject].gradient }">
+                  <span class="browser-placeholder-label">{{ projetos[activeProject].title }}</span>
+                </div>
+              </div>
+            </a>
 
-          <!-- Setas de navegação -->
-          <button class="portfolio-arrow portfolio-arrow--prev" @click="prevProject">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
-          <button class="portfolio-arrow portfolio-arrow--next" @click="nextProject">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-          </button>
-        </div>
+            <button class="portfolio-arrow portfolio-arrow--prev" @click="prevProject">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <button class="portfolio-arrow portfolio-arrow--next" @click="nextProject">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+        </ScrollReveal>
 
-        <!-- Info lateral -->
         <div class="portfolio-info">
-          <span class="portfolio-num">{{ projetos[activeProject].num }} — {{ projetos[activeProject].category }}</span>
-          <h3 class="portfolio-title">{{ projetos[activeProject].title }}</h3>
-          <p class="portfolio-desc">{{ projetos[activeProject].desc }}</p>
-          <a :href="projetos[activeProject].link" target="_blank" class="portfolio-cta">
+          <ScrollReveal tag="span" class="portfolio-num" :delay="360">
+            {{ projetos[activeProject].num }} — {{ projetos[activeProject].category }}
+          </ScrollReveal>
+          <ScrollReveal tag="h3" class="portfolio-title" :delay="480">
+            {{ projetos[activeProject].title }}
+          </ScrollReveal>
+          <ScrollReveal tag="p" class="portfolio-desc" :delay="600">
+            {{ projetos[activeProject].desc }}
+          </ScrollReveal>
+          <ScrollReveal
+            tag="a"
+            class="portfolio-cta"
+            :href="projetos[activeProject].link"
+            target="_blank"
+            :delay="720"
+          >
             Visitar site <span>→</span>
-          </a>
+          </ScrollReveal>
 
-          <!-- Dots -->
-          <div class="portfolio-dots">
+          <ScrollReveal class="portfolio-dots" :delay="840">
             <button
               v-for="(p, i) in projetos"
               :key="i"
@@ -311,7 +352,7 @@
               :class="{ 'portfolio-dot--active': activeProject === i }"
               @click="activeProject = i"
             />
-          </div>
+          </ScrollReveal>
         </div>
 
       </div>
@@ -522,15 +563,35 @@
     </div>
   </section>
   <!---------------------- FOOTER --------------------->
-  <footer class="footer">
+  <footer
+    class="footer"
+    :style="{ '--footer-logo-align-overflow': `${footerLogoAlignOverflow}px` }"
+  >
     <div class="footer-top">
       <span class="footer-copy">©2026 LYNX Studio. All Rights Reserved</span>
       <nav class="footer-nav">
         <a href="#">Política de Privacidade</a>
       </nav>
     </div>
-    <div class="footer-logo-wrap">
-      <img :src="LynxLogo" alt="LYNX" class="footer-logo" />
+    <div
+      ref="footerLogoWrapRef"
+      class="footer-logo-wrap"
+      :style="{
+        '--footer-logo-scale': footerLogoScale,
+        '--footer-logo-align-shift': `${footerLogoAlignShift}px`,
+      }"
+    >
+      <div class="footer-logo-scale">
+        <div class="footer-logo-visual">
+          <img
+            ref="footerLogoRef"
+            :src="LynxLogo"
+            alt="LYNX"
+            class="footer-logo"
+            draggable="false"
+          />
+        </div>
+      </div>
     </div>
   </footer>
 </template>
@@ -544,20 +605,18 @@
     import ScrollSparkle from './components/ScrollSparkle.vue'
     import DecoSparkle from './components/DecoSparkle.vue'
     import TypingTitle from './components/TypingTitle.vue'
+    import ScrollReveal from './components/ScrollReveal.vue'
     import SectionDecoDraw from './components/SectionDecoDraw.vue'
     import SectionDecoLine from './components/SectionDecoLine.vue'
-    import GlobalGrain from './components/GlobalGrain.vue'
     import { ref, onMounted, onUnmounted, nextTick } from 'vue'
     import { initLenis, destroyLenis, scrollTo } from './composables/useLenis'
+    import { useHeroMobileMinHeight } from './composables/useHeroMobileMinHeight.js'
+    import { useHeroParallax } from './composables/useHeroParallax.js'
+    import { useFooterLogoScale } from './composables/useFooterLogoScale.js'
     import LynxLogo from './assets/LynxLogoLetras.png'
     import { SlidersHorizontal, Globe, ShieldCheck, Eye, Search, 
              Smartphone, MessageCircle, Zap, Shield, Settings, Palette, 
              BarChart2, FileText, ArrowUpRight, ArrowDown, ChevronDown } from 'lucide-vue-next'
-
-    const typedTitle = ref('')
-
-    const heroTitle = 'Conectando sua empresa ao digital'
-    const speed = 80 
 
     const vantagens = [
       {
@@ -609,8 +668,8 @@
         icon: Shield
       },
       {
-        title: 'Manutenção',
-        desc: 'Suporte e atualizações contínuas',
+        title: 'Suporte Contínuo',
+        desc: 'Acompanhamento após o lançamento do site',
         icon: Settings
       }
     ]
@@ -650,30 +709,24 @@
         num: '01.',
         title: 'Sites Institucionais',
         tags: ['User Interface', 'User Experience', 'Web Design'],
-        desc: 'Presença online profissional para apresentar sua empresa, serviços e gerar credibilidade.',
-        imgClass1: 'service-img-placeholder--1',
-        imgClass2: 'service-img-placeholder--2'
+        desc: 'Presença online profissional para seus clientes te encontrarem no Google, conhecerem seus serviços e confiarem no seu negócio.',
+        image: '/site_institucional.svg'
       },
       {
         num: '02.',
         title: 'E-Commerce',
-        tags: ['Shopify', 'VTEX'],
-        desc: 'Venda seus produtos online com um site rápido, seguro e fácil de usar.',
-        imgClass1: 'service-img-placeholder--1', // Você pode criar classes de imagens específicas depois
-        imgClass2: 'service-img-placeholder--2'
+        tags: ['Loja Virtual', 'Pagamento Online', 'Catálogo de Produtos'],
+        desc: 'Comece a vender pela internet com uma loja própria, fácil de gerenciar e com pagamento integrado para seus clientes.',
+        image: '/ecommerce.svg'
       },
       {
         num: '03.',
         title: 'Landing Pages',
-        tags: ['Copywriting', 'Launch', 'Optimization'],
-        desc: 'Páginas de alta conversão estruturadas para campanhas de tráfego pago e lançamentos de produtos.',
-        imgClass1: 'service-img-placeholder--1',
-        imgClass2: 'service-img-placeholder--2'
+        tags: ['Captação de Clientes', 'Promoções', 'Resultado Rápido'],
+        desc: 'Página única e direta para anunciar uma promoção, lançar um produto ou captar contatos de clientes interessados.',
+        image: '/landing_page.svg'
       }
     ]
-
-    const SERVICE_CARD_ANIMATION_DELAYS = [0.1, 0.3, 0.5]
-    const serviceCardsEntered = ref(listaServicos.map(() => false))
 
     const projetos = ref([
       {
@@ -731,10 +784,18 @@
       if (el) scrollTo(el)
     }
 
-    function scrollToNext() {
-      const el = document.querySelector('#servicos')
-      if (el) scrollTo(el)
-    }
+    useHeroMobileMinHeight()
+
+    const {
+      wrapRef: footerLogoWrapRef,
+      logoRef: footerLogoRef,
+      scale: footerLogoScale,
+      alignShift: footerLogoAlignShift,
+      alignOverflow: footerLogoAlignOverflow,
+    } = useFooterLogoScale()
+
+    const heroRef = ref(null)
+    const heroParallax = useHeroParallax(heroRef)
 
     initLenis()
 
@@ -742,35 +803,7 @@
       destroyLenis()
     })
 
-    function revealServiceCard(index) {
-      if (serviceCardsEntered.value[index]) return
-
-      const next = [...serviceCardsEntered.value]
-      next[index] = true
-      serviceCardsEntered.value = next
-    }
-
-    function serviceRowEnterStyle(index) {
-      if (!serviceCardsEntered.value[index]) {
-        return {
-          opacity: '0',
-          transform: 'translateY(40px)',
-        }
-      }
-
-      return {
-        animation: `service-card-enter 0.7s ease ${SERVICE_CARD_ANIMATION_DELAYS[index]}s forwards`,
-      }
-    }
-
     onMounted(async () => {
-      let i = 0
-      const typeTitle = setInterval(() => {
-        typedTitle.value += heroTitle[i]
-        i++
-        if (i === heroTitle.length) clearInterval(typeTitle)
-      }, speed)
-
       await nextTick()
 
       const revealObserver = new IntersectionObserver((entries) => {
@@ -785,29 +818,6 @@
       })
 
       document.querySelectorAll('.vantagem-bar').forEach(item => revealObserver.observe(item))
-
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        serviceCardsEntered.value = listaServicos.map(() => true)
-        return
-      }
-
-      const serviceCardObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (!entry.isIntersecting) return
-
-          const index = Number(entry.target.dataset.serviceCard)
-          if (!Number.isNaN(index)) revealServiceCard(index)
-
-          serviceCardObserver.unobserve(entry.target)
-        })
-      }, {
-        threshold: 0.12,
-        rootMargin: '0px 0px -8% 0px',
-      })
-
-      document
-        .querySelectorAll('#servicos .services-list .service-row')
-        .forEach(item => serviceCardObserver.observe(item))
     })
     
 </script>
@@ -836,6 +846,7 @@
 /* ------------------------------- BANNER ---------------------------------------------------- */
 
 .banner.hero {
+  position: relative;
   overflow: hidden;
 }
 
@@ -845,6 +856,52 @@
   z-index: 1;
   overflow: hidden;
   pointer-events: none;
+  isolation: isolate;
+}
+
+.hero-sky::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: clamp(360px, 68vh, 760px);
+  background: radial-gradient(
+    ellipse 150% 110% at 50% 100%,
+    #5B3AFF 0%,
+    #380FE9 26%,
+    rgba(56, 15, 233, 0.42) 48%,
+    rgba(56, 15, 233, 0.12) 66%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(to top, #000 42%, transparent 100%);
+  mask-image: linear-gradient(to top, #000 42%, transparent 100%);
+  opacity: 0.6;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.hero-sky :deep(.hero-starfield) {
+  z-index: 0;
+}
+
+.hero-front {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.hero-constellation-band {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transform-origin: center center;
+}
+
+.hero-constellation-band :deep(.hero-constellations) {
+  z-index: 2;
 }
 
 .banner {
@@ -864,23 +921,31 @@
   color: #E8E6FF;
   user-select: none;
   background: linear-gradient(to bottom, #0A0A14 0%, #14102E 100%);
-  --hero-title: clamp(2.75rem, 4.8vw, 5rem);
+  --hero-title: clamp(2.5rem, 0.75rem + 8vw, 5rem);
+  --hero-title-line-height: 1.05;
   --hero-title-shadow:
+    0 0 18px rgba(232, 230, 255, 0.2),
+    0 0 36px rgba(56, 15, 233, 0.12),
     0 0 56px rgba(8, 8, 18, 0.48),
     0 0 112px rgba(8, 8, 18, 0.28),
     0 2px 24px rgba(8, 8, 18, 0.38);
+  --hero-title-accent-shadow:
+    0 0 16px rgba(240, 255, 31, 0.52),
+    0 0 32px rgba(240, 255, 31, 0.34),
+    0 0 56px rgba(240, 255, 31, 0.2),
+    0 0 88px rgba(240, 255, 31, 0.1);
   --hero-desc: clamp(1rem, 1.15vw, 1.2rem);
   --hero-copy-left: clamp(48px, 12vw, 180px);
   --hero-copy-width: min(50vw, 600px);
   --hero-gap-title-desc: clamp(1.25rem, 2vh, 1.75rem);
   --hero-gap-desc-btn: clamp(2.5rem, 5vh, 4rem);
-  --hero-btn-font: clamp(0.9rem, 1vw, 0.9375rem);
-  --hero-btn-secondary-font: clamp(0.9rem, 0.95vw, 0.9375rem);
-  --hero-btn-pad-y: clamp(14px, 1.6vw, 18px);
-  --hero-btn-pad-x: clamp(28px, 3.4vw, 44px);
-  --hero-btn-secondary-pad-x: clamp(24px, 3vw, 38px);
-  --hero-btn-min-h: clamp(48px, 5vw, 56px);
-  --hero-btn-secondary-min-h: clamp(46px, 4.8vw, 54px);
+  --hero-btn-font: clamp(0.8125rem, 0.75rem + 0.35vw, 0.9375rem);
+  --hero-btn-secondary-font: clamp(0.8125rem, 0.75rem + 0.35vw, 0.9375rem);
+  --hero-btn-pad-y: clamp(12px, 0.65rem + 0.8vw, 18px);
+  --hero-btn-pad-x: clamp(22px, 1rem + 2.5vw, 44px);
+  --hero-btn-secondary-pad-x: clamp(20px, 0.85rem + 2.2vw, 38px);
+  --hero-btn-min-h: clamp(44px, 2.5rem + 1.2vw, 56px);
+  --hero-btn-secondary-min-h: clamp(42px, 2.35rem + 1.1vw, 54px);
 }
 
 .banner::after {
@@ -910,7 +975,7 @@
   flex-direction: column;
   justify-content: space-between;
   width: 100%;
-  max-width: 1600px;
+  max-width: var(--section-max-width);
   min-height: 100%;
   margin: 0 auto;
   padding: clamp(80px, 11vh, 132px) clamp(32px, 6vw, 96px) clamp(36px, 5vh, 72px);
@@ -932,8 +997,27 @@
   gap: 0;
   width: var(--hero-copy-width);
   max-width: calc(100vw - var(--hero-copy-left) - clamp(24px, 4vw, 48px));
-  transform: translateY(-50%);
+  transform: translateY(-50%) translate3d(var(--hero-parallax-x, 0), var(--hero-parallax-y, 0), 0);
   text-align: left;
+  pointer-events: none;
+  isolation: isolate;
+}
+
+.banner-copy-head {
+  position: relative;
+  width: 100%;
+  isolation: isolate;
+}
+
+.banner-copy-head::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: clamp(-10px, -1.2vh, -6px) clamp(-14px, -1.8vw, -8px);
+  border-radius: clamp(12px, 1.4vw, 18px);
+  background: rgba(10, 10, 20, 0.03);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
   pointer-events: none;
 }
 
@@ -953,8 +1037,12 @@
   font-weight: 800;
   letter-spacing: -0.025em;
   color: #E8E6FF;
-  line-height: 1.2;
+  line-height: var(--hero-title-line-height);
   text-shadow: var(--hero-title-shadow);
+}
+
+.banner-title :is(.title-accent, .accent) {
+  text-shadow: var(--hero-title-accent-shadow);
 }
 
 .banner-description {
@@ -1434,11 +1522,11 @@
 .service-tag {
   font-size: var(--text-sm);
   font-weight: 500;
-  color: rgba(10,10,20,0.65);
-  border: 1px solid rgba(10,10,20,0.22);
+  color: #E8E6FF;
+  border: 1px solid #380FE9;
   border-radius: 999px;
   padding: 3px 12px;
-  background: transparent;
+  background: #380FE9;
   letter-spacing: 0.02em;
   text-transform: uppercase;
 }
@@ -1453,47 +1541,15 @@
 
 .service-row-images {
   display: flex;
-  gap: 10px;
   align-items: flex-end;
-}
-
-.service-img-card {
-  border-radius: 10px;
-  overflow: hidden;
-  width: 144px;
-  height: 96px;
-  background: #0A0A14;
   flex-shrink: 0;
 }
 
-.service-img-placeholder { width: 100%; height: 100%; }
-
-.service-img-placeholder--1 {
-  background: linear-gradient(135deg, #0d1b3e 0%, #1a3060 40%, #2255a4 70%, #4a90d9 100%);
-  position: relative;
-}
-
-.service-img-placeholder--1::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 60%),
-    radial-gradient(ellipse at 30% 40%, rgba(100,180,255,0.12) 0%, transparent 60%);
-}
-
-.service-img-placeholder--2 {
-  background: linear-gradient(135deg, #050510 0%, #0d0d22 50%, #1a1a38 100%);
-  position: relative;
-}
-
-.service-img-placeholder--2::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse at 60% 30%, rgba(56,15,233,0.22) 0%, transparent 60%),
-    linear-gradient(45deg, rgba(0,0,0,0.4) 0%, transparent 100%);
+.service-illustration {
+  display: block;
+  width: 298px;
+  max-width: 100%;
+  height: auto;
 }
 
 /* Panel CTA button */
@@ -1546,7 +1602,8 @@
 
 .extra-card,
 .outro-card,
-.vantagem-bar {
+.vantagem-bar,
+.processo-card {
   overflow: hidden;
   background:
     radial-gradient(ellipse 90% 80% at 0% 0%, rgba(138, 138, 255, 0.08) 0%, transparent 58%),
@@ -1560,7 +1617,8 @@
 
 .extra-card::before,
 .outro-card::before,
-.vantagem-bar::before {
+.vantagem-bar::before,
+.processo-card::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -1582,7 +1640,8 @@
 }
 
 .extra-card:hover,
-.outro-card:hover {
+.outro-card:hover,
+.processo-card:hover {
   background:
     radial-gradient(ellipse 90% 80% at 0% 0%, rgba(138, 138, 255, 0.12) 0%, transparent 58%),
     radial-gradient(ellipse 90% 80% at 100% 100%, rgba(138, 138, 255, 0.12) 0%, transparent 58%),
@@ -1601,7 +1660,8 @@
 }
 
 .extra-card:hover::before,
-.outro-card:hover::before {
+.outro-card:hover::before,
+.processo-card:hover::before {
   background:
     linear-gradient(135deg, rgba(138, 138, 255, 0.52) 0%, rgba(138, 138, 255, 0) 42%),
     linear-gradient(315deg, rgba(138, 138, 255, 0.52) 0%, rgba(138, 138, 255, 0) 42%);
@@ -1633,7 +1693,7 @@
   border-radius: 14px;
 }
 
-.extra-card:hover {
+.extra-card.scroll-reveal--played:hover {
   transform: translateY(-2px);
 }
 
@@ -1736,7 +1796,7 @@
   flex-direction: column;
 }
 
-.outro-card:hover {
+.outro-card.scroll-reveal--played:hover {
   transform: translateY(-4px);
 }
 
@@ -1851,6 +1911,10 @@
   grid-template-columns: 1fr 320px;
   gap: 40px;
   align-items: center;
+}
+
+.portfolio-browser-reveal {
+  min-width: 0;
 }
 
 .portfolio-browser {
@@ -1989,7 +2053,7 @@
   transition: background 0.2s ease, transform 0.2s ease;
 }
 
-.portfolio-cta:hover {
+.portfolio-cta.scroll-reveal--played:hover {
   background: rgba(240, 255, 31, 0.08);
   transform: translateY(-2px);
 }
@@ -2078,10 +2142,8 @@
   position: relative;
   padding: 32px;
   border-radius: 16px;
-  overflow: hidden;
-  background: #111128;
-  border: 1px solid rgba(56,15,233,0.15);
-  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 0 0 transparent;
+  transition: transform 0.22s ease, background 0.22s ease, box-shadow 0.22s ease;
 }
 
 .processo-card-lg   { grid-column: span 3; }
@@ -2090,19 +2152,14 @@
 .processo-card-cta  { grid-column: span 3; }
 
 .processo-card:hover {
-  transform: translateY(-5px);
-  border-color: rgba(56,15,233,0.36);
-  box-shadow: 0 12px 40px rgba(56,15,233,0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(8, 8, 22, 0.38);
 }
-.processo-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at top right, rgba(56,15,233,0.09), transparent 60%);
-  opacity: 0;
-  transition: opacity 0.35s ease;
+
+.processo-card > * {
+  position: relative;
+  z-index: 1;
 }
-.processo-card:hover::before { opacity: 1; }
 
 .processo-numero {
   position: absolute;
@@ -2114,6 +2171,7 @@
   line-height: 1;
   pointer-events: none;
   user-select: none;
+  z-index: 0;
 }
 
 .processo-card h3 {
@@ -2122,14 +2180,12 @@
   font-size: 1.1rem;
   font-weight: 700;
   letter-spacing: -0.01em;
-  position: relative;
 }
 
 .processo-card p {
   color: #9090B0;
   font-size: var(--text-sm);
   line-height: 1.72;
-  position: relative;
 }
 
 .processo-cta-btn {
@@ -2410,8 +2466,11 @@
   width: 100%;
   padding: 12px 16px;
   border-radius: 10px;
-  border: 1.5px solid rgba(255,255,255,0.22);
-  background: rgba(255,255,255,0.05);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  background: rgba(10, 10, 20, 0.4);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28);
   color: #fff;
   font-size: 0.95rem;
   font-family: inherit;
@@ -2424,8 +2483,10 @@
 
 .contato-input:focus {
   border-color: #F0FF1F;
-  background: rgba(240,255,31,0.05);
-  box-shadow: 0 0 0 3px rgba(240,255,31,0.12);
+  background: rgba(10, 10, 20, 0.4);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28), 0 0 0 3px rgba(240,255,31,0.12);
 }
 
 .contato-textarea {
@@ -2479,14 +2540,15 @@
   background: #0A0A14;
   border-top: 1px solid rgba(56, 15, 233, 0.18);
   padding: var(--section-pad-y) var(--section-pad-x) 0;
-  overflow: hidden;
+  padding-right: calc(var(--scroll-sparkle-axis) + var(--footer-logo-align-overflow, 0px));
 }
 
 .footer-top {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding-bottom: 32px;
+  justify-content: flex-start;
+  gap: 40px;
+  padding-bottom: 48px;
   max-width: var(--section-max-width);
   margin-inline: auto;
   width: 100%;
@@ -2518,19 +2580,40 @@
 .footer-logo-wrap {
   display: flex;
   align-items: flex-end;
+  justify-content: flex-end;
   width: 100%;
   max-width: var(--section-max-width);
+  margin-top: 24px;
   margin-inline: auto;
-  margin-top: -15px;
+}
+
+.footer-logo-scale {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  width: 100%;
+  height: calc(var(--footer-logo-height) * var(--footer-logo-scale, 1));
+}
+
+.footer-logo-visual {
+  transform: scale(var(--footer-logo-scale, 1));
+  transform-origin: bottom right;
+  line-height: 0;
+  flex-shrink: 0;
 }
 
 .footer-logo {
-  width: 100%;
-  max-height: 260px;
+  width: auto;
+  height: var(--footer-logo-height);
+  max-width: none;
+  max-height: none;
+  flex-shrink: 0;
   object-fit: contain;
-  object-position: bottom center;
-  opacity: 1;
+  object-position: bottom right;
   display: block;
+  margin-right: calc(-1 * var(--footer-logo-align-shift, 0px));
+  -webkit-user-drag: none;
+  user-select: none;
 }
 
 
@@ -2628,13 +2711,10 @@
 
   .service-row-images {
     width: 100%;
-    flex-wrap: wrap;
   }
 
-  .service-img-card {
-    flex: 1 1 calc(50% - 5px);
-    width: auto;
-    min-width: 0;
+  .service-illustration {
+    width: 100%;
   }
 
   .services-panel-footer {
@@ -2645,11 +2725,41 @@
 
   .services-footer-left {
     width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .services-footer-left .section-deco-draw--horizontal {
+    flex: none;
+    width: 100%;
+  }
+
+  .services-footer-text {
+    order: -1;
+    white-space: normal;
+    width: 100%;
   }
 
   .services-cta-btn {
     width: 100%;
     justify-content: center;
+  }
+}
+
+/* Scroll sparkle hidden below 1400px */
+@media (max-width: 1399px) {
+  .footer {
+    padding-right: var(--section-pad-x);
+  }
+
+  .footer-logo-wrap {
+    width: 100%;
+    margin-right: 0;
+  }
+
+  .footer-logo {
+    margin-right: 0;
   }
 }
 
@@ -2667,19 +2777,11 @@
   .outros-cards { grid-template-columns: repeat(2, 1fr); }
 
   .banner {
-    --hero-title: clamp(2.25rem, 7vw, 3.25rem);
     --hero-desc: clamp(0.9rem, 2.8vw, 1.0625rem);
     --hero-copy-left: clamp(24px, 6vw, 40px);
     --hero-copy-width: min(80vw, 520px);
     --hero-gap-title-desc: clamp(1rem, 2.5vh, 1.5rem);
     --hero-gap-desc-btn: clamp(2rem, 4.5vh, 3rem);
-    --hero-btn-font: clamp(0.9rem, 2.2vw, 0.9375rem);
-    --hero-btn-secondary-font: clamp(0.9rem, 2.1vw, 0.9375rem);
-    --hero-btn-pad-y: clamp(14px, 3vw, 18px);
-    --hero-btn-pad-x: clamp(26px, 5.5vw, 36px);
-    --hero-btn-secondary-pad-x: clamp(24px, 5vw, 32px);
-    --hero-btn-min-h: clamp(46px, 11vw, 52px);
-    --hero-btn-secondary-min-h: clamp(44px, 10.5vw, 50px);
   }
 
   .banner-copy {
@@ -2696,7 +2798,6 @@
   }
 
   .footer { padding-top: 24px; }
-  .footer-logo { max-height: 180px; }
 }
 
 /* Mobile */
@@ -2709,35 +2810,145 @@
   }
 
   .banner {
-    --hero-title: clamp(2rem, 8.5vw, 2.75rem);
     --hero-desc: clamp(0.9rem, 3.5vw, 1rem);
     --hero-copy-left: clamp(20px, 5vw, 32px);
     --hero-copy-width: min(85vw, 340px);
-    --hero-gap-title-desc: 1rem;
-    --hero-gap-desc-btn: 2rem;
-    --hero-btn-font: 0.9rem;
-    --hero-btn-secondary-font: 0.9rem;
-    --hero-btn-pad-y: 14px;
-    --hero-btn-pad-x: 28px;
-    --hero-btn-secondary-pad-x: 26px;
-    --hero-btn-min-h: 48px;
-    --hero-btn-secondary-min-h: 46px;
+    --hero-gap-title-desc: 0.5rem;
+    --hero-gap-desc-btn: 0.75rem;
+    --hero-front-top: clamp(88px, 14svh, 108px);
+    --hero-front-bottom: 0px;
+    --hero-constellation-content-gap: 12px;
+    --hero-constellation-mountain-gap: 0px;
+    --hero-constellation-width: clamp(58vw, 68vw, 74vw);
+    --hero-title-line-height: 1;
+    --hero-title-shadow:
+      0 2px 20px rgba(0, 0, 0, 0.8),
+      0 2px 8px rgba(0, 0, 0, 0.9);
+    --hero-title-accent-shadow:
+      0 2px 20px rgba(0, 0, 0, 0.8),
+      0 2px 8px rgba(0, 0, 0, 0.9),
+      0 0 18px rgba(240, 255, 31, 0.42);
+    min-height: max(100svh, var(--hero-mobile-min-height, 100svh));
+  }
+
+  .banner-copy-head {
+    isolation: isolate;
+  }
+
+  .banner-copy-head::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    left: 50%;
+    top: 50%;
+    width: min(118%, calc(100% + clamp(36px, 11vw, 52px)));
+    height: calc(100% + clamp(18px, 5vw, 30px));
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(10, 10, 20, 0.65) 0%,
+      rgba(14, 11, 34, 0.4) 50%,
+      rgba(10, 10, 20, 0) 100%
+    );
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    pointer-events: none;
   }
 
   .banner-copy {
-    top: clamp(88px, 13vh, 112px);
+    isolation: auto;
+  }
+
+  .hero-front {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding:
+      var(--hero-front-top)
+      clamp(20px, 5vw, 32px)
+      var(--hero-front-bottom);
+    overflow: visible;
+  }
+
+  .banner-copy {
+    position: relative;
+    z-index: 2;
+    top: auto;
+    left: auto;
     transform: none;
+    width: 100%;
+    max-width: var(--hero-copy-width);
+    align-self: center;
+    align-items: center;
+    text-align: center;
+    margin-inline: auto;
+  }
+
+  .banner-title,
+  .banner-description {
+    text-align: center;
+  }
+
+  .banner-title {
+    margin-top: clamp(12px, 2.5svh, 22px);
+  }
+
+  .banner-description {
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-synthesis: none;
+    line-height: 1.5;
+    text-shadow:
+      0 2px 12px rgba(0, 0, 0, 0.85),
+      0 1px 4px rgba(0, 0, 0, 0.9);
+  }
+
+  .banner-footer {
+    justify-content: center;
+    align-items: center;
+    margin-top: var(--hero-gap-desc-btn);
   }
 
   .banner-footer-buttons {
     flex-direction: column;
-    align-items: flex-start;
-    gap: clamp(12px, 2.5vh, 16px);
+    align-items: center;
+    justify-content: center;
+    gap: clamp(8px, 1.5vh, 12px);
   }
 
   .banner-footer-side {
     width: auto;
-    justify-content: flex-start;
+    justify-content: center;
+  }
+
+  .hero-constellation-band {
+    position: absolute;
+    top: var(--hero-constellation-top, auto);
+    right: auto;
+    bottom: auto;
+    left: 50%;
+    z-index: 1;
+    transform: translateX(-50%);
+    flex-shrink: 0;
+    width: var(--hero-constellation-width);
+    max-width: calc(100vw - 2 * clamp(20px, 5vw, 32px));
+    margin-top: 0;
+    aspect-ratio: 32 / 36;
+    overflow: hidden;
+    pointer-events: none;
+    --hero-constellation-star-min-radius: 26px;
+    --hero-constellation-sparkle-min-radius: 14px;
+  }
+
+  .hero-constellation-band :deep(.hero-constellations) {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: 100%;
   }
 
   .banner-footer-link,
@@ -2766,8 +2977,8 @@
   .services-panel { padding: 24px 16px 20px; }
 
   .footer { padding-top: 24px; }
+
   .footer-top { flex-direction: column; align-items: flex-start; gap: 12px; }
-  .footer-logo { max-height: 120px; }
 }
 
 </style>

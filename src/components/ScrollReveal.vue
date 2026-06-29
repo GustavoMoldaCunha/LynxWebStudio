@@ -5,8 +5,7 @@ import { useScrollRevealOnce } from '../composables/useScrollRevealOnce.js'
 defineOptions({ inheritAttrs: false })
 
 const props = defineProps({
-  tag: { type: String, default: 'h2' },
-  lines: { type: Array, required: true },
+  tag: { type: String, default: 'div' },
   threshold: { type: Number, default: 0.2 },
   direction: {
     type: String,
@@ -16,7 +15,7 @@ const props = defineProps({
   delay: { type: Number, default: 0 },
 })
 
-const { root: revealRootEl, revealed } = useScrollRevealOnce({
+const { root, revealed } = useScrollRevealOnce({
   threshold: props.threshold,
 })
 
@@ -28,7 +27,7 @@ const revealStyle = computed(() =>
 <template>
   <component
     :is="tag"
-    ref="revealRootEl"
+    ref="root"
     v-bind="$attrs"
     class="scroll-reveal"
     :class="{
@@ -38,17 +37,6 @@ const revealStyle = computed(() =>
     }"
     :style="revealStyle"
   >
-    <span v-for="(line, lineIndex) in lines" :key="lineIndex" class="title-line">
-      <template v-for="(part, partIndex) in line" :key="partIndex">
-        <span v-if="part.accentClass" :class="part.accentClass">{{ part.text }}</span>
-        <template v-else>{{ part.text }}</template>
-      </template>
-    </span>
+    <slot />
   </component>
 </template>
-
-<style scoped>
-.title-line {
-  display: block;
-}
-</style>

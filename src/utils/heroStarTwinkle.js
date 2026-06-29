@@ -11,7 +11,8 @@ export const TWINKLE_FRAMES = {
   rest: { opacity: 0.72, scale: 0.94 },
   rise: { opacity: 0.65, scale: 1.05 },
   peak: { opacity: 1, scale: 1.38 },
-  settle: { opacity: 0.82, scale: 1.1 },
+  settle: { opacity: 0.84, scale: 1.04 },
+  ease: { opacity: 0.75, scale: 0.98 },
 }
 
 export function twinkleTiming(rand) {
@@ -27,7 +28,11 @@ export function twinkleTiming(rand) {
     holdEnd: +holdEnd.toFixed(2),
     riseAt: +(holdEnd + flashSpan * (0.08 + rand() * 0.06)).toFixed(2),
     peakAt: +(holdEnd + flashSpan * (0.22 + rand() * 0.16)).toFixed(2),
-    settleAt: +(holdEnd + flashSpan * (0.55 + rand() * 0.14)).toFixed(2),
+    settleAt: +(holdEnd + flashSpan * (0.40 + rand() * 0.10)).toFixed(2),
+    easeAt: +Math.min(
+      99.2,
+      holdEnd + flashSpan * (0.74 + rand() * 0.12),
+    ).toFixed(2),
   }
 }
 
@@ -52,8 +57,8 @@ export function twinkleAnimationName(id) {
   return `hero-star-twinkle-${id}`
 }
 
-export function buildTwinkleKeyframesCss(items) {
-  const { rest, rise, peak, settle } = TWINKLE_FRAMES
+export function buildTwinkleKeyframesCss(items, frames = TWINKLE_FRAMES) {
+  const { rest, rise, peak, settle, ease } = frames
 
   return items
     .filter((item) => item.twinkle)
@@ -74,6 +79,10 @@ export function buildTwinkleKeyframesCss(items) {
   ${item.settleAt}% {
     opacity: ${settle.opacity};
     transform: scale(${settle.scale});
+  }
+  ${item.easeAt}% {
+    opacity: ${ease.opacity};
+    transform: scale(${ease.scale});
   }
   100% {
     opacity: ${rest.opacity};

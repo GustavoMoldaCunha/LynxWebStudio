@@ -1,0 +1,24 @@
+/* Minimum on-screen star radii — scoped to hero sky SVGs only. */
+.hero-starfield {
+  --hero-star-min-radius: clamp(2px, 0.5vw, 4px);
+  --hero-star-glow-min-radius: clamp(3px, 0.85vw, 8px);
+  --hero-star-sparkle-min-arm: clamp(5px, 0.95vw, 9px);
+}
+
+.hero-constellations {
+  --hero-constellation-star-min-radius: clamp(14px, 1.8vw, 22px);
+  --hero-constellation-sparkle-min-radius: clamp(8px, 1.1vw, 12px);
+}
+
+@media (max-width: 480px) {
+  .hero-starfield {
+    --hero-star-min-radius: 1.95px;
+    --hero-star-glow-min-radius: 3.9px;
+    --hero-star-sparkle-min-arm: 5.5px;
+  }
+
+  .hero-constellations {
+    --hero-constellation-star-min-radius: 26px;
+    --hero-constellation-sparkle-min-radius: 14px;
+  }
+}

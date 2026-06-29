@@ -6,3 +6,12 @@ export const DECO_SPARKLE_VIEW_SIZE = 24
 
 /** Approximate arm length from viewBox center to tip (for scaling to match constellation nodes). */
 export const DECO_SPARKLE_ARM = 9
+
+/** Visible radius in viewBox units (for spacing and exclusion). */
+export function heroStarExtent(star) {
+  if (star.sparkle) {
+    return star.glow ? star.glowR : star.sparkleScale * DECO_SPARKLE_ARM
+  }
+
+  return star.glow ? star.glowR : star.r
+}

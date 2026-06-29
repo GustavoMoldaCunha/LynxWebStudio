@@ -1,6 +1,7 @@
 <template>
   <component :is="'style'">{{ twinkleKeyframes }}</component>
   <svg
+    ref="svgRef"
     class="hero-starfield"
     viewBox="0 0 100 100"
     :preserveAspectRatio="layout.preserveAspectRatio"
@@ -31,32 +32,102 @@
         <stop offset="62%" stop-color="#380FE9" stop-opacity="0.14" />
         <stop offset="100%" stop-color="#380FE9" stop-opacity="0" />
       </radialGradient>
+      <radialGradient id="hero-star-sparkle-fill" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#ffffff" />
+        <stop offset="45%" stop-color="#e8eeff" />
+        <stop offset="100%" stop-color="#380FE9" />
+      </radialGradient>
     </defs>
 
     <g :clip-path="`url(#${clipId})`">
-      <g v-for="star in stars" :key="star.id">
-        <g
-          class="hero-star"
-          :class="{
-            'hero-star--bright': star.glow,
-            'hero-star-twinkle': star.twinkle,
-          }"
-          :style="twinkleAnimationStyle(star)"
-        >
-          <circle
-            v-if="star.glow"
-            :cx="star.x"
-            :cy="star.y"
-            :r="star.glowR"
-            fill="url(#hero-star-glow-unified)"
-          />
-          <circle
-            v-else
-            :cx="star.x"
-            :cy="star.y"
-            :r="star.r"
-            fill="url(#hero-star-core)"
-          />
+      <g :transform="parallaxGroupTransform(parallaxBack)">
+        <g v-for="star in backStars" :key="star.id">
+          <g
+            class="hero-star"
+            :class="{
+              'hero-star--bright': star.glow,
+              'hero-star--sparkle': star.sparkle,
+              'hero-star-twinkle': star.twinkle,
+            }"
+            :style="twinkleAnimationStyle(star)"
+          >
+            <template v-if="star.sparkle">
+              <circle
+                v-if="star.glow"
+                :cx="star.x"
+                :cy="star.y"
+                :r="star.glowR"
+                fill="url(#hero-star-glow-unified)"
+              />
+              <path
+                class="hero-star-sparkle"
+                :d="DECO_SPARKLE_PATH"
+                :transform="sparkleTransform(star)"
+                :fill="star.glow ? 'url(#hero-star-sparkle-fill)' : 'url(#hero-star-core)'"
+              />
+            </template>
+            <template v-else>
+              <circle
+                v-if="star.glow"
+                :cx="star.x"
+                :cy="star.y"
+                :r="star.glowR"
+                fill="url(#hero-star-glow-unified)"
+              />
+              <circle
+                v-else
+                :cx="star.x"
+                :cy="star.y"
+                :r="star.r"
+                fill="url(#hero-star-core)"
+              />
+            </template>
+          </g>
+        </g>
+      </g>
+      <g :transform="parallaxGroupTransform(parallaxMid)">
+        <g v-for="star in midStars" :key="star.id">
+          <g
+            class="hero-star"
+            :class="{
+              'hero-star--bright': star.glow,
+              'hero-star--sparkle': star.sparkle,
+              'hero-star-twinkle': star.twinkle,
+            }"
+            :style="twinkleAnimationStyle(star)"
+          >
+            <template v-if="star.sparkle">
+              <circle
+                v-if="star.glow"
+                :cx="star.x"
+                :cy="star.y"
+                :r="star.glowR"
+                fill="url(#hero-star-glow-unified)"
+              />
+              <path
+                class="hero-star-sparkle"
+                :d="DECO_SPARKLE_PATH"
+                :transform="sparkleTransform(star)"
+                :fill="star.glow ? 'url(#hero-star-sparkle-fill)' : 'url(#hero-star-core)'"
+              />
+            </template>
+            <template v-else>
+              <circle
+                v-if="star.glow"
+                :cx="star.x"
+                :cy="star.y"
+                :r="star.glowR"
+                fill="url(#hero-star-glow-unified)"
+              />
+              <circle
+                v-else
+                :cx="star.x"
+                :cy="star.y"
+                :r="star.r"
+                fill="url(#hero-star-core)"
+              />
+            </template>
+          </g>
         </g>
       </g>
     </g>
@@ -64,22 +135,114 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+import {
+  DECO_SPARKLE_PATH,
+  DECO_SPARKLE_VIEW_SIZE,
+} from '../config/decoSparkle.js'
 import { useHeroSkyLayout } from '../composables/useHeroSkyLayout.js'
 import { generateHeroStarfield } from '../utils/generateHeroStarfield.js'
+import {
+  applyStarfieldFloors,
+  fallbackMinPx,
+  readHeroStarFloorsPx,
+} from '../utils/heroStarScreenFloor.js'
+import { violatesHeroConstellation } from '../utils/heroConstellationExclusion.js'
 import {
   buildTwinkleKeyframesCss,
   twinkleAnimationStyle,
 } from '../utils/heroStarTwinkle.js'
+import '../styles/heroStarMinRadius.css'
 import '../styles/heroStarTwinkle.css'
 
-const { layout } = useHeroSkyLayout()
+const props = defineProps({
+  parallaxBack: {
+    type: Object,
+    default: null,
+  },
+  parallaxMid: {
+    type: Object,
+    default: null,
+  },
+})
+
+const STARFIELD_VIEWBOX_WIDTH = 100
+const DECO_STAR_CENTER = DECO_SPARKLE_VIEW_SIZE / 2
+
+const { layout, viewportWidth } = useHeroSkyLayout()
+
+const svgRef = ref(null)
+const svgWidthPx = ref(0)
 
 const clipId = computed(() => `starfield-bounds-${layout.value.id}`)
 
-const stars = computed(() => generateHeroStarfield(layout.value))
+const stars = computed(() => generateHeroStarfield(layout.value, viewportWidth.value))
+
+const flooredStars = computed(() => {
+  const el = svgRef.value
+  const width = svgWidthPx.value || viewportWidth.value
+  const floors = el
+    ? readHeroStarFloorsPx(el)
+    : {
+        core: fallbackMinPx('core', viewportWidth.value),
+        glow: fallbackMinPx('glow', viewportWidth.value),
+        sparkle: fallbackMinPx('sparkle', viewportWidth.value),
+      }
+
+  return applyStarfieldFloors(
+    stars.value,
+    floors,
+    width,
+    STARFIELD_VIEWBOX_WIDTH,
+    layout.value.starfieldSizeScale ?? 1,
+  ).filter(
+    (star) =>
+      !violatesHeroConstellation(star, layout.value, {
+        viewportWidth: width,
+        svgWidthPx: width,
+      }),
+  )
+})
+
+const backStars = computed(() =>
+  flooredStars.value.filter((star) => !star.glow && !star.sparkle),
+)
+
+const midStars = computed(() =>
+  flooredStars.value.filter((star) => star.glow || star.sparkle),
+)
 
 const twinkleKeyframes = computed(() => buildTwinkleKeyframesCss(stars.value))
+
+function parallaxGroupTransform(offset) {
+  if (!offset || (!offset.x && !offset.y)) return undefined
+
+  const width = svgWidthPx.value || viewportWidth.value
+  if (!width) return undefined
+
+  const unitsPerPx = STARFIELD_VIEWBOX_WIDTH / width
+  const tx = offset.x * unitsPerPx
+  const ty = offset.y * unitsPerPx
+
+  return `translate(${tx.toFixed(4)} ${ty.toFixed(4)})`
+}
+
+function sparkleTransform(star) {
+  return `translate(${star.x} ${star.y}) scale(${star.sparkleScale}) translate(${-DECO_STAR_CENTER} ${-DECO_STAR_CENTER})`
+}
+
+function syncSvgWidth() {
+  svgWidthPx.value = svgRef.value?.getBoundingClientRect().width ?? viewportWidth.value
+}
+
+onMounted(() => {
+  syncSvgWidth()
+  window.addEventListener('resize', syncSvgWidth, { passive: true })
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', syncSvgWidth)
+})
 </script>
 
 <style scoped>
@@ -89,5 +252,11 @@ const twinkleKeyframes = computed(() => buildTwinkleKeyframesCss(stars.value))
   width: 100%;
   height: 100%;
   pointer-events: none;
+}
+
+.hero-starfield :deep(.hero-star),
+.hero-starfield :deep(.hero-star-twinkle) {
+  transform-box: fill-box;
+  transform-origin: center;
 }
 </style>

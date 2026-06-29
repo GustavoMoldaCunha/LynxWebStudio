@@ -16,12 +16,21 @@
   --font-display: 'Recoleta', serif;
   --font-body: 'Lexend Deca', sans-serif;
   --accent-yellow: #F0FF1F;
-  --section-max-width: 1600px;
+  --section-max-width: 1280px;
   --section-pad-x: 48px;
   --section-pad-y: 96px;
   --text-sm: 0.9rem;
   --text-deco: 0.72rem;
   --deco-trail-thickness: 6px;
+  --scroll-sparkle-edge: -11px;
+  --scroll-sparkle-size: 92px;
+  --scroll-sparkle-min-width: 1400px;
+  --scroll-sparkle-line-offset: 0px;
+  --scroll-sparkle-trail-opacity: 1;
+  --scroll-sparkle-axis: calc(var(--scroll-sparkle-edge) + var(--scroll-sparkle-size) / 2);
+  --footer-logo-png-trim: 12.5%;
+  --footer-logo-x-offset: 2px;
+  --footer-logo-height: 180px;
 }
 
 *, *::before, *::after {
@@ -29,7 +38,7 @@
 }
 
 html {
-  overflow-x: clip;
+  overflow-x: hidden;
 }
 
 html.lenis,
@@ -59,39 +68,17 @@ body {
   padding: 0;
   width: 100%;
   max-width: 100%;
-  overflow-x: clip;
+  overflow-x: hidden;
 }
 
 #app {
   width: 100%;
   max-width: 100%;
-  overflow-x: clip;
-}
-
-.global-grain {
-  position: fixed;
-  inset: 0;
-  top: 0;
-  left: 0;
-  z-index: 9990;
-  width: 100%;
-  height: 100%;
-  min-height: 100vh;
-  min-height: 100dvh;
-  pointer-events: none;
-  opacity: 0.06;
-  mix-blend-mode: overlay;
-}
-
-.global-grain__pattern {
-  display: block;
-  width: 100%;
-  height: 100%;
-  max-width: none;
+  overflow-x: hidden;
 }
 
 img,
-svg:not(.global-grain__pattern),
+svg,
 video {
   max-width: 100%;
   height: auto;
@@ -114,26 +101,6 @@ video {
   :root {
     --section-pad-y: 64px;
     --section-pad-x: 20px;
-  }
-}
-
-@keyframes service-card-enter {
-  from {
-    opacity: 0;
-    transform: translateY(40px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  #servicos .services-list .service-row {
-    animation: none !important;
-    opacity: 1 !important;
-    transform: none !important;
   }
 }
 
@@ -320,6 +287,41 @@ h3 em {
   .section-deco-draw--vertical:not(.section-deco-draw--played) .section-deco-draw__star,
   .section-deco-draw--vertical.section-deco-draw--reverse:not(.section-deco-draw--played) .section-deco-draw__star,
   .section-deco-draw--horizontal:not(.section-deco-draw--played) .section-deco-draw__star {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.scroll-reveal {
+  --scroll-reveal-travel: clamp(36px, 6vw, 72px);
+  --scroll-reveal-delay: 0ms;
+  --scroll-reveal-duration: 1.4s;
+  --scroll-reveal-fade-duration: 1.1s;
+  --scroll-reveal-easing: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.scroll-reveal:not(.scroll-reveal--played) {
+  opacity: 0;
+}
+
+.scroll-reveal--from-right:not(.scroll-reveal--played) {
+  transform: translateX(var(--scroll-reveal-travel));
+}
+
+.scroll-reveal--from-left:not(.scroll-reveal--played) {
+  transform: translateX(calc(-1 * var(--scroll-reveal-travel)));
+}
+
+.scroll-reveal.scroll-reveal--played {
+  transform: translateX(0);
+  opacity: 1;
+  transition:
+    transform var(--scroll-reveal-duration) var(--scroll-reveal-easing) var(--scroll-reveal-delay),
+    opacity var(--scroll-reveal-fade-duration) ease-out var(--scroll-reveal-delay);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-reveal:not(.scroll-reveal--played) {
     transform: none;
     opacity: 1;
   }

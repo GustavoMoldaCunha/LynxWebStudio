@@ -95,6 +95,7 @@
   height: 72%;
   pointer-events: none;
   z-index: 2;
+  transform-origin: center bottom;
 }
 
 .hero-terrain__layer {

@@ -2,7 +2,7 @@
   <nav class="navbar">
     <div class="container">
       <a href="#top">
-       <img src="../assets/LynxLogoLetras.png" alt="Logo Lynx" class="logo">
+       <img src="../assets/LynxLogoLetras.png" alt="Logo Lynx" class="logo" draggable="false">
       </a>
 
       <!-- MENU DESKTOP -->
@@ -96,6 +96,9 @@ onUnmounted(() => {
   max-width: 13rem;
   max-height: 13rem;
   width: clamp(5.5rem, 24vw, 13rem);
+  object-fit: contain;
+  -webkit-user-drag: none;
+  user-select: none;
 }
 
 .nav-left {
@@ -139,14 +142,15 @@ onUnmounted(() => {
   border-radius: 999px;
   font-size: 0.95rem;
 
-  background: #3D40FF;
-  color: #E5FF00 !important;
+  background: #380FE9;
+  color: #E8E6FF !important;
   border-color: transparent;
 
   transition: transform 0.2s ease;
 }
 .cta:hover {
   transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(56, 15, 233, 0.35);
 }
 
 /* ── Hamburger ── */
@@ -197,6 +201,13 @@ onUnmounted(() => {
     padding: 0.45rem 0.875rem;
   }
 
+  .logo {
+    width: auto;
+    height: 2.05rem;
+    max-width: min(42vw, 11rem);
+    max-height: none;
+  }
+
   .menu-mobile {
     position: absolute;
     top: 100%;
@@ -227,8 +238,8 @@ onUnmounted(() => {
     transition: color 0.35s ease, text-shadow 0.35s ease;
   }
   .menu-mobile a:hover {
-    color: #3D40FF;
-    text-shadow: 0 0 10px rgba(61, 64, 255, 0.25);
+    color: #380FE9;
+    text-shadow: 0 0 10px rgba(56, 15, 233, 0.25);
   }
 }
 
@@ -237,7 +248,10 @@ onUnmounted(() => {
   .container { gap: 0.625rem; }
   .nav-right { gap: 0.625rem; }
   .menu-mobile { right: 1.25rem; }
-  .logo { width: clamp(4.5rem, 22vw, 6.5rem); }
+  .logo {
+    height: 1.95rem;
+    max-width: min(48vw, 10rem);
+  }
   .cta {
     font-size: 0.8125rem;
     padding: 0.4rem 0.7rem;
