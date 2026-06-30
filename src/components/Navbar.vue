@@ -1,4 +1,5 @@
 <template>
+  <Teleport to="body">
   <nav class="navbar">
     <div class="container">
       <a href="#top">
@@ -31,6 +32,7 @@
       <a href="#">contato</a>
     </div>
   </nav>
+  </Teleport>
 </template>
 
 <script setup>
@@ -73,12 +75,20 @@ onUnmounted(() => {
   min-height: 5rem;
   display: flex;
   align-items: flex-end;
+  background: transparent;
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.22);
+}
 
-  background: rgba(10, 10, 20, 0.4);
+.navbar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(10, 10, 20, 0.38);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28);
-  border-bottom: 1.5px solid rgba(255, 255, 255, 0.3);
+  pointer-events: none;
 }
 
 .container {
@@ -87,6 +97,7 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   position: relative;
+  z-index: 1;
   align-items: flex-end;
   gap: 1rem;
 }

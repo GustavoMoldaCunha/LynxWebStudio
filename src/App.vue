@@ -4,6 +4,7 @@
   <MenuBtn />
   <ScrollSparkle />
 
+  <main id="main-content">
 <!---------------------- HERO --------------------->  
   <section ref="heroRef" class="banner hero" id="top">
     <div class="hero-sky" aria-hidden="true">
@@ -51,8 +52,11 @@
           </div>
         </ScrollReveal>
       </div>
-      <div class="hero-constellation-band" aria-hidden="true" :style="heroParallax.layers.constellation">
-        <HeroConstellations />
+      <div class="hero-constellation-band" aria-hidden="true">
+        <HeroConstellations
+          :parallax-x="heroParallax.offsets.constellation.x"
+          :parallax-y="heroParallax.offsets.constellation.y"
+        />
       </div>
     </div>
   </section>
@@ -309,17 +313,36 @@
               @click="projetos[activeProject].link === '#' && $event.preventDefault()"
             >
               <div class="browser-screen">
-                <div class="browser-placeholder" :style="{ background: projetos[activeProject].gradient }">
+                <img
+                  v-if="projetos[activeProject].image"
+                  :src="projetos[activeProject].image"
+                  :alt="`Preview do site ${projetos[activeProject].title}`"
+                  class="browser-screen-img"
+                  :class="{ 'browser-screen-img--scroll': projetos[activeProject].imageScroll }"
+                />
+                <div
+                  v-else-if="projetos[activeProject].logo"
+                  class="browser-placeholder browser-placeholder--logo"
+                  :style="{ background: projetos[activeProject].placeholderBg }"
+                >
+                  <img
+                    :src="projetos[activeProject].logo"
+                    alt=""
+                    class="browser-placeholder-logo"
+                    draggable="false"
+                  />
+                </div>
+                <div v-else class="browser-placeholder" :style="{ background: projetos[activeProject].gradient }">
                   <span class="browser-placeholder-label">{{ projetos[activeProject].title }}</span>
                 </div>
               </div>
             </a>
 
-            <button class="portfolio-arrow portfolio-arrow--prev" @click="prevProject">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            <button type="button" class="portfolio-arrow portfolio-arrow--prev" aria-label="Projeto anterior" @click="prevProject">
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
             </button>
-            <button class="portfolio-arrow portfolio-arrow--next" @click="nextProject">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            <button type="button" class="portfolio-arrow portfolio-arrow--next" aria-label="Próximo projeto" @click="nextProject">
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
             </button>
           </div>
         </ScrollReveal>
@@ -337,19 +360,25 @@
           <ScrollReveal
             tag="a"
             class="portfolio-cta"
-            :href="projetos[activeProject].link"
-            target="_blank"
+            :href="projetos[activeProject].ctaLink ?? projetos[activeProject].link"
+            :target="(projetos[activeProject].ctaLink ?? projetos[activeProject].link) !== '#' ? '_blank' : null"
             :delay="720"
           >
-            Visitar site <span>→</span>
+            {{ projetos[activeProject].ctaLabel ?? 'Visitar site' }}
+            <ArrowUpRight v-if="projetos[activeProject].ctaArrowUp" class="portfolio-cta-arrow" aria-hidden="true" />
+            <span v-else aria-hidden="true">→</span>
           </ScrollReveal>
 
-          <ScrollReveal class="portfolio-dots" :delay="840">
+          <ScrollReveal class="portfolio-dots" :delay="840" role="tablist" aria-label="Projetos do portfólio">
             <button
               v-for="(p, i) in projetos"
               :key="i"
+              type="button"
+              role="tab"
               class="portfolio-dot"
               :class="{ 'portfolio-dot--active': activeProject === i }"
+              :aria-label="`Ir para o projeto ${i + 1} de ${projetos.length}: ${p.title}`"
+              :aria-selected="activeProject === i"
               @click="activeProject = i"
             />
           </ScrollReveal>
@@ -449,9 +478,9 @@
 
       <div class="pricing-cards">
 
-        <!-- Card Standard -->
+        <!-- Card Simples -->
         <div class="pricing-card">
-          <span class="pricing-tier">Standard</span>
+          <span class="pricing-tier">Simples</span>
           <div class="pricing-price">
             <span class="pricing-value">R$500</span>
             <span class="pricing-old">– R$750</span>
@@ -460,7 +489,7 @@
           <div class="pricing-divider"></div>
           <ul class="pricing-features">
             <li>Layout simples e estruturado</li>
-            <li>Mobile responsivo</li>
+            <li>Site Responsivo (desktop, tablet, celular)</li>
             <li>Animações de scroll básicas</li>
             <li>Formulário de contato</li>
             <li>2 rodadas de revisões</li>
@@ -472,13 +501,13 @@
           <span class="pricing-badge">Recomendado</span>
           <span class="pricing-tier">Premium</span>
           <div class="pricing-price">
-            <span class="pricing-value">R$1.000</span>
-            <span class="pricing-old">– R$1.500</span>
+            <span class="pricing-value pricing-value--quote">Sob Orçamento</span>
           </div>
           <p class="pricing-desc">Design personalizado de alto nível</p>
           <div class="pricing-divider"></div>
           <ul class="pricing-features">
             <li>Layout e direção visual customizados</li>
+            <li>Site Responsivo (desktop, tablet, celular)</li>
             <li>Animações e interações avançadas</li>
             <li>Vídeo embutido ou galeria filtrável</li>
             <li>Formulário de contato com notificações</li>
@@ -562,6 +591,7 @@
       </div>
     </div>
   </section>
+  </main>
   <!---------------------- FOOTER --------------------->
   <footer
     class="footer"
@@ -614,6 +644,8 @@
     import { useHeroParallax } from './composables/useHeroParallax.js'
     import { useFooterLogoScale } from './composables/useFooterLogoScale.js'
     import LynxLogo from './assets/LynxLogoLetras.png'
+    import GeoaxisPreview from './assets/geoaxisambiental.com.br.png'
+    import VictormolPreview from './assets/www.victormol.com.br_.png'
     import { SlidersHorizontal, Globe, ShieldCheck, Eye, Search, 
              Smartphone, MessageCircle, Zap, Shield, Settings, Palette, 
              BarChart2, FileText, ArrowUpRight, ArrowDown, ChevronDown } from 'lucide-vue-next'
@@ -736,6 +768,8 @@
         desc: 'Site institucional para consultoria ambiental com foco em licenciamento, conformidade legal e soluções sustentáveis para empresas.',
         url: 'geoaxisambiental.com.br',
         link: 'https://geoaxisambiental.com.br/',
+        image: GeoaxisPreview,
+        imageScroll: true,
         gradient: 'linear-gradient(135deg, #0A0A14 0%, #1a0a4a 50%, #380FE9 100%)'
       },
       {
@@ -744,16 +778,24 @@
         title: 'Dr. Victor Mol - Radiologista',
         desc: 'Site profissional para radiologista com apresentação de serviços, agendamento de consultas e segunda opinião em exames radiológicos.',
         url: 'victormol.com.br',
+        url: 'victormol.com.br',
         link: 'https://victormol.com.br/',
+        image: VictormolPreview,
+        imageScroll: true,
         gradient: 'linear-gradient(135deg, #0A0A14 0%, #0d2a1a 50%, #0f6e3a 100%)'
       },
       {
         num: '03',
-        category: 'E-Commerce',
-        title: 'Projeto em Breve',
-        desc: 'Aqui vai a descrição do seu projeto: tecnologias usadas, desafios e resultados obtidos para o cliente.',
-        url: 'seucliente.com.br',
+        category: 'Seu Site',
+        title: 'Projeto Disponível',
+        desc: 'Seu negócio merece uma presença digital à altura. Vamos construir o seu site juntos.',
+        url: 'seusite.com.br',
         link: '#',
+        ctaLabel: 'Pedir site',
+        ctaLink: '#contato',
+        ctaArrowUp: true,
+        logo: LynxLogo,
+        placeholderBg: '#1A0F55',
         gradient: 'linear-gradient(135deg, #0A0A14 0%, #1a1400 50%, #5a4a00 100%)'
       }
     ])
@@ -1961,6 +2003,22 @@
   background: #0e0e1c;
 }
 
+.browser-screen-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+}
+
+.browser-screen-img--scroll {
+  transition: object-position 10s ease;
+}
+
+.browser-screen-link:hover .browser-screen-img--scroll {
+  object-position: bottom center;
+}
+
 .browser-placeholder {
   width: 100%;
   height: 100%;
@@ -1978,6 +2036,14 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   user-select: none;
+}
+
+.browser-placeholder-logo {
+  width: min(85%, 380px);
+  max-height: 67%;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .portfolio-arrow {          /* Setas */
@@ -2056,6 +2122,14 @@
 .portfolio-cta.scroll-reveal--played:hover {
   background: rgba(240, 255, 31, 0.08);
   transform: translateY(-2px);
+}
+
+.portfolio-cta-arrow {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  flex-shrink: 0;
 }
 
 .portfolio-dots {
@@ -2310,6 +2384,10 @@
   font-weight: 800;
   color: #E8E6FF;
   line-height: 1;
+}
+
+.pricing-value--quote {
+  font-size: clamp(1.65rem, 3.2vw, 2.35rem);
 }
 
 .pricing-old {

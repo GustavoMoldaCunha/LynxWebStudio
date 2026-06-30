@@ -5,6 +5,7 @@
     class="hero-constellations"
     :viewBox="svgViewBox"
     :preserveAspectRatio="layout.preserveAspectRatio"
+    :style="parallaxStyle"
     aria-hidden="true"
   >
     <defs>
@@ -151,6 +152,17 @@ const LINES_END_S = STARS_END_S + LINE_DRAW_DURATION_S + LEFT_SHAFT_DRAW_DURATIO
 
 const TWINKLE_START_OFFSET_S = LINES_END_S + TWINKLE_BUFFER_S
 
+const props = defineProps({
+  parallaxX: {
+    type: Number,
+    default: 0,
+  },
+  parallaxY: {
+    type: Number,
+    default: 0,
+  },
+})
+
 const { layout, viewportWidth } = useHeroSkyLayout()
 
 const svgRef = ref(null)
@@ -278,6 +290,14 @@ const clipRect = computed(() => {
 const constellationTransform = computed(() => {
   const { tx, ty, scale } = constellationLayout.value
   return `translate(${tx} ${ty}) scale(${scale})`
+})
+
+const parallaxStyle = computed(() => {
+  if (!props.parallaxX && !props.parallaxY) return undefined
+
+  return {
+    transform: `translate3d(${props.parallaxX.toFixed(2)}px, ${props.parallaxY.toFixed(2)}px, 0)`,
+  }
 })
 
 /** Screen pixels per local unit inside the scaled constellation group. */

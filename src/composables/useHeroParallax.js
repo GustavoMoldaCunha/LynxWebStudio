@@ -5,7 +5,7 @@ const LAYER_FACTORS = {
   starsBack: 0.16,
   starsMid: 0.44,
   terrain: 0.3,
-  constellation: 1.22,
+  constellation: 0.45,
   copy: -0.085,
 }
 
@@ -139,22 +139,25 @@ export function useHeroParallax(containerRef) {
     }
   }
 
+  function layerVarsStyle(key) {
+    const offset = offsets[key]
+    const moving =
+      pointerInside.value ||
+      Math.abs(current.x) > SETTLE_EPSILON ||
+      Math.abs(current.y) > SETTLE_EPSILON
+
+    return {
+      '--hero-parallax-x': `${offset.x.toFixed(2)}px`,
+      '--hero-parallax-y': `${offset.y.toFixed(2)}px`,
+      willChange: enabled.value && moving ? 'transform' : undefined,
+    }
+  }
+
   const layers = computed(() => ({
     starsBack: layerStyle('starsBack'),
     starsMid: layerStyle('starsMid'),
     terrain: layerStyle('terrain'),
-    constellation: layerStyle('constellation'),
-    copy: {
-      '--hero-parallax-x': `${offsets.copy.x.toFixed(2)}px`,
-      '--hero-parallax-y': `${offsets.copy.y.toFixed(2)}px`,
-      willChange:
-        enabled.value &&
-        (pointerInside.value ||
-          Math.abs(current.x) > SETTLE_EPSILON ||
-          Math.abs(current.y) > SETTLE_EPSILON)
-          ? 'transform'
-          : undefined,
-    },
+    copy: layerVarsStyle('copy'),
   }))
 
   onMounted(() => {
