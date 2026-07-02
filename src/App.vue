@@ -568,45 +568,65 @@
         </div>
 
       
-      <div class="contato-form-wrap">     <!-- Formulário -->
+      <form class="contato-form-wrap" @submit.prevent="enviarFormulario">
         <div class="contato-form-group">
-          <label class="contato-label">Nome</label>
+          <label class="contato-label" for="contato-nome">Nome</label>
           <input
+            id="contato-nome"
             v-model="formNome"
             class="contato-input"
             type="text"
+            name="nome"
             placeholder="Seu nome"
+            :disabled="formLoading"
+            required
           />
         </div>
 
         <div class="contato-form-group">
-          <label class="contato-label">Telefone / Whatsapp</label>
+          <label class="contato-label" for="contato-telefone">Telefone / Whatsapp</label>
           <input
+            id="contato-telefone"
             v-model="formTelefone"
             class="contato-input"
-            type="text"
+            type="tel"
+            name="telefone"
             placeholder="+55 (22) 00000-0000"
+            :disabled="formLoading"
+            required
           />
         </div>
 
         <div class="contato-form-group">
-          <label class="contato-label">Detalhes</label>
+          <label class="contato-label" for="contato-detalhes">Detalhes</label>
           <textarea
+            id="contato-detalhes"
             v-model="formDetalhes"
             class="contato-input contato-textarea"
+            name="mensagem"
             placeholder="Conte-nos sobre o seu negócio e o que você precisa..."
             rows="5"
+            :disabled="formLoading"
+            required
           ></textarea>
         </div>
 
-        <div class="btn-constellation-contato">
-          <button class="contato-submit" @click="enviarFormulario">
+        <p v-if="formErro" class="contato-feedback contato-feedback--erro" role="alert">
+          {{ formErro }}
+        </p>
 
-            <span v-if="!formEnviado">Enviar Solicitação</span>
-            <span v-else>✓ Enviado com sucesso!</span>
+        <div class="btn-constellation-contato">
+          <button
+            class="contato-submit"
+            type="submit"
+            :disabled="formLoading || formEnviado"
+          >
+            <span v-if="formLoading">Enviando...</span>
+            <span v-else-if="formEnviado">✓ Enviado com sucesso!</span>
+            <span v-else>Enviar Solicitação</span>
           </button>
         </div>
-      </div>
+      </form>
     </div>
   </section>
   </main>
@@ -751,6 +771,8 @@
     const formTelefone = ref('')
     const formDetalhes = ref('')
     const formEnviado = ref(false)
+    const formLoading = ref(false)
+    const formErro = ref('')
 
     const activeService = ref(0) // Começa com o primeiro aberto (01)
 
@@ -827,15 +849,48 @@
       activeProject.value = (activeProject.value + 1) % projetos.value.length
     }
 
-    function enviarFormulario() {
-      if (!formNome.value || !formTelefone.value) return
-      formEnviado.value = true
-      setTimeout(() => {
+    async function enviarFormulario() {
+      if (formLoading.value || formEnviado.value) return
+
+      formErro.value = ''
+
+      if (!formNome.value.trim() || !formTelefone.value.trim()) {
+        formErro.value = 'Preencha nome e telefone.'
+        return
+      }
+
+      formLoading.value = true
+
+      try {
+        const response = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nome: formNome.value.trim(),
+            telefone: formTelefone.value.trim(),
+            mensagem: formDetalhes.value.trim(),
+          }),
+        })
+
+        const data = await response.json()
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || 'Não foi possível enviar. Tente novamente.')
+        }
+
+        formEnviado.value = true
         formNome.value = ''
         formTelefone.value = ''
         formDetalhes.value = ''
-        formEnviado.value = false
-      }, 3000)
+
+        setTimeout(() => {
+          formEnviado.value = false
+        }, 4000)
+      } catch (err) {
+        formErro.value = err instanceof Error ? err.message : 'Erro ao enviar. Tente novamente.'
+      } finally {
+        formLoading.value = false
+      }
     }
 
     function scrollToContato() {
@@ -2670,11 +2725,20 @@
 
 .contato-submit:active { transform: scale(0.98); }
 
-.contato-submit[disabled],  
-.contato-submit:has(span:empty) {    /* Aviso */
+.contato-submit[disabled] {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+}
+
+.contato-feedback {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.contato-feedback--erro {
+  color: #ffb4b4;
 }
 
 
