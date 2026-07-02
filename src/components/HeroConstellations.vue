@@ -26,10 +26,11 @@
         <stop offset="62%" stop-color="#380FE9" stop-opacity="0.14" />
         <stop offset="100%" stop-color="#380FE9" stop-opacity="0" />
       </radialGradient>
-      <radialGradient id="constellation-sparkle-fill" cx="50%" cy="50%" r="50%">
+      <radialGradient id="constellation-sparkle-fill" cx="50%" cy="50%" r="72%">
         <stop offset="0%" stop-color="#ffffff" />
-        <stop offset="45%" stop-color="#e8eeff" />
-        <stop offset="100%" stop-color="#380FE9" />
+        <stop offset="40%" stop-color="#eef1ff" />
+        <stop offset="78%" stop-color="#cfc9fc" />
+        <stop offset="100%" stop-color="#9078f0" />
       </radialGradient>
       <filter id="constellation-line-glow" x="-30%" y="-30%" width="160%" height="160%">
         <feGaussianBlur :stdDeviation="cursorLineGlowStdDeviation" result="blur" />
@@ -129,6 +130,7 @@ import {
 import {
   assignTwinkleTiming,
   buildTwinkleKeyframesCss,
+  CONSTELLATION_TWINKLE_FRAMES,
   TWINKLE_FRAMES,
   twinkleAnimationStyle,
 } from '../utils/heroStarTwinkle.js'
@@ -360,7 +362,9 @@ const CURSOR_VERTEX_ENTRIES = CURSOR_VERTICES.map((vertex, index) => ({
   },
 }))
 
-const twinkleKeyframes = computed(() => buildTwinkleKeyframesCss(CURSOR_VERTICES))
+const twinkleKeyframes = computed(() =>
+  buildTwinkleKeyframesCss(CURSOR_VERTICES, CONSTELLATION_TWINKLE_FRAMES),
+)
 
 function constellationTwinkleStyle(vertex) {
   return twinkleAnimationStyle(vertex, { startOffset: TWINKLE_START_OFFSET_S })
@@ -626,6 +630,10 @@ onUnmounted(() => {
   fill: url(#constellation-sparkle-fill);
 }
 
+.hero-constellations :deep(.hero-star-twinkle) {
+  opacity: 0.98;
+}
+
 .constellation-node {
   opacity: 0;
   transform: scale(0.42);
@@ -656,6 +664,11 @@ onUnmounted(() => {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .hero-constellations :deep(.hero-star-twinkle) {
+    opacity: 1;
+    animation: none;
+  }
+
   .constellation-node {
     opacity: 1;
     transform: none;

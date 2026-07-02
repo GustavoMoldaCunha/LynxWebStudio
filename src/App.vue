@@ -313,27 +313,45 @@
               @click="projetos[activeProject].link === '#' && $event.preventDefault()"
             >
               <div class="browser-screen">
-                <img
-                  v-if="projetos[activeProject].image"
-                  :src="projetos[activeProject].image"
-                  :alt="`Preview do site ${projetos[activeProject].title}`"
-                  class="browser-screen-img"
-                  :class="{ 'browser-screen-img--scroll': projetos[activeProject].imageScroll }"
-                />
                 <div
-                  v-else-if="projetos[activeProject].logo"
-                  class="browser-placeholder browser-placeholder--logo"
-                  :style="{ background: projetos[activeProject].placeholderBg }"
+                  v-for="(projeto, i) in projetos"
+                  :key="projeto.num"
+                  class="browser-screen-slide"
+                  :class="{ 'browser-screen-slide--active': activeProject === i }"
+                  :aria-hidden="activeProject !== i"
                 >
-                  <img
-                    :src="projetos[activeProject].logo"
-                    alt=""
-                    class="browser-placeholder-logo"
-                    draggable="false"
-                  />
-                </div>
-                <div v-else class="browser-placeholder" :style="{ background: projetos[activeProject].gradient }">
-                  <span class="browser-placeholder-label">{{ projetos[activeProject].title }}</span>
+                  <div
+                    v-if="projeto.image"
+                    class="browser-screen-track"
+                    :class="{ 'browser-screen-track--scroll': projeto.imageScroll }"
+                  >
+                    <img
+                      :src="projeto.image"
+                      :alt="`Preview do site ${projeto.title}`"
+                      class="browser-screen-img"
+                      decoding="async"
+                      :loading="i === 0 ? 'eager' : 'lazy'"
+                      :fetchpriority="i === 0 ? 'high' : 'low'"
+                      draggable="false"
+                    />
+                  </div>
+                  <div
+                    v-else-if="projeto.logo"
+                    class="browser-placeholder browser-placeholder--logo"
+                    :style="{ background: projeto.placeholderBg }"
+                  >
+                    <img
+                      :src="projeto.logo"
+                      alt=""
+                      class="browser-placeholder-logo"
+                      decoding="async"
+                      loading="lazy"
+                      draggable="false"
+                    />
+                  </div>
+                  <div v-else class="browser-placeholder" :style="{ background: projeto.gradient }">
+                    <span class="browser-placeholder-label">{{ projeto.title }}</span>
+                  </div>
                 </div>
               </div>
             </a>
@@ -544,7 +562,7 @@
 
             <div class="contato-info-item">
               <span class="contato-info-label">E-mail</span>
-              <span class="contato-info-value">contato@suaempresa.com</span>
+              <span class="contato-info-value">contato@lynx.app.br</span>
             </div>
           </div>
         </div>
@@ -778,7 +796,6 @@
         title: 'Dr. Victor Mol - Radiologista',
         desc: 'Site profissional para radiologista com apresentação de serviços, agendamento de consultas e segunda opinião em exames radiológicos.',
         url: 'victormol.com.br',
-        url: 'victormol.com.br',
         link: 'https://victormol.com.br/',
         image: VictormolPreview,
         imageScroll: true,
@@ -839,6 +856,15 @@
     const heroRef = ref(null)
     const heroParallax = useHeroParallax(heroRef)
 
+    function preloadPortfolioImages() {
+      for (const projeto of projetos.value) {
+        if (!projeto.image) continue
+        const img = new Image()
+        img.decoding = 'async'
+        img.src = projeto.image
+      }
+    }
+
     initLenis()
 
     onUnmounted(() => {
@@ -846,6 +872,7 @@
     })
 
     onMounted(async () => {
+      preloadPortfolioImages()
       await nextTick()
 
       const revealObserver = new IntersectionObserver((entries) => {
@@ -1076,7 +1103,7 @@
   text-align: left;
   white-space: normal;
   font-size: var(--hero-title);
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: -0.025em;
   color: #E8E6FF;
   line-height: var(--hero-title-line-height);
@@ -1293,7 +1320,7 @@
 
 .intro-headline {
   font-size: clamp(2.4rem, 5vw, 4.5rem);
-  font-weight: 800;
+  font-weight: 700;
   color: #E8E6FF;
   line-height: 1.06;
   margin-bottom: 16px;
@@ -1305,7 +1332,8 @@
   color: #9090B0;
   line-height: 1.75;
   max-width: 520px;
-  margin-bottom: 48px;
+  margin: 0 auto 48px;
+  text-align: center;
 }
 
 .vantagens-wrap {
@@ -1513,7 +1541,7 @@
 
 /* Active service title */
 .services-panel .service-title {
-  font-family: 'Recoleta', serif;
+  font-family: var(--font-display);
   font-weight: 700;
   color: #380FE9;
   font-size: clamp(2.4rem, 5.5vw, 4.5rem);
@@ -1941,9 +1969,9 @@
 }
 
 .portfolio-headline {
-  font-family: 'Recoleta', serif;
+  font-family: var(--font-display);
   font-size: clamp(2.2rem, 5vw, 3.4rem);
-  font-weight: 800;
+  font-weight: 700;
   color: #E8E6FF;
   line-height: 1.1;
 }
@@ -1965,6 +1993,7 @@
   overflow: hidden;
   border: 1px solid rgba(56, 15, 233, 0.25);
   background: #1a1a2e;
+  contain: layout paint;
 }
 
 .browser-bar {
@@ -1997,26 +2026,63 @@
 }
 
 .browser-screen {
+  position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
   overflow: hidden;
   background: #0e0e1c;
+  container-type: size;
+  contain: layout paint style;
+}
+
+.browser-screen-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  content-visibility: hidden;
+}
+
+.browser-screen-slide--active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  content-visibility: visible;
+}
+
+.browser-screen-track {
+  width: 100%;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
 }
 
 .browser-screen-img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top center;
+  height: auto;
   display: block;
+  max-width: none;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
-.browser-screen-img--scroll {
-  transition: object-position 10s ease;
+.browser-screen-track--scroll {
+  transition: none;
 }
 
-.browser-screen-link:hover .browser-screen-img--scroll {
-  object-position: bottom center;
+.browser-screen-link:hover .browser-screen-slide--active .browser-screen-track--scroll {
+  transition: transform 10s ease;
+  transform: translate3d(0, min(0px, calc(100cqh - 100%)), 0);
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .browser-screen-track--scroll,
+  .browser-screen-link:hover .browser-screen-slide--active .browser-screen-track--scroll {
+    transition: none !important;
+    transform: none !important;
+    will-change: auto;
+  }
 }
 
 .browser-placeholder {
@@ -2029,7 +2095,7 @@
 }
 
 .browser-placeholder-label {
-  font-family: 'Recoleta', serif;
+  font-family: var(--font-display);
   font-size: clamp(1.2rem, 3vw, 2rem);
   font-weight: 700;
   color: rgba(232, 230, 255, 0.15);
@@ -2088,9 +2154,9 @@
 }
 
 .portfolio-title {
-  font-family: 'Recoleta', serif;
+  font-family: var(--font-display);
   font-size: clamp(1.5rem, 2.5vw, 2rem);
-  font-weight: 800;
+  font-weight: 700;
   color: #E8E6FF;
   line-height: 1.15;
 }
@@ -2191,7 +2257,7 @@
 
 .processo-header h2 {
   font-size: clamp(2.4rem, 4.5vw, 4rem);
-  font-weight: 800;
+  font-weight: 700;
   color: #E8E6FF;
   margin-bottom: 16px;
   letter-spacing: -0.025em;
@@ -2240,7 +2306,7 @@
   top: 12px;
   right: 16px;
   font-size: 4.5rem;
-  font-weight: 800;
+  font-weight: 700;
   color: rgba(56,15,233,0.1);
   line-height: 1;
   pointer-events: none;
@@ -2314,9 +2380,9 @@
 }
 
 .pricing-headline {
-  font-family: 'Recoleta', serif;
+  font-family: var(--font-display);
   font-size: clamp(2.2rem, 5vw, 3.6rem);
-  font-weight: 800;
+  font-weight: 700;
   color: #E8E6FF;
   line-height: 1.1;
 }
@@ -2379,9 +2445,9 @@
 }
 
 .pricing-value {
-  font-family: 'Recoleta', serif;
+  font-family: var(--font-display);
   font-size: clamp(2rem, 4vw, 2.8rem);
-  font-weight: 800;
+  font-weight: 700;
   color: #E8E6FF;
   line-height: 1;
 }
@@ -2479,7 +2545,7 @@
 
 .contato-headline {
   font-size: clamp(2.2rem, 4vw, 3.5rem);
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.12;
   letter-spacing: -0.025em;
   margin: 0 0 16px 0;
@@ -2841,6 +2907,16 @@
   }
 }
 
+/* Tablet / mobile — copyright e privacidade nas extremidades */
+@media (max-width: 920px) {
+  .footer-top {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+  }
+}
+
 /* Mobile large */
 @media (max-width: 768px) {
   .intro-frase { padding: 48px 24px; }
@@ -2854,21 +2930,52 @@
 
   .outros-cards { grid-template-columns: repeat(2, 1fr); }
 
-  .banner {
-    --hero-desc: clamp(0.9rem, 2.8vw, 1.0625rem);
-    --hero-copy-left: clamp(24px, 6vw, 40px);
-    --hero-copy-width: min(80vw, 520px);
-    --hero-gap-title-desc: clamp(1rem, 2.5vh, 1.5rem);
-    --hero-gap-desc-btn: clamp(2rem, 4.5vh, 3rem);
-  }
-
-  .banner-copy {
-    top: clamp(96px, 14vh, 128px);
-    transform: none;
-    max-width: calc(100% - var(--hero-copy-left) - clamp(16px, 4vw, 24px));
-  }
-
   .extras-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  .portfolio-browser-reveal {
+    display: flex;
+    justify-content: center;
+    padding-inline: clamp(28px, 8vw, 44px);
+  }
+
+  .portfolio-browser {
+    width: min(72vw, 300px);
+    border-radius: 28px;
+    box-shadow:
+      0 24px 48px rgba(0, 0, 0, 0.32),
+      0 0 0 1px rgba(56, 15, 233, 0.2);
+  }
+
+  .browser-bar {
+    padding: 10px 14px;
+    justify-content: center;
+  }
+
+  .browser-dot {
+    display: none;
+  }
+
+  .browser-url {
+    margin-left: 0;
+    font-size: 0.75rem;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  .browser-screen {
+    aspect-ratio: 9 / 17;
+  }
+
+  .portfolio-arrow {
+    width: 32px;
+    height: 32px;
+  }
+
+  .portfolio-arrow--prev { left: 10px; }
+  .portfolio-arrow--next { right: 10px; }
 
   .banner-inner {
     padding-left: clamp(20px, 4vw, 32px);
@@ -2878,34 +2985,20 @@
   .footer { padding-top: 24px; }
 }
 
-/* Mobile */
-@media (max-width: 480px) {
-  .outros-cards { grid-template-columns: 1fr; }
-  .extras-grid { grid-template-columns: minmax(0, 1fr); }
-
-  .banner-inner {
-    padding: calc(72px + env(safe-area-inset-top, 0px)) calc(20px + env(safe-area-inset-right, 0px)) calc(24px + env(safe-area-inset-bottom, 0px)) calc(20px + env(safe-area-inset-left, 0px));
-  }
-
+/* Hero empilhado — tablet e mobile */
+@media (max-width: 920px) {
   .banner {
-    --hero-desc: clamp(0.9rem, 3.5vw, 1rem);
-    --hero-copy-left: clamp(20px, 5vw, 32px);
-    --hero-copy-width: min(85vw, 340px);
-    --hero-gap-title-desc: 0.5rem;
-    --hero-gap-desc-btn: 0.75rem;
-    --hero-front-top: clamp(88px, 14svh, 108px);
+    --hero-desc: clamp(0.95rem, 2.2vw, 1.125rem);
+    --hero-copy-width: min(78vw, 560px);
+    --hero-gap-title-desc: clamp(1rem, 2.5vh, 1.5rem);
+    --hero-gap-desc-btn: clamp(1.5rem, 3.5vh, 2.25rem);
+    --hero-front-top: clamp(96px, 11svh, 128px);
     --hero-front-bottom: 0px;
-    --hero-constellation-content-gap: 12px;
+    --hero-constellation-content-gap: 10px;
+    --hero-constellation-lift: 20px;
     --hero-constellation-mountain-gap: 0px;
-    --hero-constellation-width: clamp(58vw, 68vw, 74vw);
-    --hero-title-line-height: 1;
-    --hero-title-shadow:
-      0 2px 20px rgba(0, 0, 0, 0.8),
-      0 2px 8px rgba(0, 0, 0, 0.9);
-    --hero-title-accent-shadow:
-      0 2px 20px rgba(0, 0, 0, 0.8),
-      0 2px 8px rgba(0, 0, 0, 0.9),
-      0 0 18px rgba(240, 255, 31, 0.42);
+    --hero-constellation-width: clamp(36vw, 44vw, 420px);
+    --hero-title-line-height: 1.02;
     min-height: max(100svh, var(--hero-mobile-min-height, 100svh));
   }
 
@@ -2919,8 +3012,8 @@
     z-index: -1;
     left: 50%;
     top: 50%;
-    width: min(118%, calc(100% + clamp(36px, 11vw, 52px)));
-    height: calc(100% + clamp(18px, 5vw, 30px));
+    width: min(118%, calc(100% + clamp(36px, 8vw, 56px)));
+    height: calc(100% + clamp(18px, 4vw, 28px));
     transform: translate(-50%, -50%);
     border-radius: 50%;
     background: radial-gradient(
@@ -2947,7 +3040,7 @@
     justify-content: flex-start;
     padding:
       var(--hero-front-top)
-      clamp(20px, 5vw, 32px)
+      clamp(24px, 5vw, 40px)
       var(--hero-front-bottom);
     overflow: visible;
   }
@@ -2972,7 +3065,7 @@
   }
 
   .banner-title {
-    margin-top: clamp(12px, 2.5svh, 22px);
+    margin-top: clamp(8px, 1.5svh, 16px);
   }
 
   .banner-description {
@@ -2992,10 +3085,11 @@
   }
 
   .banner-footer-buttons {
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    gap: clamp(8px, 1.5vh, 12px);
+    gap: clamp(12px, 2vw, 20px);
   }
 
   .banner-footer-side {
@@ -3010,16 +3104,16 @@
     bottom: auto;
     left: 50%;
     z-index: 1;
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateY(calc(-1 * var(--hero-constellation-lift, 0px)));
     flex-shrink: 0;
     width: var(--hero-constellation-width);
-    max-width: calc(100vw - 2 * clamp(20px, 5vw, 32px));
+    max-width: calc(100vw - 2 * clamp(24px, 5vw, 40px));
     margin-top: 0;
     aspect-ratio: 32 / 36;
     overflow: hidden;
     pointer-events: none;
-    --hero-constellation-star-min-radius: 26px;
-    --hero-constellation-sparkle-min-radius: 14px;
+    --hero-constellation-star-min-radius: 22px;
+    --hero-constellation-sparkle-min-radius: 12px;
   }
 
   .hero-constellation-band :deep(.hero-constellations) {
@@ -3032,8 +3126,57 @@
   .banner-footer-link,
   .banner-footer-cta {
     width: auto;
-    min-width: clamp(160px, 48vw, 220px);
+    min-width: clamp(148px, 22vw, 200px);
     justify-content: center;
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .outros-cards { grid-template-columns: 1fr; }
+  .extras-grid { grid-template-columns: minmax(0, 1fr); }
+
+  .banner-inner {
+    padding: calc(72px + env(safe-area-inset-top, 0px)) calc(20px + env(safe-area-inset-right, 0px)) calc(24px + env(safe-area-inset-bottom, 0px)) calc(20px + env(safe-area-inset-left, 0px));
+  }
+
+  .banner {
+    --hero-desc: clamp(0.9rem, 3.5vw, 1rem);
+    --hero-copy-width: min(85vw, 340px);
+    --hero-gap-title-desc: 0.875rem;
+    --hero-gap-desc-btn: 1.125rem;
+    --hero-front-top: clamp(88px, 14svh, 108px);
+    --hero-constellation-content-gap: 4px;
+    --hero-constellation-lift: 28px;
+    --hero-constellation-width: clamp(58vw, 68vw, 74vw);
+    --hero-title-line-height: 1;
+    --hero-title-shadow:
+      0 2px 20px rgba(0, 0, 0, 0.8),
+      0 2px 8px rgba(0, 0, 0, 0.9);
+    --hero-title-accent-shadow:
+      0 2px 20px rgba(0, 0, 0, 0.8),
+      0 2px 8px rgba(0, 0, 0, 0.9),
+      0 0 18px rgba(240, 255, 31, 0.42);
+  }
+
+  .banner-title {
+    margin-top: clamp(12px, 2.5svh, 22px);
+  }
+
+  .banner-footer-buttons {
+    flex-direction: column;
+    gap: clamp(8px, 1.5vh, 12px);
+  }
+
+  .hero-constellation-band {
+    max-width: calc(100vw - 2 * clamp(20px, 5vw, 32px));
+    --hero-constellation-star-min-radius: 26px;
+    --hero-constellation-sparkle-min-radius: 14px;
+  }
+
+  .banner-footer-link,
+  .banner-footer-cta {
+    min-width: clamp(160px, 48vw, 220px);
   }
 
   .servicos,
@@ -3055,8 +3198,6 @@
   .services-panel { padding: 24px 16px 20px; }
 
   .footer { padding-top: 24px; }
-
-  .footer-top { flex-direction: column; align-items: flex-start; gap: 12px; }
 }
 
 </style>

@@ -10,11 +10,17 @@
   --hero-constellation-sparkle-min-radius: clamp(8px, 1.1vw, 12px);
 }
 
+@media (max-width: 920px) and (min-width: 481px) {
+  .hero-starfield {
+    --hero-star-sparkle-min-arm: clamp(3.2px, 0.5vw, 4.8px);
+  }
+}
+
 @media (max-width: 480px) {
   .hero-starfield {
-    --hero-star-min-radius: 1.95px;
-    --hero-star-glow-min-radius: 3.9px;
-    --hero-star-sparkle-min-arm: 5.5px;
+    --hero-star-min-radius: 1.1px;
+    --hero-star-glow-min-radius: 2.1px;
+    --hero-star-sparkle-min-arm: 3.4px;
   }
 
   .hero-constellations {

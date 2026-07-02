@@ -42,17 +42,19 @@ export function fallbackMinPx(kind, viewportWidth) {
 
   if (kind === 'core') {
     const base = Math.min(4, Math.max(2, vw * 0.005))
-    return vw <= 480 ? base * 0.78 : base
+    return vw <= 480 ? base * 0.55 : base
   }
 
   if (kind === 'glow') {
     const base = Math.min(8, Math.max(3, vw * 0.0085))
-    return vw <= 480 ? base * 0.78 : base
+    return vw <= 480 ? base * 0.55 : base
   }
 
   if (kind === 'sparkle') {
     const base = Math.min(9, Math.max(5, vw * 0.0095))
-    return vw <= 480 ? base * 0.85 : base
+    if (vw <= 480) return base * 0.6
+    if (vw <= 920) return Math.min(4.8, base * 0.62)
+    return base
   }
 
   if (kind === 'constellation') {
@@ -85,7 +87,14 @@ export function flooredSvgRadius(r, minPx, svgWidthPx, viewBoxWidth) {
 /**
  * Raise starfield radii to on-screen minimums while preserving relative size variation.
  */
-export function applyStarfieldFloors(stars, floors, svgWidthPx, viewBoxWidth, sizeScale = 1) {
+export function applyStarfieldFloors(
+  stars,
+  floors,
+  svgWidthPx,
+  viewBoxWidth,
+  sizeScale = 1,
+  caps = {},
+) {
   if (!svgWidthPx || !viewBoxWidth || !stars.length) return stars
 
   const pxPerUnit = svgWidthPx / viewBoxWidth
@@ -119,7 +128,7 @@ export function applyStarfieldFloors(stars, floors, svgWidthPx, viewBoxWidth, si
     }
   }
 
-  return stars.map((star) => ({
+  const scaled = stars.map((star) => ({
     ...star,
     r: star.sparkle ? star.r : +(star.r * coreScale * sizeScale).toFixed(3),
     glowR: star.glow ? +(star.glowR * glowScale * sizeScale).toFixed(3) : star.glowR,
@@ -131,6 +140,24 @@ export function applyStarfieldFloors(stars, floors, svgWidthPx, viewBoxWidth, si
         ).toFixed(4)
       : star.sparkleScale,
   }))
+
+  const maxArmPx = caps.sparkleArmMaxPx
+  if (!maxArmPx) return scaled
+
+  return scaled.map((star) => {
+    if (!star.sparkle) return star
+
+    const armPx = star.sparkleScale * DECO_SPARKLE_ARM * pxPerUnit
+    if (armPx <= maxArmPx) return star
+
+    const cappedScale = +(maxArmPx / (DECO_SPARKLE_ARM * pxPerUnit)).toFixed(4)
+
+    return {
+      ...star,
+      sparkleScale: cappedScale,
+      r: +(cappedScale * DECO_SPARKLE_ARM).toFixed(3),
+    }
+  })
 }
 
 /**

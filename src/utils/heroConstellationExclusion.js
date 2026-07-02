@@ -7,8 +7,11 @@ import { distancePointToSegment } from './constellationWorldGeometry.js'
 import { flooredScreenSize, fallbackMinPx } from './heroStarScreenFloor.js'
 
 const NODE_CORE_LOCAL_R = 1.568
+const CONSTELLATION_SPARKLE_ARM_FACTOR = 0.58
+const TWINKLE_PEAK_SCALE = 1.08
 const STROKE_PX = 6
 const STROKE_GLOW_PX = 6
+const LINE_GLOW_BLUR_FACTOR = 2.75
 
 function transformPoint(x, y, tx, ty, scale) {
   return { x: tx + x * scale, y: ty + y * scale }
@@ -18,10 +21,41 @@ function strokeClearanceViewBox(viewportWidth, layout) {
   const pxPerUnit = (viewportWidth || 1280) / 100
   const glowPx = layout?.constellationLineGlowPx ?? STROKE_GLOW_PX
   const halfStroke = STROKE_PX / 2
-  const base = (halfStroke + glowPx) / pxPerUnit
+  const glowReach = glowPx * LINE_GLOW_BLUR_FACTOR
+  const base = (halfStroke + glowReach) / pxPerUnit
   const extra = layout?.constellationLineClearance ?? 0.5
 
   return base + extra
+}
+
+function estimateNodeSparkleWorldR(vertex, layout, viewportWidth, svgWidthPx) {
+  const { scale, starSizeScale = 1.5 } = layout.constellation
+  const viewW = layout.constellationViewBox?.width ?? 100
+  const width = svgWidthPx || viewportWidth || 1280
+  const localArm =
+    CONSTELLATION_SPARKLE_ARM_FACTOR * starSizeScale * (vertex.sparkleScale ?? 1)
+  const floorPx = fallbackMinPx('constellationSparkle', width)
+  const flooredArm = flooredScreenSize(localArm, floorPx, width, viewW, scale)
+
+  return flooredArm * scale * TWINKLE_PEAK_SCALE
+}
+
+function estimateNodeWorldR(vertex, layout, viewportWidth, svgWidthPx) {
+  const { scale, starSizeScale = 1.5, starMinBoost = 1 } = layout.constellation
+  const baseR = NODE_CORE_LOCAL_R * starSizeScale * starMinBoost * (vertex.sparkleScale ?? 1)
+  const viewW = layout.constellationViewBox?.width ?? 100
+  const width = svgWidthPx || viewportWidth || 1280
+  const floorPx = fallbackMinPx('constellation', width)
+  const localR = flooredScreenSize(baseR, floorPx, width, viewW, scale)
+  const glowWorldR = localR * scale * TWINKLE_PEAK_SCALE
+  const sparkleWorldR = estimateNodeSparkleWorldR(
+    vertex,
+    layout,
+    viewportWidth,
+    svgWidthPx,
+  )
+
+  return Math.max(glowWorldR, sparkleWorldR) + 0.3
 }
 
 function polygonCentroid(polygon) {
@@ -69,17 +103,6 @@ function pointInPolygon(point, polygon) {
   }
 
   return inside
-}
-
-function estimateNodeWorldR(vertex, layout, viewportWidth, svgWidthPx) {
-  const { scale, starSizeScale = 1.5, starMinBoost = 1 } = layout.constellation
-  const baseR = NODE_CORE_LOCAL_R * starSizeScale * starMinBoost * (vertex.sparkleScale ?? 1)
-  const viewW = layout.constellationViewBox?.width ?? 100
-  const width = svgWidthPx || viewportWidth || 1280
-  const floorPx = fallbackMinPx('constellation', width)
-  const localR = flooredScreenSize(baseR, floorPx, width, viewW, scale)
-
-  return localR * scale * 1.1
 }
 
 export function getHeroCursorConstellationWorld(layout, options = {}) {

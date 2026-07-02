@@ -7,10 +7,14 @@ export const DECO_SPARKLE_VIEW_SIZE = 24
 /** Approximate arm length from viewBox center to tip (for scaling to match constellation nodes). */
 export const DECO_SPARKLE_ARM = 9
 
+/** Halo radius factor for plain sparkles (matches HeroStarfield sparkleGlowRadius). */
+export const SPARKLE_GLOW_R_FACTOR = 2.35
+
 /** Visible radius in viewBox units (for spacing and exclusion). */
 export function heroStarExtent(star) {
   if (star.sparkle) {
-    return star.glow ? star.glowR : star.sparkleScale * DECO_SPARKLE_ARM
+    const arm = star.sparkleScale * DECO_SPARKLE_ARM
+    return star.glow ? star.glowR : arm * SPARKLE_GLOW_R_FACTOR
   }
 
   return star.glow ? star.glowR : star.r

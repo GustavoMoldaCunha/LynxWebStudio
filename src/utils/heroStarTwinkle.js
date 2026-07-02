@@ -15,6 +15,15 @@ export const TWINKLE_FRAMES = {
   ease: { opacity: 0.75, scale: 0.98 },
 }
 
+/** Brighter rest state so constellation lines do not read through the nodes. */
+export const CONSTELLATION_TWINKLE_FRAMES = {
+  rest: { opacity: 0.98, scale: 0.96 },
+  rise: { opacity: 0.94, scale: 1.05 },
+  peak: { opacity: 1, scale: 1.38 },
+  settle: { opacity: 0.97, scale: 1.04 },
+  ease: { opacity: 0.95, scale: 0.98 },
+}
+
 export function twinkleTiming(rand) {
   const interval = 4 + rand() * 8
   const flashDuration = 0.8

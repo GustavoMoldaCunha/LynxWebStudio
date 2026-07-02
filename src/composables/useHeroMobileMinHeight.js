@@ -1,8 +1,19 @@
 import { onMounted, onUnmounted } from 'vue'
 
-const MOBILE_MAX_WIDTH = 480
+const STACKED_HERO_MAX_WIDTH = 920
 const MOUNTAIN_GAP_PX = 0
-const CONTENT_GAP_PX = 12
+const CONTENT_GAP_PX_MOBILE = 4
+const CONTENT_GAP_PX_TABLET = 10
+const CONSTELLATION_LIFT_PX_MOBILE = 28
+const CONSTELLATION_LIFT_PX_TABLET = 20
+
+function getContentGap() {
+  return window.innerWidth <= 480 ? CONTENT_GAP_PX_MOBILE : CONTENT_GAP_PX_TABLET
+}
+
+function getConstellationLift() {
+  return window.innerWidth <= 480 ? CONSTELLATION_LIFT_PX_MOBILE : CONSTELLATION_LIFT_PX_TABLET
+}
 
 function getConstellationBandVisualExtent(band) {
   const bandRect = band.getBoundingClientRect()
@@ -48,6 +59,7 @@ function getMountainMetrics(back) {
 function clearMobileHeroVars(hero, band) {
   hero?.style.removeProperty('--hero-mobile-min-height')
   band?.style.removeProperty('--hero-constellation-top')
+  band?.style.removeProperty('--hero-constellation-lift')
 }
 
 export function useHeroMobileMinHeight() {
@@ -58,7 +70,7 @@ export function useHeroMobileMinHeight() {
     if (!hero) return
 
     const band = document.querySelector('.hero-constellation-band')
-    if (window.innerWidth > MOBILE_MAX_WIDTH) {
+    if (window.innerWidth > STACKED_HERO_MAX_WIDTH) {
       clearMobileHeroVars(hero, band)
       return
     }
@@ -76,9 +88,12 @@ export function useHeroMobileMinHeight() {
     const mountain = getMountainMetrics(back)
     const mountainHeight = mountain.visibleHeight
 
+    const contentGap = getContentGap()
+    const constellationLift = getConstellationLift()
+
     const requiredHeight = Math.ceil(
       copyBottomRel +
-        CONTENT_GAP_PX +
+        contentGap +
         visualSpan +
         MOUNTAIN_GAP_PX +
         mountainHeight,
@@ -95,11 +110,12 @@ export function useHeroMobileMinHeight() {
       const height = band.getBoundingClientRect().height
       const { topInset, bottomInset } = getConstellationBandVisualExtent(band)
 
-      const slotTop = copyBottom + CONTENT_GAP_PX
+      const slotTop = copyBottom + contentGap
       const slotBottom = mountainTop - MOUNTAIN_GAP_PX
       const top = Math.max(slotTop - topInset, slotBottom - height + bottomInset)
 
       band.style.setProperty('--hero-constellation-top', `${top}px`)
+      band.style.setProperty('--hero-constellation-lift', `${constellationLift}px`)
     })
   }
 

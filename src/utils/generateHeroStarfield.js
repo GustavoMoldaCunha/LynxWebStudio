@@ -3,7 +3,7 @@ import { twinkleTiming } from './heroStarTwinkle.js'
 import { violatesHeroConstellation } from './heroConstellationExclusion.js'
 
 const GLOW_SHARE = 0.14
-const SPARKLE_SHARE = 0.2
+const SPARKLE_SHARE = 0.12
 
 const R_SMALL_MIN = 0.1
 const R_SMALL_MAX = 0.28
@@ -92,12 +92,19 @@ export function generateHeroStarfield(layout, viewportWidth) {
     yDensePower = 0.4,
     yDenseSpan = 0.82,
     minSpacing = 1.6,
+    glowShare = GLOW_SHARE,
+    sparkleShare = SPARKLE_SHARE,
+    sparkleGlowAllowed = true,
+    sparkleArmMin = SPARKLE_ARM_MIN,
+    sparkleArmMax = SPARKLE_ARM_MAX,
+    sparkleGlowArmMin = SPARKLE_GLOW_ARM_MIN,
+    sparkleGlowArmMax = SPARKLE_GLOW_ARM_MAX,
   } = layout
 
   const rand = mulberry32(seed)
   const stars = []
-  const glowTarget = Math.max(6, Math.round(count * GLOW_SHARE))
-  const sparkleTarget = Math.max(1, Math.round(count * SPARKLE_SHARE))
+  const glowTarget = Math.max(4, Math.round(count * glowShare))
+  const sparkleTarget = Math.max(1, Math.round(count * sparkleShare))
   let glowPlaced = 0
   let sparklePlaced = 0
   let attempts = 0
@@ -132,6 +139,10 @@ export function generateHeroStarfield(layout, viewportWidth) {
     let sparkle = false
     let sparkleScale = 0
 
+    if (isSparkle && isGlow && !sparkleGlowAllowed) {
+      isGlow = false
+    }
+
     if (isSparkle) {
       sparkle = true
       sparklePlaced += 1
@@ -140,8 +151,8 @@ export function generateHeroStarfield(layout, viewportWidth) {
         glow = true
         glowPlaced += 1
         const arm =
-          SPARKLE_GLOW_ARM_MIN +
-          rand() * (SPARKLE_GLOW_ARM_MAX - SPARKLE_GLOW_ARM_MIN)
+          sparkleGlowArmMin +
+          rand() * (sparkleGlowArmMax - sparkleGlowArmMin)
         sparkleScale = arm / DECO_SPARKLE_ARM
         r = arm
         glowR = glowRadiusForCore(
@@ -150,7 +161,7 @@ export function generateHeroStarfield(layout, viewportWidth) {
         )
       } else {
         const arm =
-          SPARKLE_ARM_MIN + rand() * (SPARKLE_ARM_MAX - SPARKLE_ARM_MIN)
+          sparkleArmMin + rand() * (sparkleArmMax - sparkleArmMin)
         sparkleScale = arm / DECO_SPARKLE_ARM
         r = arm
       }

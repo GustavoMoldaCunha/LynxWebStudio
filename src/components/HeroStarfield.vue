@@ -32,10 +32,11 @@
         <stop offset="62%" stop-color="#380FE9" stop-opacity="0.14" />
         <stop offset="100%" stop-color="#380FE9" stop-opacity="0" />
       </radialGradient>
-      <radialGradient id="hero-star-sparkle-fill" cx="50%" cy="50%" r="50%">
+      <radialGradient id="hero-star-sparkle-fill" cx="50%" cy="50%" r="72%">
         <stop offset="0%" stop-color="#ffffff" />
-        <stop offset="45%" stop-color="#e8eeff" />
-        <stop offset="100%" stop-color="#380FE9" />
+        <stop offset="40%" stop-color="#eef1ff" />
+        <stop offset="78%" stop-color="#cfc9fc" />
+        <stop offset="100%" stop-color="#9078f0" />
       </radialGradient>
     </defs>
 
@@ -53,17 +54,16 @@
           >
             <template v-if="star.sparkle">
               <circle
-                v-if="star.glow"
                 :cx="star.x"
                 :cy="star.y"
-                :r="star.glowR"
+                :r="sparkleGlowRadius(star)"
                 fill="url(#hero-star-glow-unified)"
               />
               <path
                 class="hero-star-sparkle"
                 :d="DECO_SPARKLE_PATH"
                 :transform="sparkleTransform(star)"
-                :fill="star.glow ? 'url(#hero-star-sparkle-fill)' : 'url(#hero-star-core)'"
+                fill="url(#hero-star-sparkle-fill)"
               />
             </template>
             <template v-else>
@@ -98,17 +98,16 @@
           >
             <template v-if="star.sparkle">
               <circle
-                v-if="star.glow"
                 :cx="star.x"
                 :cy="star.y"
-                :r="star.glowR"
+                :r="sparkleGlowRadius(star)"
                 fill="url(#hero-star-glow-unified)"
               />
               <path
                 class="hero-star-sparkle"
                 :d="DECO_SPARKLE_PATH"
                 :transform="sparkleTransform(star)"
-                :fill="star.glow ? 'url(#hero-star-sparkle-fill)' : 'url(#hero-star-core)'"
+                fill="url(#hero-star-sparkle-fill)"
               />
             </template>
             <template v-else>
@@ -137,8 +136,10 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import {
+  DECO_SPARKLE_ARM,
   DECO_SPARKLE_PATH,
   DECO_SPARKLE_VIEW_SIZE,
+  SPARKLE_GLOW_R_FACTOR,
 } from '../config/decoSparkle.js'
 import { useHeroSkyLayout } from '../composables/useHeroSkyLayout.js'
 import { generateHeroStarfield } from '../utils/generateHeroStarfield.js'
@@ -195,6 +196,7 @@ const flooredStars = computed(() => {
     width,
     STARFIELD_VIEWBOX_WIDTH,
     layout.value.starfieldSizeScale ?? 1,
+    { sparkleArmMaxPx: layout.value.sparkleArmMaxPx },
   ).filter(
     (star) =>
       !violatesHeroConstellation(star, layout.value, {
@@ -225,6 +227,12 @@ function parallaxGroupTransform(offset) {
   const ty = offset.y * unitsPerPx
 
   return `translate(${tx.toFixed(4)} ${ty.toFixed(4)})`
+}
+
+function sparkleGlowRadius(star) {
+  if (star.glow && star.glowR > 0) return star.glowR
+
+  return +(star.sparkleScale * DECO_SPARKLE_ARM * SPARKLE_GLOW_R_FACTOR).toFixed(3)
 }
 
 function sparkleTransform(star) {

@@ -1,6 +1,7 @@
 <template>
   <Teleport to="body">
   <nav class="navbar">
+    <div class="navbar-glass" aria-hidden="true"></div>
     <div class="container">
       <a href="#top">
        <img src="../assets/LynxLogoLetras.png" alt="Logo Lynx" class="logo" draggable="false">
@@ -19,9 +20,15 @@
           class="cta desktop-cta">Fale Conosco
         </a>
 
-        <div class="hamburger" @click="toggleMenu">
+        <button
+          type="button"
+          class="hamburger"
+          :aria-label="isOpen ? 'Fechar menu' : 'Abrir menu'"
+          :aria-expanded="isOpen"
+          @click="toggleMenu"
+        >
           <span :class="{ open: isOpen }"></span>
-        </div>
+        </button>
       </div>
     </div>
 
@@ -75,20 +82,28 @@ onUnmounted(() => {
   min-height: 5rem;
   display: flex;
   align-items: flex-end;
+  isolation: isolate;
   background: transparent;
   border-bottom: 1.5px solid rgba(255, 255, 255, 0.22);
 }
 
-.navbar::before {
-  content: '';
+.navbar-glass {
   position: absolute;
   inset: 0;
-  z-index: -1;
+  z-index: 0;
   background: rgba(10, 10, 20, 0.38);
-  backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28);
   pointer-events: none;
+}
+
+@supports not (
+  (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))
+) {
+  .navbar-glass {
+    background: rgba(10, 10, 20, 0.92);
+  }
 }
 
 .container {
@@ -168,24 +183,41 @@ onUnmounted(() => {
 .hamburger {
   display: none;
   cursor: pointer;
-  padding: 0.45rem;
+  padding: 0;
   flex-shrink: 0;
+  border: none;
+  background: transparent;
+  min-width: 48px;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  margin: -0.25rem -0.375rem -0.25rem 0;
+  border-radius: 10px;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.hamburger:focus-visible {
+  outline: 2px solid rgba(240, 255, 31, 0.55);
+  outline-offset: 2px;
 }
 
 .hamburger span {
   display: block;
-  width: 28px;
+  width: 26px;
   height: 2px;
   background: rgba(232, 230, 255, 0.92);
   position: relative;
   transition: all 0.3s ease;
+  pointer-events: none;
 }
 
 .hamburger span::before,
 .hamburger span::after {
   content: '';
   position: absolute;
-  width: 28px;
+  left: 0;
+  width: 26px;
   height: 2px;
   background: rgba(232, 230, 255, 0.92);
   transition: all 0.3s ease;
@@ -205,7 +237,7 @@ onUnmounted(() => {
   .navbar { padding: 0 1.5rem 8px; min-height: 4.5rem; }
   .nav-left { display: none; }
   .nav-right { gap: 1rem; }
-  .hamburger { display: flex; align-items: center; }
+  .hamburger { display: flex; }
   .cta {
     white-space: nowrap;
     font-size: 0.875rem;
@@ -224,13 +256,14 @@ onUnmounted(() => {
     top: 100%;
     right: 1.5rem;
     margin-top: 0.5rem;
+    z-index: 2;
     background: #E8E6FF;
     border-radius: 16px;
-    padding: 1rem;
-    width: 200px;
+    padding: 0.625rem;
+    width: min(240px, calc(100vw - 2.5rem));
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.25rem;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     opacity: 0;
     pointer-events: none;
@@ -243,14 +276,20 @@ onUnmounted(() => {
     transform: translateY(0);
   }
   .menu-mobile a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.625rem 0.875rem;
+    border-radius: 10px;
     color: #555;
     text-decoration: none;
     text-transform: none;
-    transition: color 0.35s ease, text-shadow 0.35s ease;
+    transition: color 0.35s ease, background 0.2s ease;
   }
-  .menu-mobile a:hover {
+  .menu-mobile a:hover,
+  .menu-mobile a:active {
     color: #380FE9;
-    text-shadow: 0 0 10px rgba(56, 15, 233, 0.25);
+    background: rgba(56, 15, 233, 0.08);
   }
 }
 
