@@ -500,8 +500,8 @@
         <div class="pricing-card">
           <span class="pricing-tier">Simples</span>
           <div class="pricing-price">
-            <span class="pricing-value">R$500</span>
-            <span class="pricing-old">– R$750</span>
+            <span class="pricing-from">a partir de</span>
+            <span class="pricing-value">R$570</span>
           </div>
           <p class="pricing-desc">Site institucional profissional de uma página</p>
           <div class="pricing-divider"></div>
@@ -645,7 +645,7 @@
     <div class="footer-top">
       <span class="footer-copy">©2026 LYNX Studio. All Rights Reserved</span>
       <nav class="footer-nav">
-        <a href="#">Política de Privacidade</a>
+        <RouterLink to="/politica-de-privacidade">Política de Privacidade</RouterLink>
       </nav>
     </div>
     <div
@@ -861,8 +861,8 @@
 
       formErro.value = ''
 
-      if (!formNome.value.trim() || !formTelefone.value.trim()) {
-        formErro.value = 'Preencha nome e telefone.'
+      if (!formNome.value.trim() || !formTelefone.value.trim() || !formDetalhes.value.trim()) {
+        formErro.value = 'Preencha nome, telefone e detalhes.'
         return
       }
 
@@ -2482,17 +2482,56 @@
 .pricing-card {
   position: relative;
   min-width: 0;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1.5px solid rgba(56, 15, 233, 0.22);
+  isolation: isolate;
   border-radius: 16px;
   padding: 32px;
   color: #E8E6FF;
-  transition: border-color 0.2s ease;
+  background: transparent;
+  overflow: visible;
 }
 
-.pricing-card--featured {
-  border-color: #F0FF1F;
-  background: rgba(240, 255, 31, 0.03);
+.pricing-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background: rgba(10, 10, 20, 0.38);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28);
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  pointer-events: none;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+@supports not (
+  (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))
+) {
+  .pricing-card::before {
+    background: rgba(10, 10, 20, 0.92);
+  }
+}
+
+.pricing-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.pricing-card--featured::before {
+  border-color: rgba(240, 255, 31, 0.85);
+  background: rgba(10, 10, 20, 0.42);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.28),
+    inset 0 0 0 1px rgba(240, 255, 31, 0.08);
+}
+
+@supports not (
+  (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))
+) {
+  .pricing-card--featured::before {
+    background: rgba(14, 12, 28, 0.94);
+  }
 }
 
 .pricing-badge {
@@ -2528,6 +2567,14 @@
   margin-bottom: 8px;
 }
 
+.pricing-from {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: rgba(232, 230, 255, 0.55);
+  letter-spacing: 0.02em;
+  text-transform: lowercase;
+}
+
 .pricing-value {
   font-family: var(--font-display);
   font-size: clamp(2rem, 4vw, 2.8rem);
@@ -2538,12 +2585,6 @@
 
 .pricing-value--quote {
   font-size: clamp(1.65rem, 3.2vw, 2.35rem);
-}
-
-.pricing-old {
-  font-size: var(--text-sm);
-  color: rgba(232, 230, 255, 0.38);
-  text-decoration: line-through;
 }
 
 .pricing-desc {
