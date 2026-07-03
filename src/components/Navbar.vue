@@ -3,15 +3,15 @@
   <nav class="navbar">
     <div class="navbar-glass" aria-hidden="true"></div>
     <div class="container">
-      <a href="#top">
+      <RouterLink to="/">
        <img src="../assets/LynxLogoLetras.png" alt="Logo Lynx" class="logo" draggable="false">
-      </a>
+      </RouterLink>
 
       <!-- MENU DESKTOP -->
       <div class="nav-left">
-        <a href="#servicos">serviços</a>
-        <a href="#processo">processo</a>
-        <a href="#contato">contato</a>
+        <RouterLink to="/#servicos">serviços</RouterLink>
+        <RouterLink to="/#processo">processo</RouterLink>
+        <RouterLink to="/#contato">contato</RouterLink>
       </div>
 
       <div class="nav-right">
@@ -33,10 +33,9 @@
     </div>
 
     <div :class="['menu-mobile', { open: isOpen }]">
-      <a href="#">serviços</a>
-      <a href="#">processo</a>
-      <a href="#">sobre</a>
-      <a href="#">contato</a>
+      <RouterLink to="/#servicos">serviços</RouterLink>
+      <RouterLink to="/#processo">processo</RouterLink>
+      <RouterLink to="/#contato">contato</RouterLink>
     </div>
   </nav>
   </Teleport>
@@ -137,7 +136,8 @@ onUnmounted(() => {
   transform: translateX(-50%);
 }
 
-.nav-left a {
+.nav-left a,
+.nav-left :deep(a) {
   position: relative;
   text-decoration: none;
   color: rgba(232, 230, 255, 0.92);
@@ -146,7 +146,8 @@ onUnmounted(() => {
   transition: color 0.35s ease, text-shadow 0.35s ease;
 }
 
-.nav-left a:hover {
+.nav-left a:hover,
+.nav-left :deep(a:hover) {
   color: #fff;
   text-shadow:
     0 0 8px rgba(220, 218, 255, 0.45),
@@ -275,7 +276,8 @@ onUnmounted(() => {
     pointer-events: auto;
     transform: translateY(0);
   }
-  .menu-mobile a {
+  .menu-mobile a,
+  .menu-mobile :deep(a) {
     display: flex;
     align-items: center;
     min-height: 44px;
@@ -287,7 +289,9 @@ onUnmounted(() => {
     transition: color 0.35s ease, background 0.2s ease;
   }
   .menu-mobile a:hover,
-  .menu-mobile a:active {
+  .menu-mobile a:active,
+  .menu-mobile :deep(a:hover),
+  .menu-mobile :deep(a:active) {
     color: #380FE9;
     background: rgba(56, 15, 233, 0.08);
   }

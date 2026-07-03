@@ -1,59 +1,55 @@
 <template>
   <div class="privacy-page">
-    <header class="pp-topbar">
-      <RouterLink to="/" class="pp-back">
-        <ArrowLeft :size="16" stroke-width="2.5" />
-        Voltar ao site
-      </RouterLink>
-    </header>
+    <MenuBtn />
 
-    <div class="hero">
-      <div class="section-deco hero-deco">
-        <SectionDecoDraw orientation="horizontal" observe-target=".hero">
-          <template #star>
-            <DecoSparkle class="section-deco-sparkle" />
-          </template>
-          <template #line>
-            <SectionDecoLine class="section-deco-line" />
-          </template>
-        </SectionDecoDraw>
-        <span class="section-deco-label">Documentação legal</span>
-      </div>
-      <h1>Política de <em>Privacidade</em></h1>
-      <div class="hero-meta">
-        <span class="meta-tag">Última atualização: 3 de julho de 2026</span>
-        <span class="meta-tag">lynx.app.br</span>
-        <span class="meta-tag">LGPD</span>
-      </div>
-    </div>
-
-    <main>
-      <div class="section" v-for="(sec, i) in sections" :key="i">
-        <div class="section-number">{{ String(i + 1).padStart(2, '0') }} —</div>
-        <h2>{{ sec.title }}</h2>
-        <div v-html="sec.content" />
-      </div>
-
-      <div class="contact-card">
-        <div class="section-number">Contato</div>
-        <h2>Dúvidas sobre privacidade?</h2>
-        <p>Para exercer seus direitos ou esclarecer qualquer ponto desta política, fale conosco:</p>
-        <div class="contact-item" v-for="item in contactItems" :key="item.label">
-          <span class="contact-label">{{ item.label }}</span>
-          <span class="contact-value" v-html="item.value" />
+    <article class="pp-content">
+      <header class="pp-header">
+        <div class="section-deco pp-deco">
+          <SectionDecoDraw orientation="horizontal" observe-target=".pp-header">
+            <template #star>
+              <DecoSparkle class="section-deco-sparkle" />
+            </template>
+            <template #line>
+              <SectionDecoLine class="section-deco-line" />
+            </template>
+          </SectionDecoDraw>
+          <span class="section-deco-label">[ privacidade ]</span>
         </div>
-      </div>
-    </main>
+        <h1>Política de <em>Privacidade</em></h1>
+        <p class="pp-lead">
+          Como tratamos os dados pessoais coletados neste site, em conformidade com a LGPD.
+        </p>
+        <p class="pp-updated">Última atualização: 3 de julho de 2026</p>
+      </header>
 
-    <footer class="pp-footer">
-      <p>© 2026 <strong>LYNX Studio</strong> — lynx.app.br. Todos os direitos reservados.<br />
-      Esta política pode ser atualizada periodicamente. Recomendamos revisá-la com regularidade.</p>
-    </footer>
+      <div class="pp-body">
+        <section v-for="(sec, i) in sections" :key="i" class="pp-section">
+          <h2>{{ sec.title }}</h2>
+          <div class="pp-section-content" v-html="sec.content" />
+        </section>
+
+        <section class="pp-section pp-contact">
+          <h2>Dúvidas sobre privacidade?</h2>
+          <p class="pp-contact-intro">
+            Para exercer seus direitos ou esclarecer qualquer ponto desta política, fale conosco:
+          </p>
+          <div class="pp-contact-info">
+            <div class="pp-contact-item" v-for="item in contactItems" :key="item.label">
+              <span class="pp-contact-label">{{ item.label }}</span>
+              <span class="pp-contact-value" v-html="item.value" />
+            </div>
+          </div>
+        </section>
+      </div>
+    </article>
+
+    <SiteFooter />
   </div>
 </template>
 
 <script setup>
-import { ArrowLeft } from 'lucide-vue-next'
+import MenuBtn from './Navbar.vue'
+import SiteFooter from './SiteFooter.vue'
 import DecoSparkle from './DecoSparkle.vue'
 import SectionDecoDraw from './SectionDecoDraw.vue'
 import SectionDecoLine from './SectionDecoLine.vue'
@@ -64,7 +60,6 @@ const sections = [
     content: `
       <p>Esta Política de Privacidade explica, de forma clara, quais dados pessoais são coletados neste site, como eles são usados e quais são os seus direitos.</p>
       <p>O tratamento de dados segue a <strong>Lei Geral de Proteção de Dados Pessoais (LGPD — Lei nº 13.709/2018)</strong>.</p>
-      <div class="highlight"><p>Ao preencher e enviar o formulário de contato, você declara estar ciente e de acordo com esta política.</p></div>
     `,
   },
   {
@@ -131,7 +126,7 @@ const sections = [
   {
     title: 'Como exercer seus direitos',
     content: `
-      <p>Para exercer qualquer um dos direitos acima, envie um e-mail para <strong><a href="mailto:contato@lynx.app.br">contato@lynx.app.br</a></strong> com o assunto <strong>“Privacidade — LGPD”</strong>, informando qual direito deseja exercer e dados que permitam identificar sua solicitação.</p>
+      <p>Para exercer qualquer um dos direitos acima, envie um e-mail para <a href="mailto:contato@lynx.app.br">contato@lynx.app.br</a> com o assunto <strong>“Privacidade — LGPD”</strong>, informando qual direito deseja exercer e dados que permitam identificar sua solicitação.</p>
       <p>Responderemos em até <strong>15 dias úteis</strong>, conforme previsto na LGPD.</p>
     `,
   },
@@ -139,8 +134,7 @@ const sections = [
     title: 'Cookies e rastreamento',
     content: `
       <p>Atualmente, este site <strong>não utiliza cookies de rastreamento</strong>, Google Analytics ou ferramentas similares de monitoramento de navegação.</p>
-      <div class="no-cookie">✓ Sem cookies de rastreamento ou publicidade no momento</div>
-      <p style="margin-top: 16px;">Está prevista, para o futuro, a implementação de ferramentas de análise (como Google Analytics) para entender o uso do site de forma agregada. Quando isso ocorrer, esta política será <strong>atualizada</strong> com informações sobre quais cookies são usados, suas finalidades e como você pode gerenciá-los.</p>
+      <p>Está prevista, para o futuro, a implementação de ferramentas de análise (como Google Analytics) para entender o uso do site de forma agregada. Quando isso ocorrer, esta política será <strong>atualizada</strong> com informações sobre quais cookies são usados, suas finalidades e como você pode gerenciá-los.</p>
     `,
   },
 ]
@@ -154,296 +148,185 @@ const contactItems = [
 
 <style scoped>
 .privacy-page {
-  --yellow: var(--accent-yellow, #F0FF1F);
   --blue: #380FE9;
-  --blue-light: #E8E6FF;
-  --dark: #0A0A14;
-  --border: rgba(56, 15, 233, 0.18);
-  --r-sm: 8px;
-  --r-md: 12px;
-  --r-xl: 24px;
-  --r-pill: 999px;
-
-  background: var(--dark);
-  color: var(--blue-light);
+  background: #0A0A14;
+  color: #E8E6FF;
   font-family: var(--font-body, 'Lexend Deca', sans-serif);
-  font-size: 16px;
-  line-height: 1.7;
+  font-size: 1rem;
+  line-height: 1.75;
   min-height: 100vh;
   width: 100%;
   max-width: 100%;
   overflow-x: clip;
+  position: relative;
 }
 
-.pp-topbar {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: rgba(10, 10, 20, 0.85);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border);
-  padding: 16px 24px;
+.privacy-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(56, 15, 233, 0.05) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
 }
 
-.pp-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: rgba(232, 230, 255, 0.75);
-  text-decoration: none;
-  font-size: var(--text-sm);
-  transition: color 0.2s ease;
-}
-
-.pp-back:hover {
-  color: var(--yellow);
-}
-
-.hero {
-  max-width: 800px;
+.pp-content {
+  position: relative;
+  z-index: 1;
+  max-width: var(--section-max-width, 1280px);
   margin: 0 auto;
-  padding: 64px 24px 48px;
+  padding: calc(5rem + var(--section-pad-y, 96px)) var(--section-pad-x, 48px) var(--section-pad-y, 96px);
 }
 
-.hero-deco {
-  margin-bottom: 24px;
-}
-
-h1 {
-  font-family: var(--font-display, 'Noto Serif', serif);
-  font-size: clamp(2rem, 5vw, 3.2rem);
-  font-weight: 700;
-  line-height: 1.1;
-  color: #fff;
-  margin-bottom: 24px;
-  letter-spacing: -0.02em;
-}
-
-h1 em {
-  font-style: italic;
-  color: var(--yellow);
-}
-
-.hero-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-}
-
-.meta-tag {
-  font-size: var(--text-sm);
-  color: rgba(232, 230, 255, 0.5);
-  border: 1px solid var(--border);
-  border-radius: var(--r-pill);
-  padding: 4px 12px;
-}
-
-main {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 0 24px 128px;
-}
-
-.section {
-  border: 1px solid var(--border);
-  border-radius: var(--r-xl);
-  padding: 40px;
+.pp-deco {
   margin-bottom: 16px;
-  background: rgba(13, 13, 26, 0.6);
-  backdrop-filter: blur(8px);
-  transition: border-color 0.3s;
 }
 
-.section:hover {
-  border-color: rgba(56, 15, 233, 0.38);
+.pp-header {
+  max-width: 640px;
+  margin-bottom: 64px;
 }
 
-.section-number {
-  font-family: var(--font-body, 'Lexend Deca', sans-serif);
-  font-size: var(--text-sm);
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--blue);
-  margin-bottom: 12px;
-}
-
-h2 {
+.pp-header h1 {
   font-family: var(--font-display, 'Noto Serif', serif);
-  font-size: 1.3rem;
+  font-size: clamp(2.4rem, 4.5vw, 4rem);
   font-weight: 700;
-  color: #fff;
-  margin-bottom: 16px;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  color: #E8E6FF;
+  margin: 0 0 16px;
+}
+
+.pp-lead {
+  color: #9090B0;
+  margin: 0 0 12px;
+  max-width: 560px;
+}
+
+.pp-updated {
+  font-size: var(--text-sm);
+  color: rgba(232, 230, 255, 0.45);
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.pp-body {
+  max-width: 640px;
+  border-top: 1px solid rgba(56, 15, 233, 0.18);
+}
+
+.pp-section {
+  padding: 40px 0;
+  border-bottom: 1px solid rgba(56, 15, 233, 0.18);
+}
+
+.pp-section h2 {
+  font-family: var(--font-display, 'Noto Serif', serif);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #E8E6FF;
+  margin: 0 0 16px;
   letter-spacing: -0.01em;
 }
 
-.section :deep(p),
-.contact-card :deep(p) {
-  color: rgba(232, 230, 255, 0.75);
-  margin-bottom: 12px;
+.pp-section-content :deep(p) {
+  color: rgba(232, 230, 255, 0.72);
+  margin: 0 0 12px;
 }
 
-.section :deep(p:last-child) {
+.pp-section-content :deep(p:last-child) {
   margin-bottom: 0;
 }
 
-.section :deep(ul) {
-  margin: 12px 0;
-  padding-left: 0;
+.pp-section-content :deep(ul) {
   list-style: none;
+  margin: 12px 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.section :deep(li) {
-  color: rgba(232, 230, 255, 0.75);
-  padding: 6px 0 6px 24px;
+.pp-section-content :deep(li) {
   position: relative;
-  border-bottom: 1px solid rgba(56, 15, 233, 0.08);
+  padding-left: 20px;
+  color: rgba(232, 230, 255, 0.72);
+  line-height: 1.6;
 }
 
-.section :deep(li:last-child) {
-  border-bottom: none;
-}
-
-.section :deep(li::before) {
-  content: '→';
+.pp-section-content :deep(li::before) {
+  content: '';
   position: absolute;
   left: 0;
-  color: var(--blue);
-  font-size: 0.85em;
-  top: 7px;
+  top: 0.62em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--blue);
 }
 
-.section :deep(strong) {
-  color: #fff;
-  font-weight: 500;
-}
-
-.section :deep(a) {
-  color: var(--yellow);
-  text-decoration: none;
-  border-bottom: 1px solid rgba(240, 255, 31, 0.3);
-  transition: border-color 0.2s;
-}
-
-.section :deep(a:hover) {
-  border-color: var(--yellow);
-}
-
-.section :deep(.highlight) {
-  background: rgba(56, 15, 233, 0.1);
-  border: 1px solid rgba(56, 15, 233, 0.3);
-  border-left: 3px solid var(--blue);
-  border-radius: var(--r-md);
-  padding: 16px 20px;
-  margin: 16px 0;
-}
-
-.section :deep(.highlight p) {
-  color: var(--blue-light);
-  margin: 0;
-}
-
-.section :deep(.no-cookie) {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(240, 255, 31, 0.08);
-  border: 1px solid rgba(240, 255, 31, 0.25);
-  border-radius: var(--r-pill);
-  padding: 8px 16px;
-  font-size: var(--text-sm);
-  font-weight: 500;
-  color: var(--yellow);
-  margin-top: 12px;
-}
-
-.contact-card {
-  background: linear-gradient(135deg, rgba(56, 15, 233, 0.15), rgba(56, 15, 233, 0.05));
-  border: 1px solid rgba(56, 15, 233, 0.35);
-  border-radius: var(--r-xl);
-  padding: 40px;
-  margin-top: 32px;
-}
-
-.contact-card h2 {
-  color: var(--yellow);
-}
-
-.contact-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border);
-  min-width: 0;
-}
-
-.contact-item:last-child {
-  border-bottom: none;
-}
-
-.contact-label {
-  font-size: var(--text-sm);
+.pp-section-content :deep(strong) {
+  color: #E8E6FF;
   font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: rgba(232, 230, 255, 0.4);
-  min-width: 72px;
-  flex-shrink: 0;
-  padding-top: 1px;
 }
 
-.contact-value {
-  color: #fff;
-  min-width: 0;
+.pp-section-content :deep(a) {
+  color: #F0FF1F;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(240, 255, 31, 0.35);
+}
+
+.pp-contact-intro {
+  color: rgba(232, 230, 255, 0.72);
+  margin: 0 0 24px;
+}
+
+.pp-contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pp-contact-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pp-contact-label {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #F0FF1F;
+}
+
+.pp-contact-value {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.8);
   overflow-wrap: anywhere;
 }
 
-.contact-value :deep(a) {
-  color: var(--yellow);
-  text-decoration: none;
-  border-bottom: 1px solid rgba(240, 255, 31, 0.3);
-  transition: border-color 0.2s;
+.pp-contact-value :deep(a) {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(255, 255, 255, 0.25);
 }
 
-.contact-value :deep(a:hover) {
-  border-color: var(--yellow);
-}
-
-.pp-footer {
-  border-top: 1px solid var(--border);
-  padding: 32px 24px;
-  text-align: center;
-}
-
-.pp-footer p {
-  font-size: var(--text-sm);
-  color: rgba(232, 230, 255, 0.3);
-  margin: 0;
-}
-
-.pp-footer strong {
-  color: rgba(232, 230, 255, 0.5);
-}
-
-@media (max-width: 600px) {
-  .section,
-  .contact-card {
-    padding: 24px 20px;
+@media (max-width: 920px) {
+  .pp-content {
+    padding-top: calc(4.5rem + 64px);
+    padding-bottom: 64px;
   }
 
-  .hero {
-    padding: 48px 20px 32px;
+  .pp-header {
+    margin-bottom: 48px;
   }
 
-  main {
-    padding: 0 20px 128px;
-  }
-
-  .contact-item {
-    flex-direction: column;
-    gap: 4px;
+  .pp-section {
+    padding: 32px 0;
   }
 }
 </style>
