@@ -658,6 +658,7 @@
     import { initLenis, destroyLenis, scrollTo } from './composables/useLenis'
     import { useHeroMobileMinHeight } from './composables/useHeroMobileMinHeight.js'
     import { useHeroParallax } from './composables/useHeroParallax.js'
+    import LynxLogo from './assets/LynxLogoLetras.png'
     import GeoaxisPreview from './assets/geoaxisambiental.com.br.webp'
     import VictormolPreview from './assets/www.victormol.com.br_.webp'
     import { SlidersHorizontal, Globe, ShieldCheck, Eye, Search, 
