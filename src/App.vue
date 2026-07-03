@@ -571,44 +571,50 @@
       <form class="contato-form-wrap" @submit.prevent="enviarFormulario">
         <div class="contato-form-group">
           <label class="contato-label" for="contato-nome">Nome</label>
-          <input
-            id="contato-nome"
-            v-model="formNome"
-            class="contato-input"
-            type="text"
-            name="nome"
-            placeholder="Seu nome"
-            :disabled="formLoading"
-            required
-          />
+          <div class="contato-input-shell">
+            <input
+              id="contato-nome"
+              v-model="formNome"
+              class="contato-input"
+              type="text"
+              name="nome"
+              placeholder="Seu nome"
+              :disabled="formLoading"
+              required
+            />
+          </div>
         </div>
 
         <div class="contato-form-group">
           <label class="contato-label" for="contato-telefone">Telefone / Whatsapp</label>
-          <input
-            id="contato-telefone"
-            v-model="formTelefone"
-            class="contato-input"
-            type="tel"
-            name="telefone"
-            placeholder="+55 (22) 00000-0000"
-            :disabled="formLoading"
-            required
-          />
+          <div class="contato-input-shell">
+            <input
+              id="contato-telefone"
+              v-model="formTelefone"
+              class="contato-input"
+              type="tel"
+              name="telefone"
+              placeholder="+55 (22) 00000-0000"
+              :disabled="formLoading"
+              required
+            />
+          </div>
         </div>
 
         <div class="contato-form-group">
           <label class="contato-label" for="contato-detalhes">Detalhes</label>
-          <textarea
-            id="contato-detalhes"
-            v-model="formDetalhes"
-            class="contato-input contato-textarea"
-            name="mensagem"
-            placeholder="Conte-nos sobre o seu negócio e o que você precisa..."
-            rows="5"
-            :disabled="formLoading"
-            required
-          ></textarea>
+          <div class="contato-input-shell contato-input-shell--textarea">
+            <textarea
+              id="contato-detalhes"
+              v-model="formDetalhes"
+              class="contato-input contato-textarea"
+              name="mensagem"
+              placeholder="Conte-nos sobre o seu negócio e o que você precisa..."
+              rows="5"
+              :disabled="formLoading"
+              required
+            ></textarea>
+          </div>
         </div>
 
         <p v-if="formErro" class="contato-feedback contato-feedback--erro" role="alert">
@@ -618,6 +624,7 @@
         <div class="btn-constellation-contato">
           <button
             class="contato-submit"
+            :class="{ 'contato-submit--success': formEnviado }"
             type="submit"
             :disabled="formLoading || formEnviado"
           >
@@ -682,8 +689,8 @@
     import { useHeroParallax } from './composables/useHeroParallax.js'
     import { useFooterLogoScale } from './composables/useFooterLogoScale.js'
     import LynxLogo from './assets/LynxLogoLetras.png'
-    import GeoaxisPreview from './assets/geoaxisambiental.com.br.png'
-    import VictormolPreview from './assets/www.victormol.com.br_.png'
+    import GeoaxisPreview from './assets/geoaxisambiental.com.br.webp'
+    import VictormolPreview from './assets/www.victormol.com.br_.webp'
     import { SlidersHorizontal, Globe, ShieldCheck, Eye, Search, 
              Smartphone, MessageCircle, Zap, Shield, Settings, Palette, 
              BarChart2, FileText, ArrowUpRight, ArrowDown, ChevronDown } from 'lucide-vue-next'
@@ -1129,7 +1136,11 @@
 
 .banner-copy-head {
   position: relative;
-  width: 100%;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: fit-content;
+  max-width: 100%;
   isolation: isolate;
 }
 
@@ -1137,11 +1148,28 @@
   content: '';
   position: absolute;
   z-index: -1;
-  inset: clamp(-10px, -1.2vh, -6px) clamp(-14px, -1.8vw, -8px);
-  border-radius: clamp(12px, 1.4vw, 18px);
-  background: rgba(10, 10, 20, 0.03);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
+  inset: clamp(-3px, -0.25vh, -2px) clamp(-5px, -0.35vw, -3px);
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  backdrop-filter: blur(10px) saturate(118%);
+  -webkit-backdrop-filter: blur(10px) saturate(118%);
+  -webkit-mask-image: radial-gradient(
+    ellipse 100% 100% at 50% 50%,
+    #000 76%,
+    rgba(0, 0, 0, 0.9) 84%,
+    rgba(0, 0, 0, 0.62) 91%,
+    rgba(0, 0, 0, 0.28) 96%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 100% 100% at 50% 50%,
+    #000 76%,
+    rgba(0, 0, 0, 0.9) 84%,
+    rgba(0, 0, 0, 0.62) 91%,
+    rgba(0, 0, 0, 0.28) 96%,
+    transparent 100%
+  );
   pointer-events: none;
 }
 
@@ -1151,7 +1179,8 @@
 
 .banner-title {
   display: block;
-  width: 100%;
+  width: auto;
+  max-width: 100%;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -1170,7 +1199,7 @@
 }
 
 .banner-description {
-  width: 100%;
+  width: auto;
   max-width: 100%;
   margin: var(--hero-gap-title-desc) 0 0;
   padding: 0;
@@ -2661,31 +2690,71 @@
   color: rgba(255,255,255,0.75);
 }
 
+.contato-input-shell {
+  position: relative;
+  isolation: isolate;
+  border-radius: 10px;
+}
+
+.contato-input-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background: rgba(10, 10, 20, 0.38);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28);
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  pointer-events: none;
+  transition: border-color 0.22s ease, background 0.22s ease, box-shadow 0.22s ease;
+}
+
+@supports not (
+  (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))
+) {
+  .contato-input-shell::before {
+    background: rgba(10, 10, 20, 0.92);
+  }
+}
+
+.contato-input-shell:focus-within::before {
+  border-color: rgba(240, 255, 31, 0.75);
+  background: rgba(10, 10, 20, 0.48);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.28),
+    0 0 0 3px rgba(240, 255, 31, 0.12);
+}
+
+.contato-input-shell:has(:disabled)::before {
+  opacity: 0.72;
+}
+
 .contato-input {
+  position: relative;
+  z-index: 1;
   width: 100%;
   padding: 12px 16px;
   border-radius: 10px;
-  border: 1.5px solid rgba(255, 255, 255, 0.3);
-  background: rgba(10, 10, 20, 0.4);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28);
+  border: none;
+  background: transparent;
   color: #fff;
   font-size: 0.95rem;
   font-family: inherit;
   outline: none;
-  transition: border-color 0.22s ease, background 0.22s ease, box-shadow 0.22s ease;
   box-sizing: border-box;
 }
 
 .contato-input::placeholder { color: rgba(255,255,255,0.28); }
 
 .contato-input:focus {
-  border-color: #F0FF1F;
-  background: rgba(10, 10, 20, 0.4);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28), 0 0 0 3px rgba(240,255,31,0.12);
+  outline: none;
+}
+
+.contato-input:disabled {
+  cursor: not-allowed;
+  color: rgba(255, 255, 255, 0.55);
 }
 
 .contato-textarea {
@@ -2725,10 +2794,20 @@
 
 .contato-submit:active { transform: scale(0.98); }
 
-.contato-submit[disabled] {
+.contato-submit[disabled]:not(.contato-submit--success) {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+}
+
+.contato-submit--success,
+.contato-submit--success[disabled] {
+  opacity: 1;
+  cursor: default;
+  background: #F0FF1F;
+  color: #0A0A00;
+  transform: none;
+  box-shadow: none;
 }
 
 .contato-feedback {
@@ -3059,7 +3138,7 @@
     --hero-front-top: clamp(96px, 11svh, 128px);
     --hero-front-bottom: 0px;
     --hero-constellation-content-gap: 10px;
-    --hero-constellation-lift: 20px;
+    --hero-constellation-lift: 10px;
     --hero-constellation-mountain-gap: 0px;
     --hero-constellation-width: clamp(36vw, 44vw, 420px);
     --hero-title-line-height: 1.02;
@@ -3211,7 +3290,7 @@
     --hero-gap-desc-btn: 1.125rem;
     --hero-front-top: clamp(88px, 14svh, 108px);
     --hero-constellation-content-gap: 4px;
-    --hero-constellation-lift: 28px;
+    --hero-constellation-lift: 16px;
     --hero-constellation-width: clamp(58vw, 68vw, 74vw);
     --hero-title-line-height: 1;
     --hero-title-shadow:

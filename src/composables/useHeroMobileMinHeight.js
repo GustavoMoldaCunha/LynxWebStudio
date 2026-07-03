@@ -4,8 +4,10 @@ const STACKED_HERO_MAX_WIDTH = 920
 const MOUNTAIN_GAP_PX = 0
 const CONTENT_GAP_PX_MOBILE = 4
 const CONTENT_GAP_PX_TABLET = 10
-const CONSTELLATION_LIFT_PX_MOBILE = 28
-const CONSTELLATION_LIFT_PX_TABLET = 20
+const CONSTELLATION_LIFT_PX_MOBILE = 16
+const CONSTELLATION_LIFT_PX_TABLET = 10
+const CONSTELLATION_DROP_PX_MOBILE = 10
+const CONSTELLATION_DROP_PX_TABLET = 8
 
 function getContentGap() {
   return window.innerWidth <= 480 ? CONTENT_GAP_PX_MOBILE : CONTENT_GAP_PX_TABLET
@@ -13,6 +15,10 @@ function getContentGap() {
 
 function getConstellationLift() {
   return window.innerWidth <= 480 ? CONSTELLATION_LIFT_PX_MOBILE : CONSTELLATION_LIFT_PX_TABLET
+}
+
+function getConstellationDrop() {
+  return window.innerWidth <= 480 ? CONSTELLATION_DROP_PX_MOBILE : CONSTELLATION_DROP_PX_TABLET
 }
 
 function getConstellationBandVisualExtent(band) {
@@ -90,6 +96,7 @@ export function useHeroMobileMinHeight() {
 
     const contentGap = getContentGap()
     const constellationLift = getConstellationLift()
+    const constellationDrop = getConstellationDrop()
 
     const requiredHeight = Math.ceil(
       copyBottomRel +
@@ -114,7 +121,7 @@ export function useHeroMobileMinHeight() {
       const slotBottom = mountainTop - MOUNTAIN_GAP_PX
       const top = Math.max(slotTop - topInset, slotBottom - height + bottomInset)
 
-      band.style.setProperty('--hero-constellation-top', `${top}px`)
+      band.style.setProperty('--hero-constellation-top', `${top + constellationDrop}px`)
       band.style.setProperty('--hero-constellation-lift', `${constellationLift}px`)
     })
   }

@@ -32,12 +32,6 @@
         <stop offset="62%" stop-color="#380FE9" stop-opacity="0.14" />
         <stop offset="100%" stop-color="#380FE9" stop-opacity="0" />
       </radialGradient>
-      <radialGradient id="hero-star-sparkle-fill" cx="50%" cy="50%" r="72%">
-        <stop offset="0%" stop-color="#ffffff" />
-        <stop offset="40%" stop-color="#eef1ff" />
-        <stop offset="78%" stop-color="#cfc9fc" />
-        <stop offset="100%" stop-color="#9078f0" />
-      </radialGradient>
     </defs>
 
     <g :clip-path="`url(#${clipId})`">
@@ -63,7 +57,7 @@
                 class="hero-star-sparkle"
                 :d="DECO_SPARKLE_PATH"
                 :transform="sparkleTransform(star)"
-                fill="url(#hero-star-sparkle-fill)"
+                fill="url(#hero-star-core)"
               />
             </template>
             <template v-else>
@@ -107,7 +101,7 @@
                 class="hero-star-sparkle"
                 :d="DECO_SPARKLE_PATH"
                 :transform="sparkleTransform(star)"
-                fill="url(#hero-star-sparkle-fill)"
+                fill="url(#hero-star-core)"
               />
             </template>
             <template v-else>
