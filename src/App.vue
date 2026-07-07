@@ -157,13 +157,13 @@
           </div>
 
           <div class="service-row-body">
-            <h3 class="service-title" :class="{ 'service-title--dim': activeService !== index }">
-              {{ service.title }}
-            </h3>
+            <div class="service-row-main">
+              <h3 class="service-title" :class="{ 'service-title--dim': activeService !== index }">
+                {{ service.title }}
+              </h3>
 
-            <div class="service-content-wrapper">
-              <div class="service-row-detail">
-                <div class="service-row-left">
+              <div class="service-content-wrapper">
+                <div class="service-row-detail">
                   <div class="service-tags">
                     <span v-for="tag in service.tags" :key="tag" class="service-tag">
                       {{ tag }}
@@ -171,16 +171,26 @@
                   </div>
                   <p class="service-desc">{{ service.desc }}</p>
                 </div>
-
-                <div class="service-row-images">
-                  <img
-                    class="service-illustration"
-                    :src="service.image"
-                    :alt="`Ilustração de ${service.title}`"
-                    loading="lazy"
-                  />
-                </div>
               </div>
+            </div>
+
+            <div class="service-row-aside">
+              <img
+                class="service-illustration"
+                :src="service.image"
+                :alt="`Ilustração de ${service.title}`"
+                loading="lazy"
+              />
+              <button
+                type="button"
+                class="services-cta-btn services-cta-btn--inline"
+                @click.stop="solicitarServico(service)"
+              >
+                Solicitar orçamento
+                <span class="services-cta-arrow">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </span>
+              </button>
             </div>
           </div>
         </div>
@@ -256,6 +266,12 @@
           :key="item.title"
           class="outro-card"
           :delay="index * 120"
+          role="button"
+          tabindex="0"
+          :aria-label="`Solicitar ${item.title}`"
+          @click="solicitarServico(item)"
+          @keydown.enter.prevent="solicitarServico(item)"
+          @keydown.space.prevent="solicitarServico(item)"
         >
           <div class="outro-icon-wrap">
             <component :is="item.icon" />
@@ -555,14 +571,32 @@
           </p>
 
           <div class="contato-info">
-            <div class="contato-info-item">
-              <span class="contato-info-label">WhatsApp</span>
-              <span class="contato-info-value">+55 (22) 98106-9554</span>
+            <div class="contato-form-group">
+              <span class="contato-label">WhatsApp</span>
+              <div class="contato-input-shell contato-info-card">
+                <a
+                  class="contato-info-link"
+                  href="https://wa.me/5522981069554?text=Olá, gostaria de mais informações."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span class="contato-info-text">+55 (22) 98106-9554</span>
+                  <ArrowRight class="contato-info-arrow" aria-hidden="true" />
+                </a>
+              </div>
             </div>
 
-            <div class="contato-info-item">
-              <span class="contato-info-label">E-mail</span>
-              <span class="contato-info-value">contato@lynx.app.br</span>
+            <div class="contato-form-group">
+              <span class="contato-label">E-mail</span>
+              <div class="contato-input-shell contato-info-card">
+                <a
+                  class="contato-info-link"
+                  href="mailto:contato@lynx.app.br?subject=Contato%20pelo%20site%20LYNX&body=Olá,%20gostaria%20de%20mais%20informações."
+                >
+                  <span class="contato-info-text">contato@lynx.app.br</span>
+                  <ArrowRight class="contato-info-arrow" aria-hidden="true" />
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -583,6 +617,36 @@
               required
             />
           </div>
+        </div>
+
+        <div class="contato-form-group">
+          <label class="contato-label" for="contato-email">E-mail</label>
+          <div
+            class="contato-input-shell"
+            :class="{ 'contato-input-shell--invalid': mostrarAvisoEmail() }"
+          >
+            <input
+              id="contato-email"
+              :value="formEmail"
+              class="contato-input"
+              type="email"
+              name="email"
+              inputmode="email"
+              autocomplete="email"
+              placeholder="seu@email.com"
+              :disabled="formLoading"
+              required
+              @input="onEmailInput"
+              @blur="formEmailTocado = true"
+            />
+          </div>
+          <p
+            v-if="mostrarAvisoEmail()"
+            class="contato-feedback contato-feedback--aviso"
+            role="status"
+          >
+            Informe um e-mail válido com @ e domínio (ex.: nome@empresa.com).
+          </p>
         </div>
 
         <div class="contato-form-group">
@@ -654,8 +718,8 @@
     import SectionDecoDraw from './components/SectionDecoDraw.vue'
     import SectionDecoLine from './components/SectionDecoLine.vue'
     import SiteFooter from './components/SiteFooter.vue'
-    import { ref, onMounted, onUnmounted, nextTick } from 'vue'
-    import { initLenis, destroyLenis, scrollTo } from './composables/useLenis'
+    import { ref, onMounted, nextTick } from 'vue'
+    import { scrollTo } from './composables/useLenis'
     import { useHeroMobileMinHeight } from './composables/useHeroMobileMinHeight.js'
     import { useHeroParallax } from './composables/useHeroParallax.js'
     import LynxLogo from './assets/LynxLogoLetras.png'
@@ -663,7 +727,7 @@
     import VictormolPreview from './assets/www.victormol.com.br_.webp'
     import { SlidersHorizontal, Globe, ShieldCheck, Eye, Search, 
              Smartphone, MessageCircle, Zap, Shield, Settings, Palette, 
-             BarChart2, FileText, ArrowUpRight, ArrowDown, ChevronDown } from 'lucide-vue-next'
+             BarChart2, FileText, ArrowUpRight, ArrowRight, ArrowDown, ChevronDown } from 'lucide-vue-next'
 
     const vantagens = [
       {
@@ -723,28 +787,34 @@
 
     const outrosServicos = [
       {
-        icon: MessageCircle, // ou o ícone que preferir do lucide-vue
+        icon: MessageCircle,
         title: 'Automação de WhatsApp',
         desc: 'Respostas automáticas, funis de atendimento e disparo de mensagens para seus clientes.',
+        contatoMensagem: 'Desejo contratar automação de WhatsApp.',
       },
       {
         icon: Palette,
         title: 'Rebranding',
         desc: 'Renovação completa da identidade visual da sua marca — logo, paleta, tipografia e tom de voz.',
+        contatoMensagem: 'Desejo fazer um rebranding.',
       },
       {
         icon: BarChart2,
         title: 'Gestão de Tráfego',
         desc: 'Campanhas no Google e Meta Ads para atrair visitantes qualificados e converter mais.',
+        contatoMensagem: 'Desejo contratar gestão de tráfego.',
       },
       {
         icon: FileText,
         title: 'Criação de Conteúdo',
         desc: 'Textos, artes e estratégia de publicações para redes sociais e blog da sua empresa.',
+        contatoMensagem: 'Desejo contratar criação de conteúdo.',
       },
     ]
 
     const formNome = ref('')
+    const formEmail = ref('')
+    const formEmailTocado = ref(false)
     const formTelefone = ref('')
     const formDetalhes = ref('')
     const formEnviado = ref(false)
@@ -759,22 +829,25 @@
         title: 'Sites Institucionais',
         tags: ['User Interface', 'User Experience', 'Web Design'],
         desc: 'Presença online profissional para seus clientes te encontrarem no Google, conhecerem seus serviços e confiarem no seu negócio.',
-        image: '/site_institucional.svg'
+        image: '/site_institucional.svg',
+        contatoMensagem: 'Desejo criar um site institucional.',
       },
       {
         num: '02.',
         title: 'E-Commerce',
         tags: ['Loja Virtual', 'Pagamento Online', 'Catálogo de Produtos'],
         desc: 'Comece a vender pela internet com uma loja própria, fácil de gerenciar e com pagamento integrado para seus clientes.',
-        image: '/ecommerce.svg'
+        image: '/ecommerce.svg',
+        contatoMensagem: 'Desejo criar uma loja virtual.',
       },
       {
         num: '03.',
         title: 'Landing Pages',
         tags: ['Captação de Clientes', 'Promoções', 'Resultado Rápido'],
         desc: 'Página única e direta para anunciar uma promoção, lançar um produto ou captar contatos de clientes interessados.',
-        image: '/landing_page.svg'
-      }
+        image: '/landing_page.svg',
+        contatoMensagem: 'Desejo criar uma landing page.',
+      },
     ]
 
     const projetos = ref([
@@ -826,13 +899,39 @@
       activeProject.value = (activeProject.value + 1) % projetos.value.length
     }
 
+    function filtrarEmail(value) {
+      return value.replace(/[^a-zA-Z0-9.@_+%-]/g, '')
+    }
+
+    function emailValido(value) {
+      const email = value.trim()
+      return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)
+    }
+
+    function mostrarAvisoEmail() {
+      const email = formEmail.value.trim()
+      if (!formEmailTocado.value && !email) return false
+      if (!email) return formEmailTocado.value
+      return !emailValido(email)
+    }
+
+    function onEmailInput(event) {
+      formEmail.value = filtrarEmail(event.target.value)
+    }
+
     async function enviarFormulario() {
       if (formLoading.value || formEnviado.value) return
 
       formErro.value = ''
+      formEmailTocado.value = true
 
-      if (!formNome.value.trim() || !formTelefone.value.trim() || !formDetalhes.value.trim()) {
-        formErro.value = 'Preencha nome, telefone e detalhes.'
+      if (!formNome.value.trim() || !formEmail.value.trim() || !formTelefone.value.trim() || !formDetalhes.value.trim()) {
+        formErro.value = 'Preencha nome, e-mail, telefone e detalhes.'
+        return
+      }
+
+      if (!emailValido(formEmail.value)) {
+        formErro.value = 'Informe um e-mail válido com @ e domínio (ex.: nome@empresa.com).'
         return
       }
 
@@ -844,6 +943,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             nome: formNome.value.trim(),
+            email: formEmail.value.trim(),
             telefone: formTelefone.value.trim(),
             mensagem: formDetalhes.value.trim(),
           }),
@@ -857,6 +957,8 @@
 
         formEnviado.value = true
         formNome.value = ''
+        formEmail.value = ''
+        formEmailTocado.value = false
         formTelefone.value = ''
         formDetalhes.value = ''
 
@@ -870,9 +972,21 @@
       }
     }
 
-    function scrollToContato() {
+    function scrollToContato(onComplete) {
       const el = document.querySelector('.contato, #contato, [data-section="contato"]')
-      if (el) scrollTo(el)
+      if (!el) return
+
+      scrollTo(el, {
+        onComplete: () => onComplete?.(),
+      })
+    }
+
+    function solicitarServico(item) {
+      formDetalhes.value = item.contatoMensagem
+      formErro.value = ''
+      scrollToContato(() => {
+        document.getElementById('contato-detalhes')?.focus({ preventScroll: true })
+      })
     }
 
     useHeroMobileMinHeight()
@@ -888,12 +1002,6 @@
         img.src = projeto.image
       }
     }
-
-    initLenis()
-
-    onUnmounted(() => {
-      destroyLenis()
-    })
 
     onMounted(async () => {
       preloadPortfolioImages()
@@ -1103,36 +1211,6 @@
   align-items: flex-start;
   width: fit-content;
   max-width: 100%;
-  isolation: isolate;
-}
-
-.banner-copy-head::before {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  inset: clamp(-3px, -0.25vh, -2px) clamp(-5px, -0.35vw, -3px);
-  border: none;
-  box-shadow: none;
-  background: transparent;
-  backdrop-filter: blur(10px) saturate(118%);
-  -webkit-backdrop-filter: blur(10px) saturate(118%);
-  -webkit-mask-image: radial-gradient(
-    ellipse 100% 100% at 50% 50%,
-    #000 76%,
-    rgba(0, 0, 0, 0.9) 84%,
-    rgba(0, 0, 0, 0.62) 91%,
-    rgba(0, 0, 0, 0.28) 96%,
-    transparent 100%
-  );
-  mask-image: radial-gradient(
-    ellipse 100% 100% at 50% 50%,
-    #000 76%,
-    rgba(0, 0, 0, 0.9) 84%,
-    rgba(0, 0, 0, 0.62) 91%,
-    rgba(0, 0, 0, 0.28) 96%,
-    transparent 100%
-  );
-  pointer-events: none;
 }
 
 .banner-copy > * {
@@ -1517,6 +1595,8 @@
   position: relative;
   overflow: hidden;
   font-family: inherit;
+  --service-motion-duration: 0.52s;
+  --service-motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .services-panel-header {
@@ -1565,7 +1645,7 @@
   border-bottom: 1px solid rgba(10,10,20,0.12);
   padding: 16px 0 0;
   cursor: default;
-  transition: padding-bottom 0.35s ease;
+  transition: padding-bottom var(--service-motion-duration) var(--service-motion-ease);
 }
 
 .service-row--last { border-bottom: none; }
@@ -1583,7 +1663,46 @@
 
 .service-num--dim { color: rgba(10,10,20,0.25); }
 
-.service-row-body { padding-bottom: 20px; }
+.service-row-body {
+  padding-bottom: 20px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0px);
+  gap: 0;
+  align-items: stretch;
+  transition:
+    grid-template-columns var(--service-motion-duration) var(--service-motion-ease),
+    gap var(--service-motion-duration) var(--service-motion-ease);
+}
+
+.service-row--active .service-row-body {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 298px);
+  gap: 32px;
+}
+
+.service-row-main {
+  grid-column: 1;
+  min-width: 0;
+}
+
+.service-row-aside {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity calc(var(--service-motion-duration) * 0.75) var(--service-motion-ease);
+  transition-delay: 0s;
+}
+
+.service-row--active .service-row-aside {
+  opacity: 1;
+  pointer-events: auto;
+  transition-delay: calc(var(--service-motion-duration) * 0.18);
+}
 
 /* Active service title */
 .services-panel .service-title {
@@ -1593,7 +1712,9 @@
   font-size: clamp(2.4rem, 5.5vw, 4.5rem);
   letter-spacing: -0.03em;
   line-height: 1.0;
-  margin: 0 0 12px 0;
+  margin: 0;
+  flex: 1;
+  min-width: 0;
   transition: color 0.25s ease, opacity 0.25s ease;
 }
 
@@ -1608,7 +1729,7 @@
 .service-content-wrapper {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows 0.38s ease;
+  transition: grid-template-rows var(--service-motion-duration) var(--service-motion-ease);
   overflow: hidden;
 }
 
@@ -1616,16 +1737,13 @@
 
 .service-row-detail {
   min-height: 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 32px;
-  padding-top: 16px;
+  max-width: 400px;
+  padding-top: 0;
+  transition: padding-top var(--service-motion-duration) var(--service-motion-ease);
 }
 
-.service-row-left {
-  flex: 1;
-  max-width: 400px;
+.service-row--active .service-row-detail {
+  padding-top: 20px;
 }
 
 .service-tags {
@@ -1655,24 +1773,39 @@
   max-width: 300px;
 }
 
-.service-row-images {
-  display: flex;
-  align-items: flex-end;
+.service-row-aside .service-illustration {
+  display: block;
+  width: 100%;
+  height: auto;
   flex-shrink: 0;
 }
 
-.service-illustration {
-  display: block;
-  width: 298px;
+.services-cta-btn--inline {
+  width: fit-content;
   max-width: 100%;
-  height: auto;
+  margin-top: auto;
+  align-self: center;
+  justify-content: flex-start;
+  gap: 4px;
+  padding: 9px 10px 9px 14px;
+  font-size: 0.8125rem;
+}
+
+.services-cta-btn--inline .services-cta-arrow {
+  width: 24px;
+  height: 24px;
+}
+
+.services-cta-btn--inline .services-cta-arrow svg {
+  width: 14px;
+  height: 14px;
 }
 
 /* Panel CTA button */
 .services-cta-btn {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 4px;
   background: #111128;
   color: #E8E6FF;
   border: 1px solid rgba(56,15,233,0.14);
@@ -1719,7 +1852,8 @@
 .extra-card,
 .outro-card,
 .vantagem-bar,
-.processo-card {
+.processo-card,
+.pricing-card {
   overflow: hidden;
   background:
     radial-gradient(ellipse 90% 80% at 0% 0%, rgba(138, 138, 255, 0.08) 0%, transparent 58%),
@@ -1734,7 +1868,8 @@
 .extra-card::before,
 .outro-card::before,
 .vantagem-bar::before,
-.processo-card::before {
+.processo-card::before,
+.pricing-card::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -1757,7 +1892,8 @@
 
 .extra-card:hover,
 .outro-card:hover,
-.processo-card:hover {
+.processo-card:hover,
+.pricing-card:hover {
   background:
     radial-gradient(ellipse 90% 80% at 0% 0%, rgba(138, 138, 255, 0.12) 0%, transparent 58%),
     radial-gradient(ellipse 90% 80% at 100% 100%, rgba(138, 138, 255, 0.12) 0%, transparent 58%),
@@ -1777,7 +1913,8 @@
 
 .extra-card:hover::before,
 .outro-card:hover::before,
-.processo-card:hover::before {
+.processo-card:hover::before,
+.pricing-card:hover::before {
   background:
     linear-gradient(135deg, rgba(138, 138, 255, 0.52) 0%, rgba(138, 138, 255, 0) 42%),
     linear-gradient(315deg, rgba(138, 138, 255, 0.52) 0%, rgba(138, 138, 255, 0) 42%);
@@ -1910,6 +2047,10 @@
   padding: 32px 24px;
   display: flex;
   flex-direction: column;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
 }
 
 .outro-card.scroll-reveal--played:hover {
@@ -2084,17 +2225,32 @@
 .browser-screen-slide {
   position: absolute;
   inset: 0;
+  z-index: 0;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
   content-visibility: hidden;
+  transition:
+    opacity 0.45s ease,
+    visibility 0s linear 0.45s;
 }
 
 .browser-screen-slide--active {
+  z-index: 1;
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
   content-visibility: visible;
+  transition:
+    opacity 0.45s ease,
+    visibility 0s linear 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .browser-screen-slide,
+  .browser-screen-slide--active {
+    transition: none;
+  }
 }
 
 .browser-screen-track {
@@ -2444,35 +2600,17 @@
 .pricing-card {
   position: relative;
   min-width: 0;
-  isolation: isolate;
   border-radius: 16px;
   padding: 32px;
   color: #E8E6FF;
-  background: transparent;
   overflow: visible;
+  box-shadow: 0 0 0 transparent;
+  transition: transform 0.22s ease, background 0.22s ease, box-shadow 0.22s ease;
 }
 
-.pricing-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  border-radius: inherit;
-  background: rgba(10, 10, 20, 0.38);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  backdrop-filter: blur(24px) saturate(180%);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28);
-  border: 1.5px solid rgba(255, 255, 255, 0.22);
-  pointer-events: none;
-  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-}
-
-@supports not (
-  (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))
-) {
-  .pricing-card::before {
-    background: rgba(10, 10, 20, 0.92);
-  }
+.pricing-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(8, 8, 22, 0.38);
 }
 
 .pricing-card > * {
@@ -2481,19 +2619,15 @@
 }
 
 .pricing-card--featured::before {
-  border-color: rgba(240, 255, 31, 0.85);
-  background: rgba(10, 10, 20, 0.42);
-  box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.28),
-    inset 0 0 0 1px rgba(240, 255, 31, 0.08);
+  background:
+    linear-gradient(135deg, rgba(240, 255, 31, 0.5) 0%, rgba(138, 138, 255, 0) 42%),
+    linear-gradient(315deg, rgba(240, 255, 31, 0.5) 0%, rgba(138, 138, 255, 0) 42%);
 }
 
-@supports not (
-  (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))
-) {
-  .pricing-card--featured::before {
-    background: rgba(14, 12, 28, 0.94);
-  }
+.pricing-card--featured:hover::before {
+  background:
+    linear-gradient(135deg, rgba(240, 255, 31, 0.68) 0%, rgba(138, 138, 255, 0) 42%),
+    linear-gradient(315deg, rgba(240, 255, 31, 0.68) 0%, rgba(138, 138, 255, 0) 42%);
 }
 
 .pricing-badge {
@@ -2650,25 +2784,53 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  max-width: 360px;
 }
 
-.contato-info-item {
+.contato-info-card:hover::before {
+  border-color: rgba(240, 255, 31, 0.55);
+  background: rgba(10, 10, 20, 0.48);
+}
+
+.contato-info-link {
+  position: relative;
+  z-index: 1;
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 0.95rem;
+  font-family: inherit;
+  text-decoration: none;
+  box-sizing: border-box;
+  transition: color 0.2s ease;
 }
 
-.contato-info-label {
-  font-size: var(--text-sm);
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+.contato-info-text {
+  min-width: 0;
+  flex: 1;
+  color: var(--accent-yellow);
+}
+
+.contato-info-arrow {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  stroke: currentColor;
+  fill: none;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.contato-info-link:hover {
   color: #F0FF1F;
 }
 
-.contato-info-value {
-  font-size: 0.95rem;
-  color: rgba(255,255,255,0.8);
+.contato-info-link:hover .contato-info-arrow {
+  transform: translateX(3px);
 }
 
 .contato-form-wrap {
@@ -2690,7 +2852,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.75);
+  color: #fff;
 }
 
 .contato-input-shell {
@@ -2728,6 +2890,17 @@
   box-shadow:
     0 4px 24px rgba(0, 0, 0, 0.28),
     0 0 0 3px rgba(240, 255, 31, 0.12);
+}
+
+.contato-input-shell--invalid::before {
+  border-color: rgba(255, 140, 140, 0.85);
+}
+
+.contato-input-shell--invalid:focus-within::before {
+  border-color: rgba(255, 140, 140, 0.95);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.28),
+    0 0 0 3px rgba(255, 140, 140, 0.14);
 }
 
 .contato-input-shell:has(:disabled)::before {
@@ -2823,6 +2996,10 @@
   color: #ffb4b4;
 }
 
+.contato-feedback--aviso {
+  color: #ffd28a;
+}
+
 
 /* ------------------------------------ FOOTER ------------------------------------- */
 /* Footer styles live in SiteFooter.vue */
@@ -2892,7 +3069,7 @@
 @media (max-width: 860px) {
   .contato-inner {
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
     gap: 40px;
     min-width: 0;
   }
@@ -2900,30 +3077,68 @@
   .contato-left {
     flex: none;
     width: 100%;
-    text-align: center;
+    text-align: left;
   }
 
-  .contato-info { align-items: center; }
+  .contato-info {
+    align-items: flex-start;
+    width: 100%;
+    max-width: none;
+    margin-inline: 0;
+  }
 
-  .contato-form-wrap { width: 100%; max-width: 480px; }
+  .contato-info .contato-form-group {
+    align-items: flex-start;
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  .contato-info-card {
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  .contato-info-link {
+    width: auto;
+  }
+
+  .contato-info-text {
+    flex: 0 1 auto;
+  }
+
+  .contato-form-wrap { width: 100%; max-width: none; }
 
   .pricing-cards { grid-template-columns: 1fr; }
 
   .services-panel { padding: 28px 24px 24px; }
 
-  .service-row-detail {
-    flex-direction: column;
+  .service-row-body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 0fr;
+    transition:
+      grid-template-rows var(--service-motion-duration) var(--service-motion-ease),
+      gap var(--service-motion-duration) var(--service-motion-ease);
+  }
+
+  .service-row--active .service-row-body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
     gap: 20px;
   }
 
-  .service-row-left { max-width: 100%; }
+  .service-row-aside {
+    grid-column: 1;
+    grid-row: 2;
+  }
 
-  .service-row-images {
+  .service-row-detail { max-width: 100%; }
+
+  .service-row-aside .service-illustration {
     width: 100%;
   }
 
-  .service-illustration {
-    width: 100%;
+  .services-cta-btn--inline {
+    margin-top: 14px;
   }
 
   .services-panel-footer {
@@ -3018,6 +3233,15 @@
   .portfolio-arrow--prev { left: 10px; }
   .portfolio-arrow--next { right: 10px; }
 
+  .portfolio-info {
+    align-items: center;
+    text-align: center;
+  }
+
+  .portfolio-desc {
+    max-width: min(320px, 82vw);
+  }
+
   .banner-inner {
     padding-left: clamp(20px, 4vw, 32px);
     padding-right: clamp(20px, 4vw, 32px);
@@ -3038,7 +3262,13 @@
     --hero-constellation-mountain-gap: 0px;
     --hero-constellation-width: clamp(36vw, 44vw, 420px);
     --hero-title-line-height: 1.02;
-    min-height: max(100svh, var(--hero-mobile-min-height, 100svh));
+    min-height: var(--hero-mobile-min-height, 100svh);
+  }
+
+  @media (min-height: 1000px) {
+    .banner {
+      min-height: var(--hero-mobile-min-height, auto);
+    }
   }
 
   .banner-copy-head {
@@ -3118,6 +3348,8 @@
   }
 
   .banner-footer {
+    position: relative;
+    z-index: 3;
     justify-content: center;
     align-items: center;
     margin-top: var(--hero-gap-desc-btn);
@@ -3207,6 +3439,14 @@
     gap: clamp(8px, 1.5vh, 12px);
   }
 
+  .banner-footer-side--right {
+    order: 1;
+  }
+
+  .banner-footer-side--left {
+    order: 2;
+  }
+
   .hero-constellation-band {
     max-width: calc(100vw - 2 * clamp(20px, 5vw, 32px));
     --hero-constellation-star-min-radius: 26px;
@@ -3230,7 +3470,6 @@
   .portfolio-deco {
     width: 100%;
     margin-left: 0;
-    justify-content: flex-start;
   }
   .processo-header h2 { font-size: 2.2rem; }
 

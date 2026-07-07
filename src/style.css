@@ -270,6 +270,37 @@ h3 em {
     opacity 0.45s ease-out;
 }
 
+/* Mobile: label above line + star; line spans full row (except service panel). */
+@media (max-width: 768px) {
+  .section-deco:not(.services-panel-deco):not(.services-footer-left),
+  .processo-deco-line,
+  .outros-sub {
+    flex-direction: column;
+    align-items: stretch;
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+
+  .section-deco:not(.services-panel-deco):not(.services-footer-left) .section-deco-label,
+  .processo-deco-line .processo-label {
+    order: -1;
+    width: 100%;
+  }
+
+  .section-deco:not(.services-panel-deco):not(.services-footer-left) > .section-deco-draw,
+  .processo-deco-line > .section-deco-draw,
+  .outros-sub > .section-deco-draw {
+    order: 1;
+    width: 100%;
+    max-width: 100%;
+    flex: 0 0 auto;
+  }
+
+  .outros-sub {
+    white-space: normal;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .section-deco-draw--vertical:not(.section-deco-draw--played) .section-deco-draw__line > *,
   .section-deco-draw--horizontal:not(.section-deco-draw--played) .section-deco-draw__line > * {

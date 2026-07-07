@@ -59,7 +59,7 @@
         </defs>
 
         <path
-          v-for="segment in HERO_CURSOR_SEGMENTS"
+          v-for="segment in cursorGeometry.segments"
           :key="segment.id"
           :ref="(el) => setSegmentPathRef(segment.id, el)"
           :data-segment-id="segment.id"
@@ -72,13 +72,13 @@
 
         <path
           ref="leftShaftPathRef"
-          :data-segment-id="HERO_CURSOR_LEFT_SHAFT.id"
+          :data-segment-id="cursorGeometry.leftShaft.id"
           class="cursor-path cursor-path--left-shaft"
           fill="none"
           stroke-linejoin="round"
           stroke-linecap="round"
           :clip-path="`url(#${leftShaftClipId})`"
-          :d="HERO_CURSOR_LEFT_SHAFT.d"
+          :d="cursorGeometry.leftShaft.d"
         />
 
         <g
@@ -89,7 +89,7 @@
         >
           <g
             class="hero-star-twinkle"
-            :style="constellationTwinkleStyle(vertex)"
+            :style="vertex.twinkleStyle"
           >
             <circle
               :cx="vertex.x"
@@ -117,9 +117,9 @@ import {
   DECO_SPARKLE_VIEW_SIZE,
 } from '../config/decoSparkle.js'
 import {
-  HERO_CURSOR_LEFT_SHAFT,
-  HERO_CURSOR_SEGMENTS,
   HERO_CURSOR_VERTICES,
+  buildHeroCursorGeometry,
+  compressVerticesY,
 } from '../config/heroCursorConstellation.js'
 import { useHeroSkyLayout } from '../composables/useHeroSkyLayout.js'
 import {
@@ -140,7 +140,7 @@ import '../styles/heroStarTwinkle.css'
 const STAR_STAGGER_S = 0.1
 const STAR_REVEAL_DURATION_S = 0.36
 const LINE_DRAW_DURATION_S = 1
-const TWINKLE_BUFFER_S = 0.15
+const TWINKLE_REVEAL_LEAD_S = 0.1
 
 const VERTEX_COUNT = HERO_CURSOR_VERTICES.length
 
@@ -151,8 +151,6 @@ const STARS_END_S =
 const LEFT_SHAFT_DRAW_DURATION_S = 0.85
 
 const LINES_END_S = STARS_END_S + LINE_DRAW_DURATION_S + LEFT_SHAFT_DRAW_DURATION_S
-
-const TWINKLE_START_OFFSET_S = LINES_END_S + TWINKLE_BUFFER_S
 
 const props = defineProps({
   parallaxX: {
@@ -191,7 +189,7 @@ function getLeftShaftPath() {
   const fromRef = leftShaftPathRef.value
   if (fromRef?.isConnected) return fromRef
 
-  const fromDom = svgRef.value?.querySelector(`[data-segment-id="${HERO_CURSOR_LEFT_SHAFT.id}"]`)
+  const fromDom = svgRef.value?.querySelector(`[data-segment-id="${cursorLeftShaft.value.id}"]`)
   if (fromDom) {
     leftShaftPathRef.value = fromDom
     return fromDom
@@ -217,14 +215,23 @@ const clipId = computed(() => `constellation-bounds-${layout.value.id}`)
 
 const leftShaftClipId = computed(() => `left-shaft-reveal-${layout.value.id}`)
 
-/** Clip band wide enough for the 6px non-scaling stroke centered on x=4. */
-const LEFT_SHAFT_CLIP = {
-  x: HERO_CURSOR_VERTICES[0].x - 1.5,
-  y: HERO_CURSOR_VERTICES[0].y,
+const LEFT_SHAFT_CLIP = computed(() => ({
+  x: cursorVertices.value[0].x - 1.5,
+  y: cursorVertices.value[0].y,
   width: 3,
-}
+}))
 
 const constellationLayout = computed(() => layout.value.constellation)
+
+const cursorGeometry = computed(() => {
+  const lineCompress = constellationLayout.value.lineCompress ?? 1
+  const vertices = compressVerticesY(HERO_CURSOR_VERTICES, lineCompress, HERO_CURSOR_VERTICES[0].y)
+  return buildHeroCursorGeometry(vertices)
+})
+
+const cursorVertices = computed(() => cursorGeometry.value.vertices)
+const cursorSegments = computed(() => cursorGeometry.value.segments)
+const cursorLeftShaft = computed(() => cursorGeometry.value.leftShaft)
 
 const constellationViewBoxWidth = computed(
   () => layout.value.constellationViewBox?.width ?? 100,
@@ -344,31 +351,39 @@ const decoStarScale = computed(() => {
 
 const DECO_STAR_CENTER = DECO_SPARKLE_VIEW_SIZE / 2
 
-const CURSOR_VERTICES = assignTwinkleTiming(
-  HERO_CURSOR_VERTICES,
-  47103,
-  { delayStagger: 1.35 },
+const CURSOR_VERTICES = computed(() =>
+  assignTwinkleTiming(cursorVertices.value, 47103, {
+    delayStagger: 0.18,
+  }),
 )
+
+function vertexTwinkleStartOffset(index) {
+  return Math.max(
+    0,
+    index * STAR_STAGGER_S + STAR_REVEAL_DURATION_S * 0.45 - TWINKLE_REVEAL_LEAD_S,
+  )
+}
 
 function cssSeconds(value) {
   return `${Number(value).toFixed(3)}s`
 }
 
-const CURSOR_VERTEX_ENTRIES = CURSOR_VERTICES.map((vertex, index) => ({
-  ...vertex,
-  style: {
-    '--delay': cssSeconds(index * STAR_STAGGER_S),
-    '--duration': cssSeconds(STAR_REVEAL_DURATION_S),
-  },
-}))
-
-const twinkleKeyframes = computed(() =>
-  buildTwinkleKeyframesCss(CURSOR_VERTICES, CONSTELLATION_TWINKLE_FRAMES),
+const CURSOR_VERTEX_ENTRIES = computed(() =>
+  CURSOR_VERTICES.value.map((vertex, index) => ({
+    ...vertex,
+    style: {
+      '--delay': cssSeconds(index * STAR_STAGGER_S),
+      '--duration': cssSeconds(STAR_REVEAL_DURATION_S),
+    },
+    twinkleStyle: twinkleAnimationStyle(vertex, {
+      startOffset: vertexTwinkleStartOffset(index),
+    }),
+  })),
 )
 
-function constellationTwinkleStyle(vertex) {
-  return twinkleAnimationStyle(vertex, { startOffset: TWINKLE_START_OFFSET_S })
-}
+const twinkleKeyframes = computed(() =>
+  buildTwinkleKeyframesCss(CURSOR_VERTICES.value, CONSTELLATION_TWINKLE_FRAMES),
+)
 
 function decoStarTransform(vertex) {
   const scale = decoStarScale.value * (vertex.sparkleScale ?? 1)
@@ -433,7 +448,7 @@ function animateSegmentOffset(path, length, durationMs, ease = easeOutQuad) {
 function countReadySegmentPaths() {
   let count = 0
 
-  for (const segment of HERO_CURSOR_SEGMENTS) {
+  for (const segment of cursorSegments.value) {
     if (getSegmentPath(segment.id)) count += 1
   }
 
@@ -446,7 +461,7 @@ function countReadyDrawPaths() {
 
 function animateLeftShaftReveal(durationMs) {
   const start = performance.now()
-  const fullHeight = HERO_CURSOR_LEFT_SHAFT.length
+  const fullHeight = cursorLeftShaft.value.length
 
   function tick(now) {
     const t = Math.min(1, (now - start) / durationMs)
@@ -469,7 +484,7 @@ function setupLeftShaftDraw(reducedMotion) {
   leftShaftRevealHeight.value = 0
 
   if (reducedMotion) {
-    leftShaftRevealHeight.value = HERO_CURSOR_LEFT_SHAFT.length
+    leftShaftRevealHeight.value = cursorLeftShaft.value.length
     return true
   }
 
@@ -498,7 +513,7 @@ function scheduleLineDrawRetry(rafAttempt) {
 function setupLineDraw(rafAttempt = 0) {
   clearLineDrawTimers()
 
-  if (countReadyDrawPaths() < HERO_CURSOR_SEGMENTS.length + 1) {
+  if (countReadyDrawPaths() < cursorSegments.value.length + 1) {
     scheduleLineDrawRetry(rafAttempt)
     return
   }
@@ -506,7 +521,7 @@ function setupLineDraw(rafAttempt = 0) {
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   const segmentDraws = []
 
-  for (const segment of HERO_CURSOR_SEGMENTS) {
+  for (const segment of cursorSegments.value) {
     const path = getSegmentPath(segment.id)
     if (!path) {
       scheduleLineDrawRetry(rafAttempt)
@@ -519,7 +534,7 @@ function setupLineDraw(rafAttempt = 0) {
     segmentDraws.push({ segmentId: segment.id, length })
   }
 
-  if (segmentDraws.length < HERO_CURSOR_SEGMENTS.length) {
+  if (segmentDraws.length < cursorSegments.value.length) {
     scheduleLineDrawRetry(rafAttempt)
     return
   }
@@ -570,12 +585,12 @@ function setupLineDraw(rafAttempt = 0) {
 
   lineDrawTimers.push(
     window.setTimeout(() => {
-      for (const segment of HERO_CURSOR_SEGMENTS) {
+      for (const segment of cursorSegments.value) {
         const path = getSegmentPath(segment.id)
         if (path) finalizeSegmentStroke(path)
       }
 
-      leftShaftRevealHeight.value = HERO_CURSOR_LEFT_SHAFT.length
+      leftShaftRevealHeight.value = cursorLeftShaft.value.length
     }, (LINES_END_S + 0.2) * 1000),
   )
 }

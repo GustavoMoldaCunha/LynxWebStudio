@@ -21,13 +21,23 @@ function escapeHtml(value) {
     .replace(/"/g, '&quot;')
 }
 
+function emailValido(value) {
+  const email = value.trim()
+  return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)
+}
+
 function parseBody(data) {
   const nome = data?.nome?.trim() ?? ''
+  const email = data?.email?.trim() ?? ''
   const telefone = data?.telefone?.trim() ?? ''
   const mensagem = data?.mensagem?.trim() ?? ''
 
   if (!nome || nome.length < 2) {
     return { error: 'Informe um nome válido.' }
+  }
+
+  if (!email || !emailValido(email)) {
+    return { error: 'Informe um e-mail válido com @ e domínio (ex.: nome@empresa.com).' }
   }
 
   if (!telefone || telefone.length < 8) {
@@ -38,11 +48,11 @@ function parseBody(data) {
     return { error: 'Descreva seu projeto com pelo menos 10 caracteres.' }
   }
 
-  if (nome.length > 120 || telefone.length > 40 || mensagem.length > 5000) {
+  if (nome.length > 120 || email.length > 254 || telefone.length > 40 || mensagem.length > 5000) {
     return { error: 'Um ou mais campos excedem o tamanho permitido.' }
   }
 
-  return { nome, telefone, mensagem }
+  return { nome, email, telefone, mensagem }
 }
 
 export function onRequestOptions() {
@@ -69,13 +79,14 @@ export async function onRequestPost({ request, env }) {
     return jsonResponse({ success: false, error: parsed.error }, 400)
   }
 
-  const { nome, telefone, mensagem } = parsed
+  const { nome, email, telefone, mensagem } = parsed
   const subject = `[LYNX] Novo contato — ${nome}`
 
   const text = [
     'Novo contato pelo site LYNX',
     '',
     `Nome: ${nome}`,
+    `E-mail: ${email}`,
     `Telefone / WhatsApp: ${telefone}`,
     '',
     'Mensagem:',
@@ -85,6 +96,7 @@ export async function onRequestPost({ request, env }) {
   const html = `
     <h2>Novo contato pelo site LYNX</h2>
     <p><strong>Nome:</strong> ${escapeHtml(nome)}</p>
+    <p><strong>E-mail:</strong> ${escapeHtml(email)}</p>
     <p><strong>Telefone / WhatsApp:</strong> ${escapeHtml(telefone)}</p>
     <p><strong>Mensagem:</strong></p>
     <p style="white-space:pre-wrap">${escapeHtml(mensagem)}</p>

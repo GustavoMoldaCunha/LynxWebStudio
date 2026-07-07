@@ -25,16 +25,16 @@ export const CONSTELLATION_TWINKLE_FRAMES = {
 }
 
 export function twinkleTiming(rand) {
-  const interval = 4 + rand() * 8
-  const flashDuration = 0.8
-  const total = interval + flashDuration
-  const holdEnd = (interval / total) * 100
-  const flashSpan = 100 - holdEnd
+  const total = 2.5 + rand() * 3.5
+  const flashPortion = 0.28 + rand() * 0.12
+  const holdEnd = +((1 - flashPortion) * 100).toFixed(2)
+  const flashSpan = flashPortion * 100
 
   return {
     twinkleDuration: +total.toFixed(2),
-    twinkleDelay: +(rand() * total).toFixed(2),
-    holdEnd: +holdEnd.toFixed(2),
+    // Negative delay starts each star mid-cycle so twinkles are visible right after load.
+    twinkleDelay: +(-(0.06 + rand() * 0.94) * total).toFixed(2),
+    holdEnd,
     riseAt: +(holdEnd + flashSpan * (0.08 + rand() * 0.06)).toFixed(2),
     peakAt: +(holdEnd + flashSpan * (0.22 + rand() * 0.16)).toFixed(2),
     settleAt: +(holdEnd + flashSpan * (0.40 + rand() * 0.10)).toFixed(2),
@@ -57,7 +57,7 @@ export function assignTwinkleTiming(items, seed = 58219, options = {}) {
       id: item.id ?? index,
       twinkle: true,
       ...timing,
-      twinkleDelay: +(timing.twinkleDelay + index * delayStagger).toFixed(2),
+      twinkleDelay: +(timing.twinkleDelay - index * delayStagger).toFixed(2),
     }
   })
 }

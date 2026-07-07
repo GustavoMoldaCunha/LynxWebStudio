@@ -8,7 +8,9 @@ const router = createRouter({
     { path: '/', name: 'home', component: HomeView },
     { path: '/politica-de-privacidade', name: 'privacy', component: PrivacyPolicy },
   ],
-  scrollBehavior() {
+  scrollBehavior(to, _from, savedPosition) {
+    if (savedPosition) return savedPosition
+    if (to.hash) return false
     return { top: 0 }
   },
 })

@@ -65,3 +65,40 @@ export const HERO_CURSOR_INTRO_PATH =
 
 /** Measured length of HERO_CURSOR_INTRO_PATH. */
 export const HERO_CURSOR_INTRO_LENGTH = 60.673
+
+function segmentLength(start, end) {
+  return Math.hypot(end.x - start.x, end.y - start.y)
+}
+
+/** Compress Y span toward the top anchor — shortens lines without shrinking star radii. */
+export function compressVerticesY(vertices, compress = 1, anchorY = vertices[0]?.y ?? 0) {
+  if (!compress || compress >= 1) return vertices
+
+  return vertices.map((vertex) => ({
+    ...vertex,
+    y: anchorY + (vertex.y - anchorY) * compress,
+  }))
+}
+
+export function buildHeroCursorGeometry(vertices = HERO_CURSOR_VERTICES) {
+  const leftShaft = {
+    id: 'c-s-left-shaft',
+    d: formatSegmentPath(vertices[0], vertices[1]),
+    length: segmentLength(vertices[0], vertices[1]),
+  }
+
+  const segments = HERO_CURSOR_ANIMATED_VERTEX_PAIRS.map(([fromIndex, toIndex], index) => {
+    const start = vertices[fromIndex]
+    const end = vertices[toIndex]
+
+    return {
+      id: `c-s${index}`,
+      d: formatSegmentPath(start, end),
+      length: segmentLength(start, end),
+    }
+  })
+
+  return { vertices, segments, leftShaft }
+}
+
+export const HERO_CURSOR_GEOMETRY = buildHeroCursorGeometry()

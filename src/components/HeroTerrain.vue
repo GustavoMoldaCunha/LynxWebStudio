@@ -94,7 +94,7 @@
   width: 100%;
   height: 72%;
   pointer-events: none;
-  z-index: 2;
+  z-index: 3;
   transform-origin: center bottom;
 }
 

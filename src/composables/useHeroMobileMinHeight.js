@@ -2,12 +2,13 @@ import { onMounted, onUnmounted } from 'vue'
 
 const STACKED_HERO_MAX_WIDTH = 920
 const MOUNTAIN_GAP_PX = 0
-const CONTENT_GAP_PX_MOBILE = 4
-const CONTENT_GAP_PX_TABLET = 10
+const CONTENT_GAP_PX_MOBILE = 12
+const CONTENT_GAP_PX_TABLET = 16
 const CONSTELLATION_LIFT_PX_MOBILE = 16
 const CONSTELLATION_LIFT_PX_TABLET = 10
 const CONSTELLATION_DROP_PX_MOBILE = 10
 const CONSTELLATION_DROP_PX_TABLET = 8
+const BUTTON_CLEARANCE_PX = 8
 
 function getContentGap() {
   return window.innerWidth <= 480 ? CONTENT_GAP_PX_MOBILE : CONTENT_GAP_PX_TABLET
@@ -62,6 +63,32 @@ function getMountainMetrics(back) {
   }
 }
 
+function shouldUseContentBasedHeroHeight(viewportWidth, viewportHeight) {
+  if (viewportWidth <= 480) return false
+  if (viewportWidth > STACKED_HERO_MAX_WIDTH) return false
+  return viewportHeight >= 1000
+}
+
+function resolveHeroMinHeight(viewportWidth, viewportHeight, requiredHeight) {
+  if (shouldUseContentBasedHeroHeight(viewportWidth, viewportHeight)) {
+    return requiredHeight
+  }
+
+  return Math.max(viewportHeight, requiredHeight)
+}
+
+function getConstellationVisualBounds(top, height, topInset, bottomInset, lift) {
+  return {
+    visualTop: top + topInset - lift,
+    visualBottom: top + height - bottomInset - lift,
+  }
+}
+
+function resolveConstellationLift(preferredLift, availableSpace, neededSpan) {
+  if (availableSpace >= neededSpan + 20) return preferredLift
+  return Math.max(0, preferredLift - (neededSpan - availableSpace + 20))
+}
+
 function clearMobileHeroVars(hero, band) {
   hero?.style.removeProperty('--hero-mobile-min-height')
   band?.style.removeProperty('--hero-constellation-top')
@@ -83,43 +110,98 @@ export function useHeroMobileMinHeight() {
 
     const back = document.querySelector('.hero-terrain__layer--back')
     const copy = document.querySelector('.banner-copy')
+    const footer = document.querySelector('.banner-footer')
     if (!band || !back || !copy) return
 
     const viewportHeight = window.innerHeight
     const heroTop = hero.getBoundingClientRect().top
     const copyBottomRel = copy.getBoundingClientRect().bottom - heroTop
+    const footerBottomRel = footer
+      ? footer.getBoundingClientRect().bottom - heroTop
+      : copyBottomRel
     const bandHeight = band.getBoundingClientRect().height
-    const { bottomInset } = getConstellationBandVisualExtent(band)
+    const { topInset, bottomInset } = getConstellationBandVisualExtent(band)
     const visualSpan = bandHeight - bottomInset
     const mountain = getMountainMetrics(back)
     const mountainHeight = mountain.visibleHeight
 
     const contentGap = getContentGap()
-    const constellationLift = getConstellationLift()
+    const preferredLift = getConstellationLift()
     const constellationDrop = getConstellationDrop()
+    const minContentBottom = footerBottomRel + BUTTON_CLEARANCE_PX
 
     const requiredHeight = Math.ceil(
-      copyBottomRel +
+      minContentBottom +
         contentGap +
+        topInset +
+        preferredLift +
         visualSpan +
         MOUNTAIN_GAP_PX +
-        mountainHeight,
+        mountainHeight +
+        12,
     )
     hero.style.setProperty(
       '--hero-mobile-min-height',
-      `${Math.max(viewportHeight, requiredHeight)}px`,
+      `${resolveHeroMinHeight(window.innerWidth, viewportHeight, requiredHeight)}px`,
     )
 
     requestAnimationFrame(() => {
       const heroTopNow = hero.getBoundingClientRect().top
-      const copyBottom = copy.getBoundingClientRect().bottom - heroTopNow
+      const heroHeight = hero.getBoundingClientRect().height
+      const footerBottom = footer
+        ? footer.getBoundingClientRect().bottom - heroTopNow
+        : copy.getBoundingClientRect().bottom - heroTopNow
+      const minVisualTop = footerBottom + BUTTON_CLEARANCE_PX
       const mountainTop = getMountainMetrics(back).top - heroTopNow
       const height = band.getBoundingClientRect().height
-      const { topInset, bottomInset } = getConstellationBandVisualExtent(band)
-
-      const slotTop = copyBottom + contentGap
+      const extent = getConstellationBandVisualExtent(band)
+      const insetTop = extent.topInset
+      const insetBottom = extent.bottomInset
+      const slotTop = footerBottom + contentGap
       const slotBottom = mountainTop - MOUNTAIN_GAP_PX
-      const top = Math.max(slotTop - topInset, slotBottom - height + bottomInset)
+      const neededSpan = height - insetBottom + insetTop
+      const availableSpace = Math.max(0, slotBottom - minVisualTop)
+      const constellationLift = resolveConstellationLift(preferredLift, availableSpace, neededSpan)
+
+      let top = slotTop - insetTop
+
+      let { visualTop, visualBottom } = getConstellationVisualBounds(
+        top,
+        height,
+        insetTop,
+        insetBottom,
+        constellationLift,
+      )
+
+      if (visualBottom > slotBottom) {
+        top = slotBottom - height + insetBottom
+        ;({ visualTop, visualBottom } = getConstellationVisualBounds(
+          top,
+          height,
+          insetTop,
+          insetBottom,
+          constellationLift,
+        ))
+      }
+
+      if (visualTop < minVisualTop) {
+        top = minVisualTop - insetTop + constellationLift
+        ;({ visualTop, visualBottom } = getConstellationVisualBounds(
+          top,
+          height,
+          insetTop,
+          insetBottom,
+          constellationLift,
+        ))
+      }
+
+      if (visualBottom > slotBottom) {
+        const deficit = Math.ceil(visualBottom - slotBottom + 12)
+        hero.style.setProperty(
+          '--hero-mobile-min-height',
+          `${resolveHeroMinHeight(window.innerWidth, viewportHeight, heroHeight + deficit)}px`,
+        )
+      }
 
       band.style.setProperty('--hero-constellation-top', `${top + constellationDrop}px`)
       band.style.setProperty('--hero-constellation-lift', `${constellationLift}px`)
@@ -137,11 +219,13 @@ export function useHeroMobileMinHeight() {
       const copy = document.querySelector('.banner-copy')
       const band = document.querySelector('.hero-constellation-band')
       const back = document.querySelector('.hero-terrain__layer--back')
+      const footer = document.querySelector('.banner-footer')
 
       if (hero) resizeObserver.observe(hero)
       if (copy) resizeObserver.observe(copy)
       if (band) resizeObserver.observe(band)
       if (back) resizeObserver.observe(back)
+      if (footer) resizeObserver.observe(footer)
     }
 
     if (document.fonts?.ready) {

@@ -9,9 +9,9 @@
 
       <!-- MENU DESKTOP -->
       <div class="nav-left">
-        <RouterLink to="/#servicos">serviços</RouterLink>
-        <RouterLink to="/#processo">processo</RouterLink>
-        <RouterLink to="/#contato">contato</RouterLink>
+        <a href="#servicos" @click.stop.prevent="goToSection('servicos')">serviços</a>
+        <a href="#processo" @click.stop.prevent="goToSection('processo')">processo</a>
+        <a href="#contato" @click.stop.prevent="goToSection('contato')">contato</a>
       </div>
 
       <div class="nav-right">
@@ -33,21 +33,41 @@
     </div>
 
     <div :class="['menu-mobile', { open: isOpen }]">
-      <RouterLink to="/#servicos">serviços</RouterLink>
-      <RouterLink to="/#processo">processo</RouterLink>
-      <RouterLink to="/#contato">contato</RouterLink>
+      <a href="#servicos" @click.stop.prevent="goToSection('servicos')">serviços</a>
+      <a href="#processo" @click.stop.prevent="goToSection('processo')">processo</a>
+      <a href="#contato" @click.stop.prevent="goToSection('contato')">contato</a>
     </div>
   </nav>
   </Teleport>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { scrollToHashWhenReady } from '../composables/useLenis.js'
 
 const isOpen = ref(false)
+const route = useRoute()
+const router = useRouter()
 
 const toggleMenu = () => {
   isOpen.value = !isOpen.value
+}
+
+async function goToSection(sectionId) {
+  isOpen.value = false
+  const hash = `#${sectionId}`
+
+  if (route.path !== '/') {
+    await router.push({ path: '/', hash })
+    return
+  }
+
+  window.history.replaceState(null, '', hash)
+  await nextTick()
+  requestAnimationFrame(() => {
+    scrollToHashWhenReady(hash)
+  })
 }
 
 const handleClickOutside = (e) => {
@@ -136,8 +156,7 @@ onUnmounted(() => {
   transform: translateX(-50%);
 }
 
-.nav-left a,
-.nav-left :deep(a) {
+.nav-left a {
   position: relative;
   text-decoration: none;
   color: rgba(232, 230, 255, 0.92);
@@ -146,8 +165,7 @@ onUnmounted(() => {
   transition: color 0.35s ease, text-shadow 0.35s ease;
 }
 
-.nav-left a:hover,
-.nav-left :deep(a:hover) {
+.nav-left a:hover {
   color: #fff;
   text-shadow:
     0 0 8px rgba(220, 218, 255, 0.45),
@@ -276,8 +294,7 @@ onUnmounted(() => {
     pointer-events: auto;
     transform: translateY(0);
   }
-  .menu-mobile a,
-  .menu-mobile :deep(a) {
+  .menu-mobile a {
     display: flex;
     align-items: center;
     min-height: 44px;
@@ -289,9 +306,7 @@ onUnmounted(() => {
     transition: color 0.35s ease, background 0.2s ease;
   }
   .menu-mobile a:hover,
-  .menu-mobile a:active,
-  .menu-mobile :deep(a:hover),
-  .menu-mobile :deep(a:active) {
+  .menu-mobile a:active {
     color: #380FE9;
     background: rgba(56, 15, 233, 0.08);
   }
