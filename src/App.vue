@@ -160,6 +160,7 @@
             <div class="service-row-main">
               <h3 class="service-title" :class="{ 'service-title--dim': activeService !== index }">
                 {{ service.title }}
+                <span v-if="service.isNew" class="service-new-badge">NOVO</span>
               </h3>
 
               <div class="service-content-wrapper">
@@ -727,7 +728,7 @@
     import VictormolPreview from './assets/www.victormol.com.br_.webp'
     import { SlidersHorizontal, Globe, ShieldCheck, Eye, Search, 
              Smartphone, MessageCircle, Zap, Shield, Settings, Palette, 
-             BarChart2, FileText, ArrowUpRight, ArrowRight, ArrowDown, ChevronDown } from 'lucide-vue-next'
+             Link2, Code2, ArrowUpRight, ArrowRight, ArrowDown, ChevronDown } from 'lucide-vue-next'
 
     const vantagens = [
       {
@@ -799,16 +800,16 @@
         contatoMensagem: 'Desejo fazer um rebranding.',
       },
       {
-        icon: BarChart2,
-        title: 'Gestão de Tráfego',
-        desc: 'Campanhas no Google e Meta Ads para atrair visitantes qualificados e converter mais.',
-        contatoMensagem: 'Desejo contratar gestão de tráfego.',
+        icon: Link2,
+        title: 'Integrações',
+        desc: 'WhatsApp, Google Agenda, formulários, CRM, APIs e sistemas da empresa.',
+        contatoMensagem: 'Desejo contratar integrações.',
       },
       {
-        icon: FileText,
-        title: 'Criação de Conteúdo',
-        desc: 'Textos, artes e estratégia de publicações para redes sociais e blog da sua empresa.',
-        contatoMensagem: 'Desejo contratar criação de conteúdo.',
+        icon: Code2,
+        title: 'Sistemas Sob Medida',
+        desc: 'Ferramentas web desenvolvidas para automatizar processos específicos do seu negócio.',
+        contatoMensagem: 'Desejo desenvolver um sistema sob medida.',
       },
     ]
 
@@ -827,27 +828,36 @@
       {
         num: '01.',
         title: 'Sites Institucionais',
-        tags: ['User Interface', 'User Experience', 'Web Design'],
-        desc: 'Presença online profissional para seus clientes te encontrarem no Google, conhecerem seus serviços e confiarem no seu negócio.',
+        tags: ['Marca', 'SEO', 'Web Design'],
+        desc: 'Fortaleça sua marca e transforme visitantes em clientes com um site rápido, moderno e otimizado para o Google.',
         image: '/site_institucional.svg',
         contatoMensagem: 'Desejo criar um site institucional.',
       },
       {
         num: '02.',
-        title: 'E-Commerce',
-        tags: ['Loja Virtual', 'Pagamento Online', 'Catálogo de Produtos'],
-        desc: 'Comece a vender pela internet com uma loja própria, fácil de gerenciar e com pagamento integrado para seus clientes.',
+        title: 'Landing Pages',
+        tags: ['Conversão', 'Campanhas', 'Captação'],
+        desc: 'Páginas focadas em conversão para campanhas, lançamentos e captação de clientes.',
+        image: '/landing_page.svg',
+        contatoMensagem: 'Desejo criar uma landing page.',
+      },
+      {
+        num: '03.',
+        title: 'Lojas Virtuais',
+        tags: ['Pagamentos', 'Catálogo', 'Gestão'],
+        desc: 'Venda online com pagamentos integrados, catálogo organizado e gestão simplificada.',
         image: '/ecommerce.svg',
         contatoMensagem: 'Desejo criar uma loja virtual.',
       },
       {
-        num: '03.',
-        title: 'Landing Pages',
-        tags: ['Captação de Clientes', 'Promoções', 'Resultado Rápido'],
-        desc: 'Página única e direta para anunciar uma promoção, lançar um produto ou captar contatos de clientes interessados.',
-        image: '/landing_page.svg',
-        contatoMensagem: 'Desejo criar uma landing page.',
-      },
+        num: '04.',
+        title: 'Assistente Inteligente',
+        tags: ['IA', 'Qualificação', 'Atendimento'],
+        desc: 'IA treinada para responder dúvidas, qualificar clientes e encaminhar apenas quem realmente tem interesse.',
+        image: '/assistente_inteligente.svg',
+        isNew: true,
+        contatoMensagem: 'Desejo contratar um assistente inteligente.',
+      }
     ]
 
     const projetos = ref([
@@ -1716,6 +1726,27 @@
   flex: 1;
   min-width: 0;
   transition: color 0.25s ease, opacity 0.25s ease;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.28em 0.4em;
+}
+
+.service-new-badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-body, sans-serif);
+  font-size: clamp(0.65rem, 1.2vw, 0.85rem);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #E8E6FF;
+  background: #380FE9;
+  border-radius: 999px;
+  padding: 0.28em 0.7em;
+  line-height: 1;
+  vertical-align: middle;
+  transform: translateY(-0.15em);
 }
 
 .services-panel .service-title--dim {
