@@ -727,7 +727,7 @@
     import GeoaxisPreview from './assets/geoaxisambiental.com.br.webp'
     import VictormolPreview from './assets/www.victormol.com.br_.webp'
     import { SlidersHorizontal, Globe, ShieldCheck, Eye, Search, 
-             Smartphone, MessageCircle, Zap, Shield, Settings, Palette, 
+             Smartphone, MessageCircle, Zap, Shield, Settings, Instagram, 
              Link2, Code2, ArrowUpRight, ArrowRight, ArrowDown, ChevronDown } from 'lucide-vue-next'
 
     const vantagens = [
@@ -755,13 +755,13 @@
 
     const extras = [
       {
-        title: 'SEO Otimizado',
-        desc: 'Seu site preparado para aparecer no Google',
+        title: 'Apareça no Google',
+        desc: 'SEO técnico desde o primeiro dia.',
         icon: Search
       },
       {
-        title: '100% Responsivo',
-        desc: 'Perfeito em qualquer tela',
+        title: 'Funciona em qualquer dispositivo',
+        desc: 'Celular, tablet e computador.',
         icon: Smartphone
       },
       {
@@ -770,18 +770,18 @@
         icon: MessageCircle
       },
       {
-        title: 'Alta Performance',
-        desc: 'Carregamento rápido e otimizado',
+        title: 'Carregamento rápido',
+        desc: 'Menos espera, mais vendas.',
         icon: Zap
       },
       {
-        title: 'Segurança',
-        desc: 'Proteção com HTTPS e boas práticas',
+        title: 'Segurança e confiabilidade',
+        desc: 'HTTPS, backups e boas práticas.',
         icon: Shield
       },
       {
-        title: 'Suporte Contínuo',
-        desc: 'Acompanhamento após o lançamento do site',
+        title: 'Cresce com seu negócio',
+        desc: 'Novas páginas e funcionalidades quando você precisar.',
         icon: Settings
       }
     ]
@@ -794,10 +794,10 @@
         contatoMensagem: 'Desejo contratar automação de WhatsApp.',
       },
       {
-        icon: Palette,
-        title: 'Rebranding',
-        desc: 'Renovação completa da identidade visual da sua marca — logo, paleta, tipografia e tom de voz.',
-        contatoMensagem: 'Desejo fazer um rebranding.',
+        icon: Instagram,
+        title: 'Bio Inteligente',
+        desc: 'Transforme sua bio do Instagram em uma experiência que guia o visitante até o orçamento ou agendamento.',
+        contatoMensagem: 'Desejo criar uma bio inteligente.',
       },
       {
         icon: Link2,
