@@ -9,18 +9,26 @@ import { flooredScreenSize, fallbackMinPx } from './heroStarScreenFloor.js'
 const NODE_CORE_LOCAL_R = 1.568
 const CONSTELLATION_SPARKLE_ARM_FACTOR = 0.58
 const TWINKLE_PEAK_SCALE = 1.08
-const STROKE_PX = 6
-const STROKE_GLOW_PX = 6
+const STROKE_BASE_PX = 6
+const STROKE_MAX_PX = 11
+const STROKE_GLOW_BASE_PX = 6
 const LINE_GLOW_BLUR_FACTOR = 2.75
 
 function transformPoint(x, y, tx, ty, scale) {
   return { x: tx + x * scale, y: ty + y * scale }
 }
 
+function strokeScreenPx(viewportWidth) {
+  const width = viewportWidth || 1280
+  const t = Math.min(1, Math.max(0, (width - 1024) / (1920 - 1024)))
+  return STROKE_BASE_PX + t * (STROKE_MAX_PX - STROKE_BASE_PX)
+}
+
 function strokeClearanceViewBox(viewportWidth, layout) {
   const pxPerUnit = (viewportWidth || 1280) / 100
-  const glowPx = layout?.constellationLineGlowPx ?? STROKE_GLOW_PX
-  const halfStroke = STROKE_PX / 2
+  const strokePx = strokeScreenPx(viewportWidth)
+  const glowPx = layout?.constellationLineGlowPx ?? STROKE_GLOW_BASE_PX * (strokePx / STROKE_BASE_PX)
+  const halfStroke = strokePx / 2
   const glowReach = glowPx * LINE_GLOW_BLUR_FACTOR
   const base = (halfStroke + glowReach) / pxPerUnit
   const extra = layout?.constellationLineClearance ?? 0.5

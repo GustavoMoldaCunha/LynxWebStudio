@@ -12,6 +12,7 @@
         :parallax-back="heroParallax.offsets.starsBack"
         :parallax-mid="heroParallax.offsets.starsMid"
       />
+      <HeroShootingStar />
     </div>
     <HeroTerrain :style="heroParallax.layers.terrain" />
     <div class="hero-front">
@@ -35,14 +36,14 @@
             :threshold="0"
             :delay="120"
           >
-            LYNX é um estúdio de DESIGN e DESENVOLVIMENTO WEB que ajuda negócios a crescerem com PRESENÇA DIGITAL DE ALTO PADRÃO.
+            Lynx é um estúdio de DESIGN e DESENVOLVIMENTO WEB que transforma presença digital em clientes, com sites de alto padrão e atendimento automatizado por IA.
           </ScrollReveal>
         </div>
         <ScrollReveal tag="div" class="banner-footer" :threshold="0" :delay="220">
           <div class="banner-footer-buttons">
             <div class="banner-footer-side banner-footer-side--left">
               <a class="scroll-btn scroll-btn--outline btn-link banner-footer-link" href="#servicos">
-                <span>Veja mais</span>
+                <span>Ver serviços</span>
                 <ArrowDown :size="12" stroke-width="2.5" />
               </a>
             </div>
@@ -124,7 +125,8 @@
 
     </div>
 
-    <div class="services-panel">
+    <div ref="servicesTrack" class="services-track">
+    <div ref="servicesPanel" class="services-panel">
       <div class="services-panel-header">
         <div class="section-deco services-panel-deco">
           <SectionDecoDraw orientation="horizontal" observe-target=".services-panel">
@@ -139,62 +141,69 @@
         </div>
       </div>
 
-      <div class="services-list">
-        <div
+      <div ref="servicesStage" class="services-stage">
+      <div ref="servicesStackList" class="services-stack">
+        <article
           v-for="(service, index) in listaServicos"
-          :key="index"
-          class="service-row"
+          :key="service.num"
+          class="service-card"
           :class="{
-            'service-row--active': activeService === index,
-            'service-row--last': index === listaServicos.length - 1
+            'service-card--last': index === listaServicos.length - 1,
+            'service-card--collapsed': cardMotion[index]?.collapsed,
           }"
-          @mouseenter="activeService = index"
+          :style="{
+            zIndex: cardMotion[index]?.zIndex ?? index + 1,
+            transform: cardMotion[index]?.transform ?? (index === 0 ? 'translate3d(0,0,0)' : 'translate3d(0,100%,0)'),
+          }"
         >
-          <div class="service-row-top">
-            <span class="service-num" :class="{ 'service-num--dim': activeService !== index }">
-              {{ service.num }}
-            </span>
-          </div>
+          <div class="service-card-inner">
+            <div class="service-row-top">
+              <span class="service-num">{{ service.num }}</span>
+            </div>
 
-          <div class="service-row-body">
-            <div class="service-row-main">
-              <h3 class="service-title" :class="{ 'service-title--dim': activeService !== index }">
-                {{ service.title }}
-                <span v-if="service.isNew" class="service-new-badge">NOVO</span>
-              </h3>
+            <div class="service-row-body">
+              <div class="service-row-main">
+                <h3 class="service-title">
+                  {{ service.title }}
+                  <span v-if="service.isNew" class="service-new-badge">NOVO</span>
+                </h3>
 
-              <div class="service-content-wrapper">
-                <div class="service-row-detail">
-                  <div class="service-tags">
-                    <span v-for="tag in service.tags" :key="tag" class="service-tag">
-                      {{ tag }}
-                    </span>
+                <div class="service-expand">
+                  <div class="service-expand-inner">
+                    <div class="service-row-detail">
+                      <div class="service-tags">
+                        <span v-for="tag in service.tags" :key="tag" class="service-tag">
+                          {{ tag }}
+                        </span>
+                      </div>
+                      <p class="service-desc">{{ service.desc }}</p>
+                    </div>
+
+                    <div class="service-row-aside">
+                      <img
+                        class="service-illustration"
+                        :src="service.image"
+                        :alt="`Ilustração de ${service.title}`"
+                        loading="lazy"
+                      />
+                      <button
+                        type="button"
+                        class="services-cta-btn services-cta-btn--inline"
+                        @click="solicitarServico(service)"
+                      >
+                        Solicitar orçamento
+                        <span class="services-cta-arrow">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                        </span>
+                      </button>
+                    </div>
                   </div>
-                  <p class="service-desc">{{ service.desc }}</p>
                 </div>
               </div>
             </div>
-
-            <div class="service-row-aside">
-              <img
-                class="service-illustration"
-                :src="service.image"
-                :alt="`Ilustração de ${service.title}`"
-                loading="lazy"
-              />
-              <button
-                type="button"
-                class="services-cta-btn services-cta-btn--inline"
-                @click.stop="solicitarServico(service)"
-              >
-                Solicitar orçamento
-                <span class="services-cta-arrow">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                </span>
-              </button>
-            </div>
           </div>
-        </div>
+        </article>
+      </div>
       </div>
 
       <div class="services-panel-footer">
@@ -216,6 +225,7 @@
           </span>
         </button>
       </div>
+    </div>
     </div>
     
     <div class="extras-grid">
@@ -710,6 +720,7 @@
 <script setup>
     import MenuBtn from './components/Navbar.vue'
     import HeroStarfield from './components/HeroStarfield.vue'
+    import HeroShootingStar from './components/HeroShootingStar.vue'
     import HeroConstellations from './components/HeroConstellations.vue'
     import HeroTerrain from './components/HeroTerrain.vue'
     import ScrollSparkle from './components/ScrollSparkle.vue'
@@ -723,6 +734,7 @@
     import { scrollTo } from './composables/useLenis'
     import { useHeroMobileMinHeight } from './composables/useHeroMobileMinHeight.js'
     import { useHeroParallax } from './composables/useHeroParallax.js'
+    import { useServiceStackScroll } from './composables/useServiceStackScroll.js'
     import LynxLogo from './assets/LynxLogoLetras.png'
     import GeoaxisPreview from './assets/geoaxisambiental.com.br.webp'
     import VictormolPreview from './assets/www.victormol.com.br_.webp'
@@ -822,14 +834,12 @@
     const formLoading = ref(false)
     const formErro = ref('')
 
-    const activeService = ref(0) // Começa com o primeiro aberto (01)
-
     const listaServicos = [
       {
         num: '01.',
         title: 'Sites Institucionais',
         tags: ['Marca', 'SEO', 'Web Design'],
-        desc: 'Fortaleça sua marca e transforme visitantes em clientes com um site rápido, moderno e otimizado para o Google.',
+        desc: 'Um site institucional que representa sua marca com credibilidade e profissionalismo. Desenvolvido com design moderno, carregamento rápido e otimização para os motores de busca (SEO), para que sua empresa seja encontrada no Google e transforme visitantes em clientes reais. Ideal para quem quer construir autoridade e presença digital sólida.',
         image: '/site_institucional.svg',
         contatoMensagem: 'Desejo criar um site institucional.',
       },
@@ -837,7 +847,7 @@
         num: '02.',
         title: 'Landing Pages',
         tags: ['Conversão', 'Campanhas', 'Captação'],
-        desc: 'Páginas focadas em conversão para campanhas, lançamentos e captação de clientes.',
+        desc: 'Páginas de alta conversão criadas especificamente para campanhas de tráfego pago, lançamentos de produtos e captação de leads. Layout direto ao ponto, foco total na ação que você quer que o visitante tome — seja preencher um formulário, agendar uma consulta ou fechar uma compra. Cada elemento é pensado para maximizar seu retorno sobre investimento.',
         image: '/landing_page.svg',
         contatoMensagem: 'Desejo criar uma landing page.',
       },
@@ -845,7 +855,7 @@
         num: '03.',
         title: 'Lojas Virtuais',
         tags: ['Pagamentos', 'Catálogo', 'Gestão'],
-        desc: 'Venda online com pagamentos integrados, catálogo organizado e gestão simplificada.',
+        desc: 'Sua loja online completa, com integração de meios de pagamento (cartão, Pix, boleto), catálogo de produtos organizado e fácil de navegar, e um painel de gestão simples para você controlar estoque, pedidos e vendas sem complicação. Uma solução pronta para vender 24 horas por dia, todos os dias.',
         image: '/ecommerce.svg',
         contatoMensagem: 'Desejo criar uma loja virtual.',
       },
@@ -853,12 +863,31 @@
         num: '04.',
         title: 'Assistente Inteligente',
         tags: ['IA', 'Qualificação', 'Atendimento'],
-        desc: 'IA treinada para responder dúvidas, qualificar clientes e encaminhar apenas quem realmente tem interesse.',
+        desc: 'Um assistente de inteligência artificial treinado para atender seus clientes automaticamente, tirar dúvidas frequentes e qualificar quem realmente tem potencial de compra. Ele filtra curiosos e só encaminha pra você (ou pro seu time) os contatos com interesse genuíno — economizando tempo e aumentando a taxa de conversão do seu atendimento.',
         image: '/assistente_inteligente.svg',
         isNew: true,
         contatoMensagem: 'Desejo contratar um assistente inteligente.',
+      },
+      {
+        num: '05.',
+        title: 'Link na Bio Profissional',
+        tags: ['Instagram', 'IA', 'Conversão'],
+        desc: 'Transforme o link da sua bio do Instagram numa mini-página organizada e estratégica. Além de reunir seus principais links, ela conta com um assistente de IA que interage com o visitante, responde perguntas e o conduz até a próxima etapa: pedir um orçamento, agendar um horário ou chamar direto no WhatsApp. Simples pra você, eficiente na conversão.',
+        image: '/link_na_bio.svg?v=2',
+        isNew: true,
+        contatoMensagem: 'Desejo criar um link na bio profissional.',
       }
     ]
+
+    const {
+      trackRef: servicesTrack,
+      panelRef: servicesPanel,
+      stageRef: servicesStage,
+      listRef: servicesStackList,
+      cardMotion,
+    } = useServiceStackScroll({
+      getCount: () => listaServicos.length,
+    })
 
     const projetos = ref([
       {
@@ -1068,6 +1097,10 @@
   overflow: hidden;
   pointer-events: none;
   isolation: isolate;
+  background:
+    radial-gradient(ellipse 80% 55% at 50% 0%, rgba(55, 14, 231, 0.28) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 40% at 80% 20%, rgba(55, 14, 231, 0.18) 0%, transparent 50%),
+    radial-gradient(ellipse 42% 32% at 16% 10%, rgba(55, 14, 231, 0.12) 0%, transparent 62%);
 }
 
 .hero-sky::before {
@@ -1080,10 +1113,10 @@
   height: clamp(360px, 68vh, 760px);
   background: radial-gradient(
     ellipse 150% 110% at 50% 100%,
-    #5B3AFF 0%,
-    #380FE9 26%,
-    rgba(56, 15, 233, 0.42) 48%,
-    rgba(56, 15, 233, 0.12) 66%,
+    #5a2cff 0%,
+    #370EE7 26%,
+    rgba(55, 14, 231, 0.42) 48%,
+    rgba(55, 14, 231, 0.12) 66%,
     transparent 100%
   );
   -webkit-mask-image: linear-gradient(to top, #000 42%, transparent 100%);
@@ -1131,7 +1164,7 @@
   isolation: isolate;
   color: #E8E6FF;
   user-select: none;
-  background: linear-gradient(to bottom, #0A0A14 0%, #14102E 100%);
+  background: linear-gradient(to bottom, #0A061C 0%, #160A4A 52%, #370EE7 100%);
   --hero-title: clamp(2.5rem, 0.75rem + 8vw, 5rem);
   --hero-title-line-height: 1.05;
   --hero-title-shadow:
@@ -1375,7 +1408,8 @@
 .servicos {
   background: #0A0A14;
   padding: var(--section-pad-y) var(--section-pad-x);
-  overflow-x: clip;
+  /* Avoid overflow clip — it breaks position:sticky in Chromium */
+  overflow: visible;
   position: relative;
   z-index: 1;
 }
@@ -1596,24 +1630,47 @@
 }
 
 
-.services-panel {
+.services-track {
+  --services-track-h: 400vh;
+  position: relative;
+  width: 100%;
+  height: var(--services-track-h);
   margin-top: 80px;
   margin-bottom: 64px;
+}
+
+.services-panel {
+  --services-sticky-top: calc(5rem + 40px);
+  --service-panel-header-h: 2.75rem;
+  --service-title-stack-h: 4.75rem;
+  --services-panel-pad-x: 44px;
+  --services-panel-pad-y-top: 40px;
+  --services-panel-pad-y-bottom: 32px;
+  --services-stage-h: 60vh;
+  width: 100%;
   background: #E8E6FF;
   border-radius: 24px;
-  padding: 40px 44px 32px;
-  position: relative;
+  padding: 0;
+  position: sticky;
+  top: var(--services-sticky-top);
+  z-index: 2;
   overflow: hidden;
   font-family: inherit;
-  --service-motion-duration: 0.52s;
-  --service-motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  display: flex;
+  flex-direction: column;
 }
 
 .services-panel-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 24px;
+  margin-bottom: 0;
+  padding: var(--services-panel-pad-y-top) var(--services-panel-pad-x) 12px;
+  border-bottom: 1px solid rgba(10, 10, 20, 0.12);
+  position: relative;
+  z-index: 40;
+  background: #E8E6FF;
+  flex-shrink: 0;
 }
 
 .services-panel-deco,
@@ -1627,9 +1684,13 @@
   justify-content: space-between;
   align-items: center;
   gap: 24px;
-  margin-top: 24px;
-  padding-top: 24px;
+  margin-top: 0;
+  padding: 24px var(--services-panel-pad-x) var(--services-panel-pad-y-bottom);
   border-top: 1px solid rgba(10,10,20,0.1);
+  position: relative;
+  z-index: 50;
+  background: #E8E6FF;
+  flex-shrink: 0;
 }
 
 .services-footer-left {
@@ -1645,91 +1706,115 @@
   flex-shrink: 0;
 }
 
-.services-list {
-  border-top: 1px solid rgba(10,10,20,0.12);
+.services-stage {
+  position: relative;
+  height: var(--services-stage-h);
+  overflow: hidden;
+  background: #E8E6FF;
+  flex-shrink: 0;
 }
 
-.service-row {
+.services-stack {
+  position: absolute;
+  inset: 0;
+}
+
+.service-card {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: #E8E6FF;
+  border-top: 1px solid rgba(10, 10, 20, 0.14);
+  padding-inline: var(--services-panel-pad-x);
+  margin: 0;
+  overflow: hidden;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+}
+
+.service-card:first-child {
+  border-top: none;
+}
+
+.service-card-inner {
   display: flex;
   flex-direction: column;
-  border-bottom: 1px solid rgba(10,10,20,0.12);
-  padding: 16px 0 0;
-  cursor: default;
-  transition: padding-bottom var(--service-motion-duration) var(--service-motion-ease);
+  gap: 2px;
+  padding: 16px 0 28px;
+  overflow: visible;
+  height: 100%;
+  box-sizing: border-box;
 }
 
-.service-row--last { border-bottom: none; }
-.service-row--active { padding-bottom: 32px; }
-
-.service-row-top { margin-bottom: 2px; }
+.service-row-top {
+  margin-bottom: 2px;
+  line-height: 1;
+}
 
 .service-num {
-  font-size: var(--text-sm);
+  font-size: 0.75rem;
   font-weight: 600;
-  color: rgba(10,10,20,0.55);
+  color: rgba(10, 10, 20, 0.45);
   letter-spacing: 0.04em;
-  transition: color 0.25s ease;
+  transition: opacity 0.12s ease;
 }
-
-.service-num--dim { color: rgba(10,10,20,0.25); }
 
 .service-row-body {
-  padding-bottom: 20px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 0px);
-  gap: 0;
-  align-items: stretch;
-  transition:
-    grid-template-columns var(--service-motion-duration) var(--service-motion-ease),
-    gap var(--service-motion-duration) var(--service-motion-ease);
-}
-
-.service-row--active .service-row-body {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 298px);
-  gap: 32px;
+  display: block;
 }
 
 .service-row-main {
-  grid-column: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.service-expand {
+  display: block;
+}
+
+.service-expand-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, min(280px, 30%));
+  gap: 28px 32px;
+  align-items: end;
 }
 
 .service-row-aside {
-  grid-column: 2;
-  grid-row: 1;
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  justify-content: flex-end;
   min-width: 0;
-  overflow: hidden;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity calc(var(--service-motion-duration) * 0.75) var(--service-motion-ease);
-  transition-delay: 0s;
+  gap: 12px;
 }
 
-.service-row--active .service-row-aside {
-  opacity: 1;
-  pointer-events: auto;
-  transition-delay: calc(var(--service-motion-duration) * 0.18);
-}
-
-/* Active service title */
 .services-panel .service-title {
   font-family: var(--font-display);
   font-weight: 700;
   color: #380FE9;
-  font-size: clamp(2.4rem, 5.5vw, 4.5rem);
+  font-size: clamp(2.2rem, 5vw, 3.6rem);
   letter-spacing: -0.03em;
-  line-height: 1.0;
+  line-height: 1.12;
   margin: 0;
-  flex: 1;
-  min-width: 0;
-  transition: color 0.25s ease, opacity 0.25s ease;
+  padding-bottom: 0.08em;
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   gap: 0.28em 0.4em;
+  transition: opacity 0.12s ease;
+}
+
+.service-card--collapsed .service-title {
+  opacity: 0.42;
+}
+
+.service-card--collapsed .service-num {
+  opacity: 0.4;
+}
+
+.service-card--collapsed .service-new-badge {
+  opacity: 0.55;
 }
 
 .service-new-badge {
@@ -1747,41 +1832,24 @@
   line-height: 1;
   vertical-align: middle;
   transform: translateY(-0.15em);
+  transition: opacity 0.12s ease;
 }
-
-.services-panel .service-title--dim {
-  color: #380FE9 !important;
-  opacity: 0.18;
-}
-
-.service-row:not(.service-row--active) .service-title { opacity: 0.18; }
-
-/* Collapsible content */
-.service-content-wrapper {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows var(--service-motion-duration) var(--service-motion-ease);
-  overflow: hidden;
-}
-
-.service-row--active .service-content-wrapper { grid-template-rows: 1fr; }
 
 .service-row-detail {
-  min-height: 0;
-  max-width: 400px;
-  padding-top: 0;
-  transition: padding-top var(--service-motion-duration) var(--service-motion-ease);
-}
-
-.service-row--active .service-row-detail {
-  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-top: 12px;
+  max-width: none;
 }
 
 .service-tags {
   display: flex;
+  flex-direction: row;
   flex-wrap: wrap;
+  align-items: center;
   gap: 6px;
-  margin-bottom: 12px;
+  margin: 0;
 }
 
 .service-tag {
@@ -1794,21 +1862,25 @@
   background: #380FE9;
   letter-spacing: 0.02em;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .service-desc {
-  font-size: var(--text-sm);
+  font-size: clamp(1.05rem, 1.35vw, 1.2rem);
   color: rgba(10,10,20,0.6);
-  line-height: 1.7;
-  margin: 0;
-  max-width: 300px;
+  line-height: 1.65;
+  margin: clamp(64px, 9vh, 112px) 0 0;
+  max-width: 28rem;
+  padding-top: 0;
 }
 
 .service-row-aside .service-illustration {
   display: block;
   width: 100%;
   height: auto;
-  flex-shrink: 0;
+  max-height: min(260px, 36vh);
+  object-fit: contain;
+  object-position: bottom center;
 }
 
 .services-cta-btn--inline {
@@ -3141,35 +3213,43 @@
 
   .pricing-cards { grid-template-columns: 1fr; }
 
-  .services-panel { padding: 28px 24px 24px; }
-
-  .service-row-body {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto 0fr;
-    transition:
-      grid-template-rows var(--service-motion-duration) var(--service-motion-ease),
-      gap var(--service-motion-duration) var(--service-motion-ease);
+  .services-track {
+    margin-top: 56px;
+    margin-bottom: 48px;
   }
 
-  .service-row--active .service-row-body {
+  .services-panel {
+    --services-sticky-top: calc(4.5rem + 32px);
+    --service-panel-header-h: 2.5rem;
+    --service-title-stack-h: 4.5rem;
+    --services-panel-pad-x: 24px;
+    --services-panel-pad-y-top: 28px;
+    --services-panel-pad-y-bottom: 24px;
+  }
+
+  .service-expand-inner {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto 1fr;
     gap: 20px;
   }
 
-  .service-row-aside {
-    grid-column: 1;
-    grid-row: 2;
+  .service-row-detail {
+    max-width: 100%;
+    padding-top: 12px;
   }
 
-  .service-row-detail { max-width: 100%; }
+  .service-desc {
+    margin-top: clamp(48px, 7vh, 72px);
+    padding-top: 0;
+  }
 
   .service-row-aside .service-illustration {
     width: 100%;
+    max-height: min(220px, 32vh);
   }
 
   .services-cta-btn--inline {
     margin-top: 14px;
+    align-self: flex-start;
   }
 
   .services-panel-footer {
@@ -3411,8 +3491,8 @@
     width: var(--hero-constellation-width);
     max-width: calc(100vw - 2 * clamp(24px, 5vw, 40px));
     margin-top: 0;
-    aspect-ratio: 32 / 36;
-    overflow: hidden;
+    aspect-ratio: var(--hero-constellation-aspect, 1 / 1.15);
+    overflow: visible;
     pointer-events: none;
     --hero-constellation-star-min-radius: 22px;
     --hero-constellation-sparkle-min-radius: 12px;
@@ -3504,7 +3584,14 @@
   }
   .processo-header h2 { font-size: 2.2rem; }
 
-  .services-panel { padding: 24px 16px 20px; }
+  .services-panel {
+    --services-sticky-top: calc(4rem + 28px);
+    --service-panel-header-h: 2.35rem;
+    --service-title-stack-h: 4.25rem;
+    --services-panel-pad-x: 16px;
+    --services-panel-pad-y-top: 24px;
+    --services-panel-pad-y-bottom: 20px;
+  }
 }
 
 </style>

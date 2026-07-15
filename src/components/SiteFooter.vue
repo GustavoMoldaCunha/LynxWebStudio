@@ -3,46 +3,66 @@
     class="footer"
     :style="{ '--footer-logo-align-overflow': `${footerLogoAlignOverflow}px` }"
   >
-    <div class="footer-top">
-      <span class="footer-copy">©2026 LYNX Studio. All Rights Reserved</span>
-      <nav class="footer-nav">
-        <RouterLink to="/politica-de-privacidade">Política de Privacidade</RouterLink>
-      </nav>
-    </div>
-    <div
-      ref="footerLogoWrapRef"
-      class="footer-logo-wrap"
-      :style="{
-        '--footer-logo-scale': footerLogoScale,
-        '--footer-logo-align-shift': `${footerLogoAlignShift}px`,
-      }"
-    >
-      <div class="footer-logo-scale">
-        <div class="footer-logo-visual">
-          <img
-            ref="footerLogoRef"
-            :src="LynxLogo"
-            alt="LYNX"
-            class="footer-logo"
-            draggable="false"
-          />
-        </div>
+    <div class="footer-inner">
+      <div class="footer-top">
+        <nav class="footer-nav" aria-label="Rodapé">
+          <a href="#servicos" @click.prevent="goToSection('servicos')">Serviços</a>
+          <a href="#processo" @click.prevent="goToSection('processo')">Processo</a>
+          <a href="#contato" @click.prevent="goToSection('contato')">Contato</a>
+          <RouterLink to="/politica-de-privacidade">Política de Privacidade</RouterLink>
+        </nav>
+        <span class="footer-copy">© 2026</span>
+      </div>
+      <div
+        ref="footerLogoWrapRef"
+        class="footer-logo-wrap"
+        :style="{
+          '--footer-logo-align-shift': `${footerLogoAlignShift}px`,
+        }"
+      >
+        <img
+          ref="footerLogoRef"
+          :src="LynxLogo"
+          alt="LYNX"
+          class="footer-logo"
+          draggable="false"
+        />
       </div>
     </div>
   </footer>
 </template>
 
 <script setup>
+import { nextTick } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useFooterLogoScale } from '../composables/useFooterLogoScale.js'
+import { scrollToHashWhenReady } from '../composables/useLenis.js'
 import LynxLogo from '../assets/LynxLogoLetras.png'
+
+const route = useRoute()
+const router = useRouter()
 
 const {
   wrapRef: footerLogoWrapRef,
   logoRef: footerLogoRef,
-  scale: footerLogoScale,
   alignShift: footerLogoAlignShift,
   alignOverflow: footerLogoAlignOverflow,
 } = useFooterLogoScale()
+
+async function goToSection(sectionId) {
+  const hash = `#${sectionId}`
+
+  if (route.path !== '/') {
+    await router.push({ path: '/', hash })
+    return
+  }
+
+  window.history.replaceState(null, '', hash)
+  await nextTick()
+  requestAnimationFrame(() => {
+    scrollToHashWhenReady(hash)
+  })
+}
 </script>
 
 <style scoped>
@@ -53,33 +73,39 @@ const {
   padding-right: calc(var(--scroll-sparkle-axis) + var(--footer-logo-align-overflow, 0px));
 }
 
-.footer-top {
+.footer-inner {
   display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 40px;
-  padding-bottom: 48px;
-  max-width: var(--section-max-width);
-  margin-inline: auto;
+  flex-direction: column;
   width: 100%;
 }
 
-.footer-copy {
-  font-size: var(--text-sm);
-  color: rgba(232, 230, 255, 0.4);
-  letter-spacing: 0.04em;
+.footer-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px 48px;
+  width: 100%;
+  max-width: var(--section-max-width);
+  margin-inline: auto;
+  padding-bottom: 96px;
 }
 
 .footer-nav {
   display: flex;
-  gap: 40px;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 16px 48px;
+  min-width: 0;
 }
 
 .footer-nav a {
-  font-size: var(--text-sm);
-  color: rgba(232, 230, 255, 0.4);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: rgba(232, 230, 255, 0.48);
   text-decoration: none;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
   transition: color 0.2s ease;
 }
 
@@ -87,41 +113,27 @@ const {
   color: #F0FF1F;
 }
 
-.footer-logo-wrap {
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
-  width: 100%;
-  max-width: var(--section-max-width);
-  margin-top: 24px;
-  margin-inline: auto;
-}
-
-.footer-logo-scale {
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-end;
-  width: 100%;
-  height: calc(var(--footer-logo-height) * var(--footer-logo-scale, 1));
-}
-
-.footer-logo-visual {
-  transform: scale(var(--footer-logo-scale, 1));
-  transform-origin: bottom right;
-  line-height: 0;
+.footer-copy {
   flex-shrink: 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: rgba(232, 230, 255, 0.48);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.footer-logo-wrap {
+  width: 100%;
+  line-height: 0;
+  overflow: visible;
 }
 
 .footer-logo {
-  width: auto;
-  height: var(--footer-logo-height);
-  max-width: none;
-  max-height: none;
-  flex-shrink: 0;
-  object-fit: contain;
-  object-position: bottom right;
   display: block;
-  margin-right: calc(-1 * var(--footer-logo-align-shift, 0px));
+  width: calc(100% + var(--footer-logo-align-shift, 0px));
+  height: auto;
+  max-width: none;
   -webkit-user-drag: none;
   user-select: none;
 }
@@ -130,23 +142,27 @@ const {
   .footer {
     padding-right: var(--section-pad-x);
   }
-
-  .footer-logo-wrap {
-    width: 100%;
-    margin-right: 0;
-  }
-
-  .footer-logo {
-    margin-right: 0;
-  }
 }
 
-@media (max-width: 920px) {
+@media (max-width: 720px) {
   .footer-top {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    padding-bottom: 56px;
+  }
+
+  .footer-nav {
+    gap: 12px 28px;
+  }
+
+  .footer-nav a,
+  .footer-copy {
+    font-size: 0.85rem;
+  }
+
+  .footer-copy {
+    order: -1;
   }
 }
 

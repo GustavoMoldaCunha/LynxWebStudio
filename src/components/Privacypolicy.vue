@@ -159,6 +159,7 @@ const contactItems = [
   max-width: 100%;
   overflow-x: clip;
   position: relative;
+  padding-inline: var(--section-pad-x, 48px);
 }
 
 .privacy-page::before {
@@ -175,7 +176,7 @@ const contactItems = [
   z-index: 1;
   max-width: var(--section-max-width, 1280px);
   margin: 0 auto;
-  padding: calc(5rem + var(--section-pad-y, 96px)) var(--section-pad-x, 48px) var(--section-pad-y, 96px);
+  padding: calc(5rem + var(--section-pad-y, 96px)) 0 var(--section-pad-y, 96px);
 }
 
 .pp-deco {

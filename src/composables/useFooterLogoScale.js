@@ -33,41 +33,15 @@ function isScrollSparkleVisible() {
 export function useFooterLogoScale() {
   const wrapRef = ref(null)
   const logoRef = ref(null)
-  const scale = ref(1)
   const alignShift = ref(0)
   const alignOverflow = ref(0)
 
   let resizeObserver = null
 
-  function readLogoHeightPx() {
-    const logo = logoRef.value
-    if (!logo) return 180
-
-    const height = parseFloat(getComputedStyle(logo).height)
-    return Number.isFinite(height) && height > 0 ? height : 180
-  }
-
-  function readIntrinsicLogoWidth() {
-    const logo = logoRef.value
-    if (!logo?.naturalWidth || !logo?.naturalHeight) return 0
-
-    const heightPx = readLogoHeightPx()
-    return (logo.naturalWidth / logo.naturalHeight) * heightPx
-  }
-
-  function updateScale() {
+  function updateAlign() {
     const wrap = wrapRef.value
     const logo = logoRef.value
     if (!wrap || !logo) return
-
-    const intrinsicWidth = readIntrinsicLogoWidth()
-    if (intrinsicWidth <= 0) return
-
-    const availableWidth = wrap.clientWidth
-    if (availableWidth <= 0) return
-
-    const nextScale = Math.min(1, availableWidth / intrinsicWidth)
-    scale.value = nextScale
 
     if (!isScrollSparkleVisible()) {
       alignShift.value = 0
@@ -75,10 +49,13 @@ export function useFooterLogoScale() {
       return
     }
 
-    const scaledWidth = intrinsicWidth * nextScale
+    const width = wrap.clientWidth
+    if (width <= 0) return
+
     const trim = readTrimRatio()
     const xOffset = readCssNumber('--footer-logo-x-offset', 0)
-    const shift = Math.max(0, scaledWidth * trim - xOffset * nextScale)
+    // Hang transparent PNG padding past the right edge so the glyph aligns with the sparkle.
+    const shift = Math.max(0, width * trim - xOffset)
 
     alignShift.value = shift
 
@@ -91,26 +68,26 @@ export function useFooterLogoScale() {
     if (!logo) return
 
     if (logo.complete) {
-      updateScale()
+      updateAlign()
       return
     }
 
-    logo.addEventListener('load', updateScale, { once: true })
+    logo.addEventListener('load', updateAlign, { once: true })
   }
 
   onMounted(() => {
     bindLogoLoad()
 
-    resizeObserver = new ResizeObserver(updateScale)
+    resizeObserver = new ResizeObserver(updateAlign)
     if (wrapRef.value) resizeObserver.observe(wrapRef.value)
 
-    window.addEventListener('resize', updateScale, { passive: true })
+    window.addEventListener('resize', updateAlign, { passive: true })
   })
 
   onUnmounted(() => {
     resizeObserver?.disconnect()
-    window.removeEventListener('resize', updateScale)
+    window.removeEventListener('resize', updateAlign)
   })
 
-  return { wrapRef, logoRef, scale, alignShift, alignOverflow }
+  return { wrapRef, logoRef, alignShift, alignOverflow }
 }

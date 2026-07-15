@@ -1,4 +1,3 @@
-/** Shared hero sky layout profiles (viewBox 0–100 coords). */
 export const HERO_SKY_DESKTOP = {
   id: 'desktop',
   starCount: 210,
@@ -51,11 +50,12 @@ export const HERO_SKY_TABLET = {
   constellationLineGlowPx: 7,
   starfieldClip: { x: 0, y: 0, width: 100, height: 88 },
   preserveAspectRatio: 'xMidYMid slice',
-  constellationViewBox: { x: 35, y: 31, width: 32, height: 36 },
+  constellationPreserveAspectRatio: 'xMidYMid meet',
+  constellationViewBox: { x: 32, y: 25, width: 38, height: 44 },
   constellation: {
-    clip: { x: 35, y: 31, width: 32, height: 36 },
+    clip: { x: 32, y: 25, width: 38, height: 44 },
     tx: 37.9,
-    ty: 33.5,
+    ty: 34.5,
     scale: 1.38,
     starSizeScale: 1.45,
     starMinBoost: 1,
@@ -82,11 +82,12 @@ export const HERO_SKY_MOBILE = {
   sparkleShare: 0.05,
   starfieldClip: { x: 0, y: 0, width: 100, height: 99 },
   preserveAspectRatio: 'xMidYMid slice',
-  constellationViewBox: { x: 35, y: 31, width: 32, height: 36 },
+  constellationPreserveAspectRatio: 'xMidYMid meet',
+  constellationViewBox: { x: 32, y: 25, width: 38, height: 44 },
   constellation: {
-    clip: { x: 35, y: 31, width: 32, height: 36 },
+    clip: { x: 32, y: 25, width: 38, height: 44 },
     tx: 37.9,
-    ty: 33.5,
+    ty: 34.5,
     scale: 1.28,
     starSizeScale: 1.5,
     starMinBoost: 1,
@@ -104,7 +105,6 @@ function lerp(from, to, t) {
   return from + (to - from) * t
 }
 
-/** Visible viewBox Y range when the 100×100 sky uses xMidYMid slice. */
 function getVisibleViewBoxY(viewportWidth, viewportHeight) {
   const visibleHeight = (100 * viewportHeight) / Math.max(viewportWidth, viewportHeight)
   const minY = (100 - visibleHeight) / 2
@@ -115,7 +115,6 @@ function getVisibleViewBoxY(viewportWidth, viewportHeight) {
   }
 }
 
-/** Map screen pixels to viewBox Y units under xMidYMid slice. */
 function screenPxToViewBoxY(px, viewportWidth, viewportHeight) {
   if (!px || viewportHeight <= 0) return 0
   const visibleHeight = (100 * viewportHeight) / Math.max(viewportWidth, viewportHeight)
@@ -131,7 +130,6 @@ const CURSOR_LOCAL_MIN_X = 4
 const CURSOR_LOCAL_MAX_X = 17
 const CURSOR_LOCAL_WIDTH = CURSOR_LOCAL_MAX_X - CURSOR_LOCAL_MIN_X
 
-/** Right edge of hero copy + gap, as a fraction of viewport width. */
 function getHeroCopyRightFraction(viewportWidth) {
   const copyLeft = Math.min(180, Math.max(48, viewportWidth * 0.12))
   const copyWidth = Math.min(viewportWidth * 0.5, 600)
@@ -139,7 +137,6 @@ function getHeroCopyRightFraction(viewportWidth) {
   return (copyLeft + copyWidth + gapPx) / viewportWidth
 }
 
-/** Keep the desktop constellation in the visible sky and above the mountain silhouette. */
 export function fitDesktopConstellation(
   constellation,
   viewportWidth,
@@ -148,7 +145,7 @@ export function fitDesktopConstellation(
 ) {
   const { minY: visibleMinY, maxY: visibleMaxY } = getVisibleViewBoxY(viewportWidth, viewportHeight)
 
-  const starGlowPx = estimateConstellationGlowPx(viewportWidth)
+  const starGlowPx = estimateConstellationGlowPx(viewportWidth) * 1.4
   const topClearancePx = navbarHeightPx + starGlowPx + 16
   const safeTopY = visibleMinY + screenPxToViewBoxY(topClearancePx, viewportWidth, viewportHeight)
 

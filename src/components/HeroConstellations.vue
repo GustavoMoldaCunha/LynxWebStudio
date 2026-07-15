@@ -4,12 +4,12 @@
     ref="svgRef"
     class="hero-constellations"
     :viewBox="svgViewBox"
-    :preserveAspectRatio="layout.preserveAspectRatio"
+    :preserveAspectRatio="layout.constellationPreserveAspectRatio ?? layout.preserveAspectRatio"
     :style="parallaxStyle"
     aria-hidden="true"
   >
     <defs>
-      <clipPath :id="clipId">
+      <clipPath v-if="useBoundsClip" :id="clipId">
         <rect
           :x="clipRect.x"
           :y="clipRect.y"
@@ -41,11 +41,14 @@
       </filter>
     </defs>
 
-    <g :clip-path="`url(#${clipId})`">
+    <g :clip-path="boundsClipUrl">
       <g
         class="constellation-group cursor-constellation"
         :transform="constellationTransform"
-        :style="{ '--cursor-path-stroke-width': cursorPathStrokeWidth }"
+        :style="{
+          '--cursor-path-stroke-width': cursorPathStrokeWidth,
+          '--cursor-path-stroke-px': cursorPathStrokePx,
+        }"
       >
         <defs>
           <clipPath :id="leftShaftClipId">
@@ -110,7 +113,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import {
   DECO_SPARKLE_ARM,
   DECO_SPARKLE_PATH,
@@ -131,7 +134,6 @@ import {
   assignTwinkleTiming,
   buildTwinkleKeyframesCss,
   CONSTELLATION_TWINKLE_FRAMES,
-  TWINKLE_FRAMES,
   twinkleAnimationStyle,
 } from '../utils/heroStarTwinkle.js'
 import '../styles/heroStarMinRadius.css'
@@ -147,7 +149,6 @@ const VERTEX_COUNT = HERO_CURSOR_VERTICES.length
 const STARS_END_S =
   (VERTEX_COUNT - 1) * STAR_STAGGER_S + STAR_REVEAL_DURATION_S
 
-/** Deliberate close — longer than a proportional share so the descent reads clearly. */
 const LEFT_SHAFT_DRAW_DURATION_S = 0.85
 
 const LINES_END_S = STARS_END_S + LINE_DRAW_DURATION_S + LEFT_SHAFT_DRAW_DURATION_S
@@ -213,6 +214,12 @@ function getSegmentPath(id) {
 
 const clipId = computed(() => `constellation-bounds-${layout.value.id}`)
 
+const useBoundsClip = computed(() => !layout.value.constellationViewBox)
+
+const boundsClipUrl = computed(() =>
+  useBoundsClip.value ? `url(#${clipId.value})` : 'none',
+)
+
 const leftShaftClipId = computed(() => `left-shaft-reveal-${layout.value.id}`)
 
 const LEFT_SHAFT_CLIP = computed(() => ({
@@ -233,10 +240,6 @@ const cursorVertices = computed(() => cursorGeometry.value.vertices)
 const cursorSegments = computed(() => cursorGeometry.value.segments)
 const cursorLeftShaft = computed(() => cursorGeometry.value.leftShaft)
 
-const constellationViewBoxWidth = computed(
-  () => layout.value.constellationViewBox?.width ?? 100,
-)
-
 function constellationFloors() {
   const boost = constellationLayout.value.starMinBoost ?? 1
   let floors
@@ -256,8 +259,66 @@ function constellationFloors() {
   }
 }
 
+const NODE_REVEAL_PEAK_SCALE = 1.08
+const GLOW_FRAME_SAFETY = 1.35
+
+function glowingFramePad(contentWorldSpan, svgWidthPx) {
+  const floors = constellationFloors()
+  const clearancePx =
+    Math.max(floors.glow, floors.sparkle * 1.35) *
+      CONSTELLATION_TWINKLE_FRAMES.peak.scale *
+      NODE_REVEAL_PEAK_SCALE *
+      GLOW_FRAME_SAFETY +
+    16
+
+  const width = Math.max(svgWidthPx || viewportWidth.value * 0.6, clearancePx * 2 + 1)
+  const denom = width - 2 * clearancePx
+  if (denom <= 1) return Math.max(contentWorldSpan, 12)
+
+  return (clearancePx * contentWorldSpan) / denom
+}
+
+const focusedFrame = computed(() => {
+  if (!layout.value.constellationViewBox) return null
+
+  const { tx, ty, scale } = constellationLayout.value
+  let minX = Infinity
+  let minY = Infinity
+  let maxX = -Infinity
+  let maxY = -Infinity
+
+  for (const vertex of cursorVertices.value) {
+    const x = tx + vertex.x * scale
+    const y = ty + vertex.y * scale
+    minX = Math.min(minX, x)
+    minY = Math.min(minY, y)
+    maxX = Math.max(maxX, x)
+    maxY = Math.max(maxY, y)
+  }
+
+  const contentW = Math.max(maxX - minX, 1)
+  const contentH = Math.max(maxY - minY, 1)
+  const widthPx = svgWidthPx.value || viewportWidth.value
+  const pad = Math.max(
+    glowingFramePad(contentW, widthPx),
+    glowingFramePad(contentH, widthPx),
+    8,
+  )
+
+  return {
+    x: minX - pad,
+    y: minY - pad,
+    width: contentW + pad * 2,
+    height: contentH + pad * 2,
+  }
+})
+
+const constellationViewBoxWidth = computed(
+  () => focusedFrame.value?.width ?? layout.value.constellationViewBox?.width ?? 100,
+)
+
 const svgViewBox = computed(() => {
-  const focused = layout.value.constellationViewBox
+  const focused = focusedFrame.value
   if (!focused) return '0 0 100 100'
   return `${focused.x} ${focused.y} ${focused.width} ${focused.height}`
 })
@@ -277,22 +338,41 @@ const starGlowR = computed(() => {
   ).toFixed(3)
 })
 
+const decoStarScale = computed(() => {
+  const sizeScale = constellationLayout.value.starSizeScale
+  const { scale } = constellationLayout.value
+  const baseScale = (0.58 * sizeScale) / DECO_SPARKLE_ARM
+  const width = svgWidthPx.value || viewportWidth.value
+  const floors = constellationFloors()
+  const flooredArm = flooredScreenSize(
+    baseScale * DECO_SPARKLE_ARM,
+    floors.sparkle,
+    width,
+    constellationViewBoxWidth.value,
+    scale,
+  )
+
+  return flooredArm / DECO_SPARKLE_ARM
+})
+
 const clipRect = computed(() => {
   const { clip, scale } = constellationLayout.value
   const worldGlowR = starGlowR.value * scale
-  const glowPad = worldGlowR * TWINKLE_FRAMES.peak.scale + 0.75
-  const padTop = glowPad
-  const padSide = glowPad
-  const padBottom = glowPad * 0.45
+  const glowPad =
+    worldGlowR *
+      CONSTELLATION_TWINKLE_FRAMES.peak.scale *
+      NODE_REVEAL_PEAK_SCALE *
+      GLOW_FRAME_SAFETY +
+    1.5
 
-  const x = Math.max(0, clip.x - padSide)
-  const y = Math.max(0, clip.y - padTop)
+  const x = Math.max(0, clip.x - glowPad)
+  const y = Math.max(0, clip.y - glowPad)
 
   return {
     x,
     y,
-    width: Math.min(100 - x, clip.width + padSide * 2),
-    height: Math.min(100 - y, clip.height + padTop + padBottom),
+    width: Math.min(100 - x, clip.width + glowPad * 2),
+    height: Math.min(100 - y, clip.height + glowPad * 2),
   }
 })
 
@@ -309,7 +389,6 @@ const parallaxStyle = computed(() => {
   }
 })
 
-/** Screen pixels per local unit inside the scaled constellation group. */
 function constellationPxPerLocalUnit() {
   const scale = constellationLayout.value.scale ?? 1
   const width = svgWidthPx.value || viewportWidth.value
@@ -317,36 +396,32 @@ function constellationPxPerLocalUnit() {
   return (width / viewBoxWidth) * scale
 }
 
-const CURSOR_PATH_SCREEN_STROKE_PX = 6
-const CURSOR_LINE_GLOW_SCREEN_PX = 0.9
+const CURSOR_PATH_STROKE_BASE_PX = 6
+const CURSOR_PATH_STROKE_MAX_PX = 11
+const CURSOR_LINE_GLOW_BASE_PX = 0.9
+
+/** Thicker constellation lines on wide viewports (≈6px ≤1024, up to 11px ≥1920). */
+function cursorStrokeScreenPx() {
+  const width = svgWidthPx.value || viewportWidth.value || 1280
+  const t = Math.min(1, Math.max(0, (width - 1024) / (1920 - 1024)))
+  return CURSOR_PATH_STROKE_BASE_PX + t * (CURSOR_PATH_STROKE_MAX_PX - CURSOR_PATH_STROKE_BASE_PX)
+}
+
+const cursorPathStrokePx = computed(() => `${cursorStrokeScreenPx().toFixed(2)}px`)
+
 const cursorPathStrokeWidth = computed(() => {
   const pxPerLocal = constellationPxPerLocalUnit()
   if (!pxPerLocal) return '0.19'
-  return (CURSOR_PATH_SCREEN_STROKE_PX / pxPerLocal).toFixed(4)
+  return (cursorStrokeScreenPx() / pxPerLocal).toFixed(4)
 })
 
-/** Local user-unit blur so the scaled filter reads ~0.9px on screen. */
 const cursorLineGlowStdDeviation = computed(() => {
   const pxPerLocal = constellationPxPerLocalUnit()
   if (!pxPerLocal) return 0.055
-  return +(CURSOR_LINE_GLOW_SCREEN_PX / pxPerLocal).toFixed(4)
-})
-
-const decoStarScale = computed(() => {
-  const sizeScale = constellationLayout.value.starSizeScale
-  const { scale } = constellationLayout.value
-  const baseScale = (0.58 * sizeScale) / DECO_SPARKLE_ARM
-  const width = svgWidthPx.value || viewportWidth.value
-  const floors = constellationFloors()
-  const flooredArm = flooredScreenSize(
-    baseScale * DECO_SPARKLE_ARM,
-    floors.sparkle,
-    width,
-    constellationViewBoxWidth.value,
-    scale,
-  )
-
-  return flooredArm / DECO_SPARKLE_ARM
+  const glowPx =
+    CURSOR_LINE_GLOW_BASE_PX *
+    (cursorStrokeScreenPx() / CURSOR_PATH_STROKE_BASE_PX)
+  return +(glowPx / pxPerLocal).toFixed(4)
 })
 
 const DECO_STAR_CENTER = DECO_SPARKLE_VIEW_SIZE / 2
@@ -599,12 +674,35 @@ function syncSvgWidth() {
   svgWidthPx.value = svgRef.value?.getBoundingClientRect().width ?? viewportWidth.value
 }
 
+function syncBandAspect() {
+  const frame = focusedFrame.value
+  const band = svgRef.value?.closest?.('.hero-constellation-band')
+  if (!band) return
+
+  if (!frame) {
+    band.style.removeProperty('--hero-constellation-aspect')
+    return
+  }
+
+  band.style.setProperty(
+    '--hero-constellation-aspect',
+    `${frame.width} / ${frame.height}`,
+  )
+}
+
+watch(focusedFrame, () => {
+  nextTick(syncBandAspect)
+})
+
 onMounted(async () => {
   syncSvgWidth()
+  syncBandAspect()
   await nextTick()
   await new Promise((resolve) => {
     window.requestAnimationFrame(() => window.requestAnimationFrame(resolve))
   })
+  syncSvgWidth()
+  syncBandAspect()
   setupLineDraw()
   window.addEventListener('resize', syncSvgWidth, { passive: true })
 })
@@ -612,6 +710,9 @@ onMounted(async () => {
 onUnmounted(() => {
   clearLineDrawTimers()
   window.removeEventListener('resize', syncSvgWidth)
+  svgRef.value?.closest?.('.hero-constellation-band')?.style.removeProperty(
+    '--hero-constellation-aspect',
+  )
 })
 </script>
 
@@ -621,6 +722,7 @@ onUnmounted(() => {
   inset: 0;
   width: 100%;
   height: 100%;
+  overflow: visible;
   pointer-events: none;
 }
 
@@ -634,10 +736,9 @@ onUnmounted(() => {
   opacity: 0.96;
 }
 
-/* Vertical shaft: fixed screen stroke; clip-path reveal avoids dash + non-scaling-stroke conflict. */
 .cursor-path--left-shaft {
   vector-effect: non-scaling-stroke;
-  stroke-width: 6px;
+  stroke-width: var(--cursor-path-stroke-px, 6px);
   filter: none;
 }
 
