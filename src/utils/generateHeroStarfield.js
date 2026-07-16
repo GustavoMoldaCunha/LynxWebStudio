@@ -43,10 +43,15 @@ function mulberry32(seed) {
 
 function sampleY(rand, spawnMin, spawnMax, options = {}) {
   const {
+    yUniform = false,
     yDenseShare = 0.78,
     yDensePower = 0.4,
     yDenseSpan = 0.82,
   } = options
+
+  if (yUniform) {
+    return spawnMin + rand() * (spawnMax - spawnMin)
+  }
 
   const span = spawnMax - spawnMin
   const denseLimit = spawnMin + span * yDenseSpan
@@ -91,6 +96,7 @@ export function generateHeroStarfield(layout, viewportWidth) {
     yDenseShare = 0.78,
     yDensePower = 0.4,
     yDenseSpan = 0.82,
+    yUniform = false,
     minSpacing = 1.6,
     glowShare = GLOW_SHARE,
     sparkleShare = SPARKLE_SHARE,
@@ -109,7 +115,7 @@ export function generateHeroStarfield(layout, viewportWidth) {
   let sparklePlaced = 0
   let attempts = 0
   const maxAttempts = count * 80
-  const ySampleOptions = { yDenseShare, yDensePower, yDenseSpan }
+  const ySampleOptions = { yUniform, yDenseShare, yDensePower, yDenseSpan }
 
   while (stars.length < count && attempts < maxAttempts) {
     attempts += 1
@@ -203,7 +209,10 @@ export function generateHeroStarfield(layout, viewportWidth) {
       continue
     }
 
-    if (violatesHeroConstellation(candidate, layout, { viewportWidth })) {
+    if (
+      !layout.starfieldIgnoreConstellation &&
+      violatesHeroConstellation(candidate, layout, { viewportWidth })
+    ) {
       rollbackQuotas()
       continue
     }

@@ -136,6 +136,9 @@ async function goToSection(sectionId) {
   max-width: none;
   -webkit-user-drag: none;
   user-select: none;
+  filter:
+    drop-shadow(0 0 18px rgba(55, 14, 231, 0.28))
+    drop-shadow(0 0 42px rgba(55, 14, 231, 0.14));
 }
 
 @media (max-width: 1399px) {

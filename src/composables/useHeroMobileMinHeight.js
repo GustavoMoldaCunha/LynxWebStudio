@@ -4,10 +4,10 @@ const STACKED_HERO_MAX_WIDTH = 920
 const MOUNTAIN_GAP_PX = 0
 const CONTENT_GAP_PX_MOBILE = 12
 const CONTENT_GAP_PX_TABLET = 16
-const CONSTELLATION_LIFT_PX_MOBILE = 16
-const CONSTELLATION_LIFT_PX_TABLET = 10
-const CONSTELLATION_DROP_PX_MOBILE = 10
-const CONSTELLATION_DROP_PX_TABLET = 8
+const CONSTELLATION_LIFT_PX_MOBILE = 0
+const CONSTELLATION_LIFT_PX_TABLET = 0
+const CONSTELLATION_DROP_PX_MOBILE = 0
+const CONSTELLATION_DROP_PX_TABLET = 0
 const BUTTON_CLEARANCE_PX = 8
 
 function getContentGap() {
@@ -159,11 +159,14 @@ export function useHeroMobileMinHeight() {
       const insetBottom = extent.bottomInset
       const slotTop = footerBottom + contentGap
       const slotBottom = mountainTop - MOUNTAIN_GAP_PX
-      const neededSpan = height - insetBottom + insetTop
+      const visualHeight = Math.max(0, height - insetTop - insetBottom)
+      const slotHeight = Math.max(0, slotBottom - slotTop)
+      const neededSpan = visualHeight
       const availableSpace = Math.max(0, slotBottom - minVisualTop)
       const constellationLift = resolveConstellationLift(preferredLift, availableSpace, neededSpan)
 
-      let top = slotTop - insetTop
+      // Vertically center the visual constellation in the CTA → mountain gap
+      let top = slotTop - insetTop + Math.max(0, (slotHeight - visualHeight) / 2)
 
       let { visualTop, visualBottom } = getConstellationVisualBounds(
         top,

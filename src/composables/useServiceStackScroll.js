@@ -1,9 +1,12 @@
 import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { getLenis } from './useLenis'
 
+const STATIC_MQ = '(max-width: 920px), (prefers-reduced-motion: reduce)'
+
 /**
  * Scroll-driven service stack: one sticky panel pin; cards are absolute and
  * move with translateY from Lenis/window scroll. No per-card sticky.
+ * Below 920px (or reduced-motion): static list — no pin / transforms.
  */
 export function useServiceStackScroll(options = {}) {
   const getCount = options.getCount ?? (() => 1)
@@ -15,13 +18,16 @@ export function useServiceStackScroll(options = {}) {
   const listRef = ref(null)
   /** @type {import('vue').Ref<Array<{ transform: string, zIndex: number, collapsed: boolean }>>} */
   const cardMotion = ref([])
+  const isMobileStack = ref(false)
 
   let resizeObserver = null
   let removeLenisScroll = null
+  let mediaQuery = null
   let peekH = 96
   let stageH = 480
   let stickyTopCache = 120
   let measureTimer = 0
+  let scrollBound = false
 
   function getScrollY() {
     return window.scrollY || document.documentElement.scrollTop || getLenis()?.scroll || 0
@@ -40,7 +46,24 @@ export function useServiceStackScroll(options = {}) {
     return a + (b - a) * t
   }
 
+  function readStaticMode() {
+    if (typeof window === 'undefined' || !window.matchMedia) return false
+    return window.matchMedia(STATIC_MQ).matches
+  }
+
+  function setNeutralMotion(n) {
+    cardMotion.value = Array.from({ length: n }, (_, i) => ({
+      transform: 'translate3d(0, 0, 0)',
+      zIndex: i + 1,
+      collapsed: false,
+    }))
+  }
+
   function ensureMotion(n) {
+    if (isMobileStack.value) {
+      setNeutralMotion(n)
+      return
+    }
     if (cardMotion.value.length === n) return
     cardMotion.value = Array.from({ length: n }, (_, i) => ({
       transform: i === 0 ? 'translate3d(0, 0, 0)' : 'translate3d(0, 100%, 0)',
@@ -49,7 +72,44 @@ export function useServiceStackScroll(options = {}) {
     }))
   }
 
-  function measure() {
+  function clearStackInlineStyles() {
+    const track = trackRef.value
+    const panel = panelRef.value
+    const stage = stageRef.value
+    track?.style.removeProperty('--services-track-h')
+    panel?.style.removeProperty('--service-panel-header-h')
+    panel?.style.removeProperty('--service-title-stack-h')
+    stage?.style.removeProperty('--services-stage-h')
+  }
+
+  function bindScroll() {
+    if (scrollBound) return
+    window.addEventListener('scroll', onScroll, { passive: true })
+    const lenis = getLenis()
+    if (lenis?.on) {
+      lenis.on('scroll', onScroll)
+      removeLenisScroll = () => lenis.off?.('scroll', onScroll)
+    }
+    scrollBound = true
+  }
+
+  function unbindScroll() {
+    if (!scrollBound) return
+    window.removeEventListener('scroll', onScroll)
+    removeLenisScroll?.()
+    removeLenisScroll = null
+    scrollBound = false
+  }
+
+  function measureStatic() {
+    const n = Math.max(1, getCount())
+    setNeutralMotion(n)
+    clearStackInlineStyles()
+    unbindScroll()
+    getLenis()?.resize()
+  }
+
+  function measureStack() {
     const track = trackRef.value
     const panel = panelRef.value
     const stage = stageRef.value
@@ -65,14 +125,12 @@ export function useServiceStackScroll(options = {}) {
     let tallestPeek = 0
     cards.forEach((card) => {
       const title = card.querySelector('.service-title')
-      const num = card.querySelector('.service-row-top')
       const inner = card.querySelector('.service-card-inner')
       if (!title || !inner) return
-      const padTop = parseFloat(getComputedStyle(inner).paddingTop) || 0
-      const numH = num ? num.getBoundingClientRect().height : 0
-      const titleH = title.getBoundingClientRect().height
-      // Extra slack so descenders (g, j, p) aren't clipped by the next card
-      const peek = padTop + numH + titleH + 16
+      // Measure to the title box bottom (includes padding for descenders).
+      // Keep slack tiny so tags below never peek into the stack gap.
+      const peek =
+        title.getBoundingClientRect().bottom - inner.getBoundingClientRect().top + 2
       if (peek > tallestPeek) tallestPeek = peek
     })
     if (tallestPeek > 40) peekH = Math.ceil(tallestPeek)
@@ -95,11 +153,26 @@ export function useServiceStackScroll(options = {}) {
     const trackH = n * segment + Math.ceil(vh * 0.2)
     track.style.setProperty('--services-track-h', `${trackH}px`)
 
+    bindScroll()
     applyScroll()
     getLenis()?.resize()
   }
 
+  function measure() {
+    const nextStatic = readStaticMode()
+    isMobileStack.value = nextStatic
+
+    if (nextStatic) {
+      measureStatic()
+      return
+    }
+
+    measureStack()
+  }
+
   function applyScroll(scrollOverride) {
+    if (isMobileStack.value) return
+
     const track = trackRef.value
     if (!track) return
 
@@ -141,6 +214,7 @@ export function useServiceStackScroll(options = {}) {
   }
 
   function onScroll(e) {
+    if (isMobileStack.value) return
     const y = typeof e?.scroll === 'number' ? e.scroll : getScrollY()
     applyScroll(y)
   }
@@ -150,18 +224,22 @@ export function useServiceStackScroll(options = {}) {
     measureTimer = window.setTimeout(() => measure(), 80)
   }
 
+  function onMediaChange() {
+    measure()
+  }
+
   onMounted(async () => {
     await nextTick()
+    isMobileStack.value = readStaticMode()
     ensureMotion(getCount())
     measure()
 
     window.addEventListener('resize', debouncedMeasure, { passive: true })
-    window.addEventListener('scroll', onScroll, { passive: true })
 
-    const lenis = getLenis()
-    if (lenis?.on) {
-      lenis.on('scroll', onScroll)
-      removeLenisScroll = () => lenis.off?.('scroll', onScroll)
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      mediaQuery = window.matchMedia(STATIC_MQ)
+      mediaQuery.addEventListener?.('change', onMediaChange)
+      mediaQuery.addListener?.(onMediaChange)
     }
 
     if (typeof ResizeObserver !== 'undefined' && listRef.value) {
@@ -173,9 +251,10 @@ export function useServiceStackScroll(options = {}) {
   onUnmounted(() => {
     clearTimeout(measureTimer)
     window.removeEventListener('resize', debouncedMeasure)
-    window.removeEventListener('scroll', onScroll)
-    removeLenisScroll?.()
+    unbindScroll()
     resizeObserver?.disconnect()
+    mediaQuery?.removeEventListener?.('change', onMediaChange)
+    mediaQuery?.removeListener?.(onMediaChange)
   })
 
   watch(
@@ -186,5 +265,5 @@ export function useServiceStackScroll(options = {}) {
     },
   )
 
-  return { trackRef, panelRef, stageRef, listRef, cardMotion }
+  return { trackRef, panelRef, stageRef, listRef, cardMotion, isMobileStack }
 }

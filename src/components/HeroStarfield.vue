@@ -193,6 +193,7 @@ const flooredStars = computed(() => {
     { sparkleArmMaxPx: layout.value.sparkleArmMaxPx },
   ).filter(
     (star) =>
+      layout.value.starfieldIgnoreConstellation ||
       !violatesHeroConstellation(star, layout.value, {
         viewportWidth: width,
         svgWidthPx: width,

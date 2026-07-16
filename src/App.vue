@@ -125,8 +125,16 @@
 
     </div>
 
-    <div ref="servicesTrack" class="services-track">
-    <div ref="servicesPanel" class="services-panel">
+    <div
+      ref="servicesTrack"
+      class="services-track"
+      :class="{ 'services-track--static': isMobileStack }"
+    >
+    <div
+      ref="servicesPanel"
+      class="services-panel"
+      :class="{ 'services-panel--static': isMobileStack }"
+    >
       <div class="services-panel-header">
         <div class="section-deco services-panel-deco">
           <SectionDecoDraw orientation="horizontal" observe-target=".services-panel">
@@ -141,20 +149,31 @@
         </div>
       </div>
 
-      <div ref="servicesStage" class="services-stage">
-      <div ref="servicesStackList" class="services-stack">
+      <div
+        ref="servicesStage"
+        class="services-stage"
+        :class="{ 'services-stage--static': isMobileStack }"
+      >
+      <div
+        ref="servicesStackList"
+        class="services-stack"
+        :class="{ 'services-stack--static': isMobileStack }"
+      >
         <article
           v-for="(service, index) in listaServicos"
           :key="service.num"
           class="service-card"
           :class="{
             'service-card--last': index === listaServicos.length - 1,
-            'service-card--collapsed': cardMotion[index]?.collapsed,
+            'service-card--collapsed': !isMobileStack && cardMotion[index]?.collapsed,
+            'service-card--static': isMobileStack,
           }"
-          :style="{
-            zIndex: cardMotion[index]?.zIndex ?? index + 1,
-            transform: cardMotion[index]?.transform ?? (index === 0 ? 'translate3d(0,0,0)' : 'translate3d(0,100%,0)'),
-          }"
+          :style="isMobileStack
+            ? undefined
+            : {
+                zIndex: cardMotion[index]?.zIndex ?? index + 1,
+                transform: cardMotion[index]?.transform ?? (index === 0 ? 'translate3d(0,0,0)' : 'translate3d(0,100%,0)'),
+              }"
         >
           <div class="service-card-inner">
             <div class="service-row-top">
@@ -885,6 +904,7 @@
       stageRef: servicesStage,
       listRef: servicesStackList,
       cardMotion,
+      isMobileStack,
     } = useServiceStackScroll({
       getCount: () => listaServicos.length,
     })
@@ -1639,6 +1659,10 @@
   margin-bottom: 64px;
 }
 
+.services-track--static {
+  height: auto;
+}
+
 .services-panel {
   --services-sticky-top: calc(5rem + 40px);
   --service-panel-header-h: 2.75rem;
@@ -1658,6 +1682,13 @@
   font-family: inherit;
   display: flex;
   flex-direction: column;
+}
+
+.services-panel--static {
+  position: static;
+  top: auto;
+  /* Keep overflow hidden so border-radius clips children */
+  overflow: hidden;
 }
 
 .services-panel-header {
@@ -1714,9 +1745,22 @@
   flex-shrink: 0;
 }
 
+.services-stage--static {
+  height: auto;
+  overflow: visible;
+  flex-shrink: 1;
+}
+
 .services-stack {
   position: absolute;
   inset: 0;
+}
+
+.services-stack--static {
+  position: static;
+  inset: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .service-card {
@@ -1732,6 +1776,15 @@
   will-change: transform;
 }
 
+.service-card--static {
+  position: static;
+  inset: auto;
+  overflow: visible;
+  transform: none !important;
+  will-change: auto;
+  height: auto;
+}
+
 .service-card:first-child {
   border-top: none;
 }
@@ -1744,6 +1797,47 @@
   overflow: visible;
   height: 100%;
   box-sizing: border-box;
+}
+
+.service-card--static .service-card-inner {
+  height: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .services-track {
+    height: auto;
+  }
+
+  .services-panel {
+    position: static;
+    top: auto;
+    overflow: hidden;
+  }
+
+  .services-stage {
+    height: auto;
+    overflow: visible;
+  }
+
+  .services-stack {
+    position: static;
+    inset: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .service-card {
+    position: static;
+    inset: auto;
+    overflow: visible;
+    transform: none !important;
+    will-change: auto;
+    height: auto;
+  }
+
+  .service-card-inner {
+    height: auto;
+  }
 }
 
 .service-row-top {
@@ -1771,6 +1865,7 @@
 
 .service-expand {
   display: block;
+  margin-top: 10px;
 }
 
 .service-expand-inner {
@@ -1797,11 +1892,9 @@
   letter-spacing: -0.03em;
   line-height: 1.12;
   margin: 0;
-  padding-bottom: 0.08em;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.28em 0.4em;
+  /* Keep descenders inside the title box so the stack cut can sit flush */
+  padding-bottom: 0.22em;
+  display: block;
   transition: opacity 0.12s ease;
 }
 
@@ -1828,10 +1921,12 @@
   color: #E8E6FF;
   background: #380FE9;
   border-radius: 999px;
-  padding: 0.28em 0.7em;
+  padding: 0.5em 0.95em;
   line-height: 1;
+  white-space: nowrap;
   vertical-align: middle;
-  transform: translateY(-0.15em);
+  margin-left: 0.35em;
+  transform: translateY(-0.12em);
   transition: opacity 0.12s ease;
 }
 
@@ -3216,6 +3311,7 @@
   .services-track {
     margin-top: 56px;
     margin-bottom: 48px;
+    height: auto;
   }
 
   .services-panel {
@@ -3225,31 +3321,176 @@
     --services-panel-pad-x: 24px;
     --services-panel-pad-y-top: 28px;
     --services-panel-pad-y-bottom: 24px;
+    position: static;
+    top: auto;
+    overflow: hidden;
+  }
+
+  .services-stage {
+    height: auto;
+    overflow: visible;
+  }
+
+  .services-stack {
+    position: static;
+    inset: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .service-card {
+    position: static;
+    inset: auto;
+    overflow: visible;
+    transform: none !important;
+    will-change: auto;
+    height: auto;
+    padding-left: calc(var(--services-panel-pad-x) + 12px);
+  }
+
+  .service-card-inner {
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 28px 0 36px;
+    align-items: flex-start;
+  }
+
+  .service-row-top {
+    margin: 0;
+    line-height: 1;
+  }
+
+  .service-num {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #380FE9;
+    letter-spacing: 0;
+  }
+
+  .service-row-body {
+    display: block;
+    width: 100%;
+  }
+
+  .service-row-main {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .services-panel .service-title {
+    padding-bottom: 0;
+    font-size: clamp(2.9rem, 8.5vw, 3.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+
+  .service-new-badge {
+    font-size: 0.7rem;
+    padding: 0.48em 0.9em;
+    transform: translateY(-0.08em);
+  }
+
+  .service-expand {
+    margin-top: 36px;
   }
 
   .service-expand-inner {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
   }
 
   .service-row-detail {
-    max-width: 100%;
-    padding-top: 12px;
-  }
-
-  .service-desc {
-    margin-top: clamp(48px, 7vh, 72px);
+    display: contents;
+    max-width: none;
     padding-top: 0;
   }
 
-  .service-row-aside .service-illustration {
+  .service-desc {
+    order: 1;
+    margin: 0;
+    max-width: none;
+    padding-top: 0;
+    font-size: clamp(1.05rem, 3.6vw, 1.2rem);
+    line-height: 1.55;
+  }
+
+  .service-row-aside {
+    order: 2;
     width: 100%;
-    max-height: min(220px, 32vh);
+    gap: 0;
+    align-items: flex-start;
+    justify-content: flex-start;
+    margin-top: 28px;
+  }
+
+  .service-tags {
+    order: 3;
+    gap: 12px;
+    margin-top: 40px;
+  }
+
+  .service-tag {
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 8px 18px;
+    letter-spacing: 0.01em;
+  }
+
+  .service-row-aside .service-illustration {
+    display: none;
   }
 
   .services-cta-btn--inline {
-    margin-top: 14px;
+    margin-top: 0;
+    margin-inline: 0;
     align-self: flex-start;
+    justify-content: flex-start;
+    width: fit-content;
+    max-width: max-content;
+    background: transparent;
+    color: #380FE9;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    gap: 8px;
+    text-align: left;
+  }
+
+  .services-cta-btn--inline:hover {
+    background: transparent;
+    transform: none;
+    color: #2a0bb5;
+  }
+
+  .services-cta-btn--inline:active {
+    transform: none;
+  }
+
+  .services-cta-btn--inline .services-cta-arrow {
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
+  }
+
+  .services-cta-btn--inline:hover .services-cta-arrow {
+    background: transparent;
+    color: inherit;
+    transform: translateX(3px);
+  }
+
+  .services-cta-btn--inline .services-cta-arrow svg {
+    width: 15px;
+    height: 15px;
   }
 
   .services-panel-footer {
@@ -3276,7 +3517,7 @@
     width: 100%;
   }
 
-  .services-cta-btn {
+  .services-panel-footer .services-cta-btn {
     width: 100%;
     justify-content: center;
   }
@@ -3369,42 +3610,39 @@
     --hero-front-top: clamp(96px, 11svh, 128px);
     --hero-front-bottom: 0px;
     --hero-constellation-content-gap: 10px;
-    --hero-constellation-lift: 10px;
+    --hero-constellation-lift: 0px;
     --hero-constellation-mountain-gap: 0px;
-    --hero-constellation-width: clamp(36vw, 44vw, 420px);
+    --hero-constellation-width: clamp(44vw, 52vw, 480px);
     --hero-title-line-height: 1.02;
     min-height: var(--hero-mobile-min-height, 100svh);
+    /* Keep mid-sky darker so constellation lines stay readable */
+    background: linear-gradient(
+      to bottom,
+      #0A061C 0%,
+      #10082E 48%,
+      #160A4A 72%,
+      #24108A 100%
+    );
+  }
+
+  .hero-sky::before {
+    height: clamp(200px, 38vh, 400px);
+    opacity: 0.32;
+    background: radial-gradient(
+      ellipse 140% 90% at 50% 100%,
+      #4a24e0 0%,
+      rgba(55, 14, 231, 0.4) 28%,
+      rgba(55, 14, 231, 0.12) 52%,
+      transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(to top, #000 28%, transparent 100%);
+    mask-image: linear-gradient(to top, #000 28%, transparent 100%);
   }
 
   @media (min-height: 1000px) {
     .banner {
       min-height: var(--hero-mobile-min-height, auto);
     }
-  }
-
-  .banner-copy-head {
-    isolation: isolate;
-  }
-
-  .banner-copy-head::before {
-    content: '';
-    position: absolute;
-    z-index: -1;
-    left: 50%;
-    top: 50%;
-    width: min(118%, calc(100% + clamp(36px, 8vw, 56px)));
-    height: calc(100% + clamp(18px, 4vw, 28px));
-    transform: translate(-50%, -50%);
-    border-radius: 50%;
-    background: radial-gradient(
-      ellipse at center,
-      rgba(10, 10, 20, 0.65) 0%,
-      rgba(14, 11, 34, 0.4) 50%,
-      rgba(10, 10, 20, 0) 100%
-    );
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    pointer-events: none;
   }
 
   .banner-copy {
@@ -3529,8 +3767,8 @@
     --hero-gap-desc-btn: 1.125rem;
     --hero-front-top: clamp(88px, 14svh, 108px);
     --hero-constellation-content-gap: 4px;
-    --hero-constellation-lift: 16px;
-    --hero-constellation-width: clamp(58vw, 68vw, 74vw);
+    --hero-constellation-lift: 0px;
+    --hero-constellation-width: clamp(68vw, 78vw, 86vw);
     --hero-title-line-height: 1;
     --hero-title-shadow:
       0 2px 20px rgba(0, 0, 0, 0.8),
