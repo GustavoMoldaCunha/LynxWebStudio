@@ -19,43 +19,22 @@
           target="_blank"  
           class="cta desktop-cta">Fale Conosco
         </a>
-
-        <button
-          type="button"
-          class="hamburger"
-          :aria-label="isOpen ? 'Fechar menu' : 'Abrir menu'"
-          :aria-expanded="isOpen"
-          @click="toggleMenu"
-        >
-          <span :class="{ open: isOpen }"></span>
-        </button>
       </div>
     </div>
 
-    <div :class="['menu-mobile', { open: isOpen }]">
-      <a href="#servicos" @click.stop.prevent="goToSection('servicos')">serviços</a>
-      <a href="#processo" @click.stop.prevent="goToSection('processo')">processo</a>
-      <a href="#contato" @click.stop.prevent="goToSection('contato')">contato</a>
-    </div>
   </nav>
   </Teleport>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { scrollToHashWhenReady } from '../composables/useLenis.js'
 
-const isOpen = ref(false)
 const route = useRoute()
 const router = useRouter()
 
-const toggleMenu = () => {
-  isOpen.value = !isOpen.value
-}
-
 async function goToSection(sectionId) {
-  isOpen.value = false
   const hash = `#${sectionId}`
 
   if (route.path !== '/') {
@@ -69,22 +48,6 @@ async function goToSection(sectionId) {
     scrollToHashWhenReady(hash)
   })
 }
-
-const handleClickOutside = (e) => {
-  const menu = document.querySelector('.menu-mobile')
-  const button = document.querySelector('.hamburger')
-  if (isOpen.value && menu && !menu.contains(e.target) && !button.contains(e.target)) {
-    isOpen.value = false
-  }
-}
-
-onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
-})
 </script>
 
 <style scoped>
@@ -199,64 +162,13 @@ onUnmounted(() => {
 }
 
 /* ── Hamburger ── */
-.hamburger {
-  display: none;
-  cursor: pointer;
-  padding: 0;
-  flex-shrink: 0;
-  border: none;
-  background: transparent;
-  min-width: 48px;
-  min-height: 48px;
-  align-items: center;
-  justify-content: center;
-  margin: -0.25rem -0.375rem -0.25rem 0;
-  border-radius: 10px;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-}
-
-.hamburger:focus-visible {
-  outline: 2px solid rgba(240, 255, 31, 0.55);
-  outline-offset: 2px;
-}
-
-.hamburger span {
-  display: block;
-  width: 26px;
-  height: 2px;
-  background: rgba(232, 230, 255, 0.92);
-  position: relative;
-  transition: all 0.3s ease;
-  pointer-events: none;
-}
-
-.hamburger span::before,
-.hamburger span::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  width: 26px;
-  height: 2px;
-  background: rgba(232, 230, 255, 0.92);
-  transition: all 0.3s ease;
-}
-.hamburger span::before { top: -8px; }
-.hamburger span::after { top: 8px; }
-
-.hamburger span.open { background: transparent; }
-.hamburger span.open::before { transform: rotate(45deg); top: 0; }
-.hamburger span.open::after { transform: rotate(-45deg); top: 0; }
 
 /* ── Menu mobile ── */
-.menu-mobile { display: none; }
-
 /* ── MOBILE ── */
 @media (max-width: 990px) {
   .navbar { padding: 0 1.5rem 8px; min-height: 4.5rem; }
   .nav-left { display: none; }
   .nav-right { gap: 1rem; }
-  .hamburger { display: flex; }
   .cta {
     white-space: nowrap;
     font-size: 0.875rem;
@@ -269,54 +181,12 @@ onUnmounted(() => {
     max-width: min(42vw, 11rem);
     max-height: none;
   }
-
-  .menu-mobile {
-    position: absolute;
-    top: 100%;
-    right: 1.5rem;
-    margin-top: 0.5rem;
-    z-index: 2;
-    background: #E8E6FF;
-    border-radius: 16px;
-    padding: 0.625rem;
-    width: min(240px, calc(100vw - 2.5rem));
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(8px);
-    transition: opacity 0.25s ease, transform 0.25s ease;
-  }
-  .menu-mobile.open {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(0);
-  }
-  .menu-mobile a {
-    display: flex;
-    align-items: center;
-    min-height: 44px;
-    padding: 0.625rem 0.875rem;
-    border-radius: 10px;
-    color: #555;
-    text-decoration: none;
-    text-transform: none;
-    transition: color 0.35s ease, background 0.2s ease;
-  }
-  .menu-mobile a:hover,
-  .menu-mobile a:active {
-    color: #380FE9;
-    background: rgba(56, 15, 233, 0.08);
-  }
 }
 
 @media (max-width: 480px) {
   .navbar { padding: 0 1.25rem 8px; min-height: 4rem; }
   .container { gap: 0.625rem; }
   .nav-right { gap: 0.625rem; }
-  .menu-mobile { right: 1.25rem; }
   .logo {
     height: 1.95rem;
     max-width: min(48vw, 10rem);

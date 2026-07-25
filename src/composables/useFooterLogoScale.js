@@ -7,12 +7,18 @@ function readCssNumber(name, fallback = 0) {
 }
 
 function readTrimRatio() {
+  return readCssRatio('--footer-logo-png-trim', 0.125)
+}
+
+function readCssRatio(name, fallback) {
   const raw = getComputedStyle(document.documentElement)
-    .getPropertyValue('--footer-logo-png-trim')
+    .getPropertyValue(name)
     .trim()
 
   if (raw.endsWith('%')) return parseFloat(raw) / 100
-  return 0.125
+
+  const value = parseFloat(raw)
+  return Number.isFinite(value) ? value : fallback
 }
 
 function readScrollSparkleAxisPx() {
@@ -34,6 +40,7 @@ export function useFooterLogoScale() {
   const wrapRef = ref(null)
   const logoRef = ref(null)
   const alignShift = ref(0)
+  const widthExtend = ref(0)
   const alignOverflow = ref(0)
 
   let resizeObserver = null
@@ -45,6 +52,7 @@ export function useFooterLogoScale() {
 
     if (!isScrollSparkleVisible()) {
       alignShift.value = 0
+      widthExtend.value = 0
       alignOverflow.value = 0
       return
     }
@@ -54,13 +62,15 @@ export function useFooterLogoScale() {
 
     const trim = readTrimRatio()
     const xOffset = readCssNumber('--footer-logo-x-offset', 0)
-    // Hang transparent PNG padding past the right edge so the glyph aligns with the sparkle.
-    const shift = Math.max(0, width * trim - xOffset)
-
-    alignShift.value = shift
-
+    const extend = Math.max(0, width * trim - xOffset)
     const axis = readScrollSparkleAxisPx()
-    alignOverflow.value = Math.max(0, shift - axis + 6)
+    const starAnchor = readCssRatio('--footer-logo-star-anchor', 0.85868)
+    const targetStarX = window.innerWidth - axis
+    const currentStarX = wrap.getBoundingClientRect().left + (width + extend) * starAnchor
+
+    widthExtend.value = extend
+    alignShift.value = targetStarX - currentStarX
+    alignOverflow.value = 0
   }
 
   function bindLogoLoad() {
@@ -89,5 +99,5 @@ export function useFooterLogoScale() {
     window.removeEventListener('resize', updateAlign)
   })
 
-  return { wrapRef, logoRef, alignShift, alignOverflow }
+  return { wrapRef, logoRef, alignShift, widthExtend, alignOverflow }
 }

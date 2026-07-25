@@ -17,6 +17,7 @@
   --scroll-sparkle-trail-opacity: 1;
   --scroll-sparkle-axis: calc(var(--scroll-sparkle-edge) + var(--scroll-sparkle-size) / 2);
   --footer-logo-png-trim: 12.5%;
+  --footer-logo-star-anchor: 87.31%;
   --footer-logo-x-offset: 2px;
 }
 
@@ -271,6 +272,10 @@ h3 em {
 
 /* Mobile: label above line + star; line spans full row (except service panel). */
 @media (max-width: 768px) {
+  :root {
+    --text-deco: 0.64rem;
+  }
+
   .section-deco:not(.services-panel-deco):not(.services-footer-left),
   .processo-deco-line,
   .outros-sub {
@@ -293,6 +298,25 @@ h3 em {
     width: 100%;
     max-width: 100%;
     flex: 0 0 auto;
+  }
+
+  .services-panel-deco {
+    flex-direction: column;
+    align-items: stretch;
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+
+  .services-panel-deco > .section-deco-draw {
+    order: 1;
+    width: 100%;
+    max-width: 100%;
+    flex: 0 0 auto;
+  }
+
+  .services-panel-deco .section-deco-label {
+    order: 2;
+    align-self: flex-end;
   }
 
   .outros-sub {

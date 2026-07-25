@@ -1,11 +1,11 @@
 /** Four-point star path shared by DecoSparkle and hero constellation vertices. */
 export const DECO_SPARKLE_PATH =
-  'M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z'
+  'M12 0.75C12.86 8.32 15.68 11.14 23.25 12C15.68 12.86 12.86 15.68 12 23.25C11.14 15.68 8.32 12.86 0.75 12C8.32 11.14 11.14 8.32 12 0.75Z'
 
 export const DECO_SPARKLE_VIEW_SIZE = 24
 
 /** Approximate arm length from viewBox center to tip (for scaling to match constellation nodes). */
-export const DECO_SPARKLE_ARM = 9
+export const DECO_SPARKLE_ARM = 11.25
 
 /** Halo radius factor for plain sparkles (matches HeroStarfield sparkleGlowRadius). */
 export const SPARKLE_GLOW_R_FACTOR = 2.35

@@ -18,14 +18,20 @@
     <div class="hero-front">
       <div class="banner-copy" :style="heroParallax.layers.copy">
         <div class="banner-copy-head">
+          <div class="hero-pill" aria-label="Estratégia digital orientada à conversão">
+            <DecoSparkle class="hero-pill-sparkle" aria-hidden="true" />
+            <span>Estratégia digital orientada à conversão</span>
+          </div>
           <TypingTitle
             tag="h1"
             class="banner-title"
             :threshold="0"
             :delay="0"
             :lines="[
+              [{ text: 'Conectando' }],
+              [{ text: 'sua empresa' }],
               [
-                { text: 'Conectando sua empresa ao ' },
+                { text: 'ao ' },
                 { text: 'digital', accentClass: 'accent' }
               ]
             ]"
@@ -83,8 +89,8 @@
         <TypingTitle
           class="intro-headline"
           :lines="[
+            [{ text: 'Como nós podemos' }],
             [
-              { text: 'Como nós podemos ' },
               { text: 'ajudar', accentClass: 'accent' },
               { text: ' o seu negócio' }
             ]
@@ -145,7 +151,7 @@
               <SectionDecoLine class="section-deco-line" />
             </template>
           </SectionDecoDraw>
-          <span class="section-deco-label">[ serviços ]</span>
+          <span class="section-deco-label">[ formatos de consultoria ]</span>
         </div>
       </div>
 
@@ -173,6 +179,7 @@
             : {
                 zIndex: cardMotion[index]?.zIndex ?? index + 1,
                 transform: cardMotion[index]?.transform ?? (index === 0 ? 'translate3d(0,0,0)' : 'translate3d(0,100%,0)'),
+                '--service-card-stack-offset': cardMotion[index]?.stackOffset ?? '0px',
               }"
         >
           <div class="service-card-inner">
@@ -189,22 +196,21 @@
 
                 <div class="service-expand">
                   <div class="service-expand-inner">
-                    <div class="service-row-detail">
+                    <div
+                      class="service-row-detail"
+                      :class="{ 'service-row-detail--with-list': service.features?.length }"
+                    >
                       <div class="service-tags">
                         <span v-for="tag in service.tags" :key="tag" class="service-tag">
                           {{ tag }}
                         </span>
                       </div>
                       <p class="service-desc">{{ service.desc }}</p>
-                    </div>
-
-                    <div class="service-row-aside">
-                      <img
-                        class="service-illustration"
-                        :src="service.image"
-                        :alt="`Ilustração de ${service.title}`"
-                        loading="lazy"
-                      />
+                      <ul v-if="service.features?.length" class="service-feature-list">
+                        <li v-for="feature in service.features" :key="feature">
+                          {{ feature }}
+                        </li>
+                      </ul>
                       <button
                         type="button"
                         class="services-cta-btn services-cta-btn--inline"
@@ -215,6 +221,19 @@
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                         </span>
                       </button>
+                    </div>
+
+                    <div
+                      class="service-row-aside"
+                      :class="{ 'service-row-aside--preview': service.image?.startsWith('/Preview') }"
+                    >
+                      <img
+                        class="service-illustration"
+                        :class="{ 'service-illustration--preview': service.image?.startsWith('/Preview') }"
+                        :src="service.image"
+                        :alt="`Ilustração de ${service.title}`"
+                        loading="lazy"
+                      />
                     </div>
                   </div>
                 </div>
@@ -246,20 +265,48 @@
       </div>
     </div>
     </div>
-    
-    <div class="extras-grid">
+
+    <div class="products-deco section-deco">
+      <SectionDecoDraw orientation="horizontal" observe-target=".products-deco">
+        <template #star>
+          <DecoSparkle class="section-deco-sparkle" />
+        </template>
+        <template #line>
+          <SectionDecoLine class="section-deco-line" />
+        </template>
+      </SectionDecoDraw>
+      <span class="section-deco-label">[ produtos ]</span>
+    </div>
+
+    <div class="extras-grid" aria-label="Recursos adicionais inclusos">
       <ScrollReveal
         v-for="(item, index) in extras"
         :key="item.title"
         class="extra-card"
         :delay="index * 120"
       >
-        <div class="icon-box-extra">
-          <component :is="item.icon" />
+        <DecoSparkle class="extra-card-sparkle extra-card-sparkle--top" aria-hidden="true" />
+        <DecoSparkle class="extra-card-sparkle extra-card-sparkle--bottom" aria-hidden="true" />
+
+        <div class="extra-media" aria-hidden="true">
+          <component :is="item.icon" class="extra-media-icon" />
         </div>
+
         <div class="extra-card-body">
-          <h4>{{ item.title }}</h4>
-          <p>{{ item.desc }}</p>
+          <div class="extra-card-copy">
+            <h4>{{ item.title }}</h4>
+            <p>{{ item.desc }}</p>
+          </div>
+          <button
+            type="button"
+            class="extra-card-cta"
+            @click="solicitarServico(item)"
+          >
+            Solicitar este recurso
+            <span class="extra-card-cta-icon" aria-hidden="true">
+              <ArrowRight :size="16" stroke-width="2.5" />
+            </span>
+          </button>
         </div>
       </ScrollReveal>
     </div>
@@ -757,8 +804,8 @@
     import LynxLogo from './assets/LynxLogoLetras.png'
     import GeoaxisPreview from './assets/geoaxisambiental.com.br.webp'
     import VictormolPreview from './assets/www.victormol.com.br_.webp'
-    import { SlidersHorizontal, Globe, ShieldCheck, Eye, Search, 
-             Smartphone, MessageCircle, Zap, Shield, Settings, Instagram, 
+    import { SlidersHorizontal, Globe, ShieldCheck, Eye, 
+             MessageCircle, Zap, Settings, Instagram, 
              Link2, Code2, ArrowUpRight, ArrowRight, ArrowDown, ChevronDown } from 'lucide-vue-next'
 
     const vantagens = [
@@ -786,34 +833,40 @@
 
     const extras = [
       {
-        title: 'Apareça no Google',
-        desc: 'SEO técnico desde o primeiro dia.',
-        icon: Search
+        title: 'Site Institucional',
+        desc: 'Apresente sua empresa, seus serviços e seus diferenciais em uma estrutura profissional, responsiva e fácil de navegar.',
+        icon: Globe,
+        contatoMensagem: 'Desejo criar um site institucional.'
       },
       {
-        title: 'Funciona em qualquer dispositivo',
-        desc: 'Celular, tablet e computador.',
-        icon: Smartphone
+        title: 'Landing Page',
+        desc: 'Uma página objetiva para divulgar um serviço, produto, campanha ou direcionar visitantes para uma ação específica.',
+        icon: Zap,
+        contatoMensagem: 'Desejo criar uma landing page.'
       },
       {
-        title: 'WhatsApp Integrado',
-        desc: 'Contato direto com mensagem personalizada',
-        icon: MessageCircle
+        title: 'Loja Virtual',
+        desc: 'Catálogo, carrinho e pagamentos integrados para sua empresa vender produtos pela internet com uma experiência organizada.',
+        icon: Settings,
+        contatoMensagem: 'Desejo criar uma loja virtual.'
       },
       {
-        title: 'Carregamento rápido',
-        desc: 'Menos espera, mais vendas.',
-        icon: Zap
+        title: 'Link na Bio Personalizado',
+        desc: 'Uma página exclusiva para reunir serviços, contatos, agendamentos e links importantes com a identidade da sua marca.',
+        icon: Link2,
+        contatoMensagem: 'Desejo criar um link na bio personalizado.'
       },
       {
-        title: 'Segurança e confiabilidade',
-        desc: 'HTTPS, backups e boas práticas.',
-        icon: Shield
+        title: 'Sistema Web',
+        desc: 'Ferramentas personalizadas para organizar cadastros, atendimentos, agendas, relatórios e processos internos.',
+        icon: Code2,
+        contatoMensagem: 'Desejo desenvolver um sistema web.'
       },
       {
-        title: 'Cresce com seu negócio',
-        desc: 'Novas páginas e funcionalidades quando você precisar.',
-        icon: Settings
+        title: 'Assistente Inteligente',
+        desc: 'Um assistente integrado ao site para responder dúvidas frequentes, apresentar informações e direcionar o visitante ao contato correto.',
+        icon: MessageCircle,
+        contatoMensagem: 'Desejo contratar um assistente inteligente.'
       }
     ]
 
@@ -856,45 +909,52 @@
     const listaServicos = [
       {
         num: '01.',
-        title: 'Sites Institucionais',
-        tags: ['Marca', 'SEO', 'Web Design'],
-        desc: 'Um site institucional que representa sua marca com credibilidade e profissionalismo. Desenvolvido com design moderno, carregamento rápido e otimização para os motores de busca (SEO), para que sua empresa seja encontrada no Google e transforme visitantes em clientes reais. Ideal para quem quer construir autoridade e presença digital sólida.',
-        image: '/site_institucional.svg',
-        contatoMensagem: 'Desejo criar um site institucional.',
+        title: 'Consultoria de Entrada',
+        tags: ['LANDING PAGE', 'LINK NA BIO', 'SITE ONE PAGE'],
+        desc: 'Para profissionais e pequenos negócios que precisam iniciar com uma presença digital clara, profissional e fácil de acessar.',
+        features: [
+          'Diagnóstico e organização das informações',
+          'Landing page, site one page ou link na bio',
+          'Direção visual alinhada à marca',
+          'Design responsivo para todos os dispositivos',
+          'WhatsApp, formulário e chamadas para contato',
+          'SEO técnico, domínio, publicação e suporte inicial',
+        ],
+        image: '/Preview1.png',
+        contatoMensagem: 'Desejo contratar a Consultoria de Entrada.',
       },
       {
         num: '02.',
-        title: 'Landing Pages',
-        tags: ['Conversão', 'Campanhas', 'Captação'],
-        desc: 'Páginas de alta conversão criadas especificamente para campanhas de tráfego pago, lançamentos de produtos e captação de leads. Layout direto ao ponto, foco total na ação que você quer que o visitante tome — seja preencher um formulário, agendar uma consulta ou fechar uma compra. Cada elemento é pensado para maximizar seu retorno sobre investimento.',
-        image: '/landing_page.svg',
-        contatoMensagem: 'Desejo criar uma landing page.',
+        title: 'Consultoria Profissional',
+        tags: ['SITE INSTITUCIONAL', 'LOJA VIRTUAL', 'REFORMULAÇÃO'],
+        desc: 'Para empresas que precisam apresentar melhor seus serviços ou produtos, fortalecer sua credibilidade e oferecer uma experiência completa ao público.',
+        features: [
+          'Site institucional completo ou loja virtual',
+          'Planejamento e organização do conteúdo',
+          'Páginas internas e seções estratégicas',
+          'Formulários e integrações',
+          'SEO técnico e alta performance',
+          'Métricas e treinamento de uso',
+          'Suporte após a publicação',
+        ],
+        image: '/Preview2.png',
+        contatoMensagem: 'Desejo contratar a Consultoria Profissional.',
       },
       {
         num: '03.',
-        title: 'Lojas Virtuais',
-        tags: ['Pagamentos', 'Catálogo', 'Gestão'],
-        desc: 'Sua loja online completa, com integração de meios de pagamento (cartão, Pix, boleto), catálogo de produtos organizado e fácil de navegar, e um painel de gestão simples para você controlar estoque, pedidos e vendas sem complicação. Uma solução pronta para vender 24 horas por dia, todos os dias.',
-        image: '/ecommerce.svg',
-        contatoMensagem: 'Desejo criar uma loja virtual.',
-      },
-      {
-        num: '04.',
-        title: 'Assistente Inteligente',
-        tags: ['IA', 'Qualificação', 'Atendimento'],
-        desc: 'Um assistente de inteligência artificial treinado para atender seus clientes automaticamente, tirar dúvidas frequentes e qualificar quem realmente tem potencial de compra. Ele filtra curiosos e só encaminha pra você (ou pro seu time) os contatos com interesse genuíno — economizando tempo e aumentando a taxa de conversão do seu atendimento.',
-        image: '/assistente_inteligente.svg',
-        isNew: true,
-        contatoMensagem: 'Desejo contratar um assistente inteligente.',
-      },
-      {
-        num: '05.',
-        title: 'Link na Bio Profissional',
-        tags: ['Instagram', 'IA', 'Conversão'],
-        desc: 'Transforme o link da sua bio do Instagram numa mini-página organizada e estratégica. Além de reunir seus principais links, ela conta com um assistente de IA que interage com o visitante, responde perguntas e o conduz até a próxima etapa: pedir um orçamento, agendar um horário ou chamar direto no WhatsApp. Simples pra você, eficiente na conversão.',
-        image: '/link_na_bio.svg?v=2',
-        isNew: true,
-        contatoMensagem: 'Desejo criar um link na bio profissional.',
+        title: 'Consultoria Avançada',
+        tags: ['SISTEMA WEB', 'AUTOMAÇÕES', 'ASSISTENTE COM IA'],
+        desc: 'Para negócios que precisam conectar sua presença digital a processos, atendimentos e ferramentas específicas da empresa.',
+        features: [
+          'Sistema web ou área administrativa',
+          'Login, áreas restritas e banco de dados',
+          'Cadastros, agendas e formulários avançados',
+          'Integrações, automações e assistente inteligente',
+          'Planejamento técnico personalizado',
+          'Acompanhamento após o lançamento',
+        ],
+        image: '/Preview3.png',
+        contatoMensagem: 'Desejo contratar a Consultoria Avançada.',
       }
     ]
 
@@ -1185,8 +1245,9 @@
   color: #E8E6FF;
   user-select: none;
   background: linear-gradient(to bottom, #0A061C 0%, #160A4A 52%, #370EE7 100%);
-  --hero-title: clamp(2.5rem, 0.75rem + 8vw, 5rem);
-  --hero-title-line-height: 1.05;
+  --hero-title: clamp(3rem, 0.85rem + 6.2vw, 6.4rem);
+  --hero-title-line-height: 1.08;
+  --hero-title-glow-bleed: clamp(12px, 0.18em, 22px);
   --hero-title-shadow:
     0 0 18px rgba(232, 230, 255, 0.2),
     0 0 36px rgba(56, 15, 233, 0.12),
@@ -1200,7 +1261,7 @@
     0 0 88px rgba(240, 255, 31, 0.1);
   --hero-desc: clamp(1rem, 1.15vw, 1.2rem);
   --hero-copy-left: clamp(48px, 12vw, 180px);
-  --hero-copy-width: min(50vw, 600px);
+  --hero-copy-width: min(78vw, 760px);
   --hero-gap-title-desc: clamp(1.25rem, 2vh, 1.75rem);
   --hero-gap-desc-btn: clamp(2.5rem, 5vh, 4rem);
   --hero-btn-font: clamp(0.8125rem, 0.75rem + 0.35vw, 0.9375rem);
@@ -1222,6 +1283,7 @@
   background: linear-gradient(to bottom, transparent 0%, rgba(10, 10, 20, 0.25) 35%, rgba(10, 10, 20, 0.72) 68%, #0A0A14 100%);
   pointer-events: none;
   z-index: 0;
+  padding-bottom: clamp(24px, 4vh, 96px);
 }
 
 @media (min-height: 900px) {
@@ -1261,7 +1323,7 @@
   gap: 0;
   width: var(--hero-copy-width);
   max-width: calc(100vw - var(--hero-copy-left) - clamp(24px, 4vw, 48px));
-  transform: translateY(-50%) translate3d(var(--hero-parallax-x, 0), var(--hero-parallax-y, 0), 0);
+  transform: translateY(calc(-50% - clamp(12px, 2.5vh, 48px))) translate3d(var(--hero-parallax-x, 0), var(--hero-parallax-y, 0), 0);
   text-align: left;
   pointer-events: none;
   isolation: isolate;
@@ -1280,12 +1342,46 @@
   pointer-events: auto;
 }
 
+.hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(7px, 0.7vw, 10px);
+  max-width: 100%;
+  margin: 0 0 clamp(16px, 2.3vh, 26px);
+  padding: clamp(7px, 0.55vw, 10px) clamp(12px, 1.15vw, 18px);
+  border: 1px solid rgba(240, 255, 31, 0.42);
+  border-radius: 999px;
+  background: #111128;
+  box-shadow:
+    inset 0 0 0 1px rgba(232, 230, 255, 0.08),
+    0 0 24px rgba(56, 15, 233, 0.28),
+    0 0 28px rgba(240, 255, 31, 0.1);
+  color: rgba(232, 230, 255, 0.94);
+  font-family: var(--font-body);
+  font-size: clamp(0.54rem, 0.39rem + 0.32vw, 0.72rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: clamp(0.07em, 0.13vw, 0.13em);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.hero-pill-sparkle {
+  width: clamp(6px, 0.48vw, 8px);
+  height: clamp(6px, 0.48vw, 8px);
+  flex: 0 0 auto;
+  color: #F0FF1F;
+  filter:
+    drop-shadow(0 0 6px rgba(240, 255, 31, 0.72))
+    drop-shadow(0 0 12px rgba(240, 255, 31, 0.28));
+}
+
 .banner-title {
   display: block;
   width: auto;
   max-width: 100%;
-  margin: 0;
-  padding: 0;
+  margin: 0 0 calc(-1 * var(--hero-title-glow-bleed));
+  padding: 0 0 var(--hero-title-glow-bleed);
   box-sizing: border-box;
   text-align: left;
   white-space: normal;
@@ -1295,15 +1391,26 @@
   color: #E8E6FF;
   line-height: var(--hero-title-line-height);
   text-shadow: var(--hero-title-shadow);
+  overflow: visible;
+  hyphens: none;
+  word-break: keep-all;
 }
 
-.banner-title :is(.title-accent, .accent) {
+.banner-title :deep(.title-line) {
+  display: block;
+  white-space: nowrap;
+  overflow: visible;
+}
+
+.banner-title :is(.title-accent, .accent),
+.banner-title :deep(.title-accent),
+.banner-title :deep(.accent) {
   text-shadow: var(--hero-title-accent-shadow);
 }
 
 .banner-description {
   width: auto;
-  max-width: 100%;
+  max-width: min(100%, 520px);
   margin: var(--hero-gap-title-desc) 0 0;
   padding: 0;
   text-align: left;
@@ -1311,6 +1418,31 @@
   line-height: 1.65;
   letter-spacing: 0.01em;
   color: rgba(232, 230, 255, 0.88);
+}
+
+@media (orientation: portrait) and (min-width: 921px) {
+  .banner-copy {
+    left: 50%;
+    align-items: center;
+    width: min(78vw, 760px);
+    max-width: calc(100vw - 2 * clamp(48px, 8vw, 120px));
+    transform: translate(-50%, calc(-50% - clamp(12px, 2.5vh, 48px))) translate3d(var(--hero-parallax-x, 0), var(--hero-parallax-y, 0), 0);
+    text-align: center;
+  }
+
+  .banner-copy-head {
+    align-items: center;
+    width: 100%;
+  }
+
+  .banner-title,
+  .banner-description {
+    text-align: center;
+  }
+
+  .banner-description {
+    margin-inline: auto;
+  }
 }
 
 .banner-footer {
@@ -1504,15 +1636,27 @@
 .intro-centro {
   flex: 1;
   max-width: 900px;
+  text-align: center;
 }
 
 .intro-headline {
-  font-size: clamp(2.4rem, 5vw, 4.5rem);
+  font-size: clamp(2.1rem, 5vw, 4.5rem);
   font-weight: 700;
   color: #E8E6FF;
   line-height: 1.06;
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
   margin-bottom: 16px;
   letter-spacing: -0.025em;
+  overflow: visible;
+  text-align: center;
+}
+
+.intro-headline :deep(.title-line) {
+  display: block;
+  white-space: nowrap;
+  overflow: visible;
 }
 
 .intro-sub {
@@ -1670,7 +1814,11 @@
   --services-panel-pad-x: 44px;
   --services-panel-pad-y-top: 40px;
   --services-panel-pad-y-bottom: 32px;
-  --services-stage-h: 60vh;
+  --services-stage-h: clamp(420px, 48vh, 560px);
+  --service-expand-mt: 4px;
+  --service-detail-pt: 4px;
+  --service-desc-mt: clamp(40px, 5vh, 72px);
+  --service-title-scale: 1;
   width: 100%;
   background: #E8E6FF;
   border-radius: 24px;
@@ -1795,7 +1943,7 @@
   gap: 2px;
   padding: 16px 0 28px;
   overflow: visible;
-  height: 100%;
+  height: calc(100% - var(--service-card-stack-offset, 0px));
   box-sizing: border-box;
 }
 
@@ -1854,25 +2002,34 @@
 }
 
 .service-row-body {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 .service-row-main {
   min-width: 0;
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 .service-expand {
   display: block;
-  margin-top: 10px;
+  flex: 1;
+  min-height: 0;
+  margin-top: var(--service-expand-mt, 10px);
 }
 
 .service-expand-inner {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, min(280px, 30%));
-  gap: 28px 32px;
-  align-items: end;
+  grid-template-columns: minmax(0, 1fr) minmax(340px, min(460px, 36%));
+  gap: 28px clamp(36px, 5vw, 72px);
+  align-items: stretch;
+  height: 100%;
+  min-height: 0;
 }
 
 .service-row-aside {
@@ -1881,25 +2038,32 @@
   align-items: stretch;
   justify-content: flex-end;
   min-width: 0;
-  gap: 12px;
+  gap: clamp(16px, 2.2vh, 24px);
+  height: 100%;
+}
+
+.service-row-aside--preview {
+  justify-content: flex-start;
+  padding-top: clamp(18px, 3.5vh, 42px);
 }
 
 .services-panel .service-title {
   font-family: var(--font-display);
   font-weight: 700;
   color: #380FE9;
-  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  font-size: calc(clamp(3.25rem, 6.8vw, 5.25rem) * var(--service-title-scale, 1));
   letter-spacing: -0.03em;
   line-height: 1.12;
   margin: 0;
   /* Keep descenders inside the title box so the stack cut can sit flush */
-  padding-bottom: 0.22em;
+  padding-bottom: calc(0.22em * var(--service-title-scale, 1));
   display: block;
   transition: opacity 0.12s ease;
 }
 
 .service-card--collapsed .service-title {
   opacity: 0.42;
+  padding-bottom: calc(0.34em * var(--service-title-scale, 1));
 }
 
 .service-card--collapsed .service-num {
@@ -1931,10 +2095,14 @@
 }
 
 .service-row-detail {
+  --service-content-gap: clamp(22px, 3vh, 34px);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding-top: 12px;
+  justify-content: flex-start;
+  padding-top: var(--service-detail-pt, 12px);
+  min-height: 0;
+  height: 100%;
   max-width: none;
 }
 
@@ -1961,32 +2129,76 @@
 }
 
 .service-desc {
-  font-size: clamp(1.05rem, 1.35vw, 1.2rem);
+  font-size: clamp(1.02rem, 1.36vw, 1.2rem);
   color: rgba(10,10,20,0.6);
-  line-height: 1.65;
-  margin: clamp(64px, 9vh, 112px) 0 0;
-  max-width: 28rem;
+  line-height: 1.6;
+  margin: clamp(56px, 8vh, 96px) 0 0;
+  max-width: 34rem;
   padding-top: 0;
+}
+
+.service-row-detail--with-list .service-desc {
+  margin-top: var(--service-content-gap);
+  max-width: 38rem;
+}
+
+.service-feature-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  width: min(100%, 38rem);
+  margin: var(--service-content-gap) 0 0;
+  padding: 0;
+  list-style: none;
+  color: rgba(10, 10, 20, 0.58);
+  font-size: clamp(0.9rem, 1.02vw, 1.04rem);
+  font-weight: 400;
+  line-height: 1.48;
+}
+
+.service-feature-list li {
+  position: relative;
+  min-width: 0;
+  padding-left: 16px;
+}
+
+.service-feature-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.56em;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #380FE9;
+  box-shadow: 0 0 10px rgba(56, 15, 233, 0.3);
 }
 
 .service-row-aside .service-illustration {
   display: block;
-  width: 100%;
+  width: min(100%, 340px);
   height: auto;
-  max-height: min(260px, 36vh);
+  max-height: min(340px, 38vh);
+  align-self: center;
   object-fit: contain;
   object-position: bottom center;
 }
 
+.service-row-aside .service-illustration--preview {
+  width: min(100%, 500px);
+  max-height: min(560px, 62vh);
+  object-position: top center;
+}
+
 .services-cta-btn--inline {
-  width: fit-content;
+  width: min(100%, 330px);
   max-width: 100%;
-  margin-top: auto;
-  align-self: center;
-  justify-content: flex-start;
-  gap: 4px;
-  padding: 9px 10px 9px 14px;
-  font-size: 0.8125rem;
+  margin-top: var(--service-content-gap);
+  align-self: flex-start;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 12px 12px 18px;
+  font-size: 0.88rem;
 }
 
 .services-cta-btn--inline .services-cta-arrow {
@@ -2040,14 +2252,32 @@
 
 /* ─── EXTRAS GRID ────────────────────────────────────────── */
 
-.extras-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  align-items: stretch;
+.products-deco {
+  width: min(100%, var(--section-max-width));
+  margin: clamp(64px, 8vw, 108px) auto clamp(28px, 4vw, 48px);
+  padding-inline: var(--services-panel-pad-x, 48px);
 }
 
-.extra-card,
+.products-deco .section-deco-label {
+  color: #380FE9;
+}
+
+.extras-grid {
+  --extra-divider-color: rgba(232, 230, 255, 0.44);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  width: 100vw;
+  max-width: none;
+  margin-inline: calc(50% - 50vw);
+  border-top: 1px solid var(--extra-divider-color);
+  border-bottom: 1px solid var(--extra-divider-color);
+  background:
+    radial-gradient(ellipse 70% 85% at 100% 0%, rgba(56, 15, 233, 0.22), transparent 58%),
+    radial-gradient(ellipse 80% 70% at 0% 100%, rgba(240, 255, 31, 0.07), transparent 62%),
+    rgba(10, 10, 20, 0.72);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+}
+
 .outro-card,
 .vantagem-bar,
 .processo-card,
@@ -2063,7 +2293,6 @@
   transition: transform 0.22s ease, background 0.22s ease;
 }
 
-.extra-card::before,
 .outro-card::before,
 .vantagem-bar::before,
 .processo-card::before,
@@ -2088,7 +2317,6 @@
   z-index: 0;
 }
 
-.extra-card:hover,
 .outro-card:hover,
 .processo-card:hover,
 .pricing-card:hover {
@@ -2109,7 +2337,6 @@
   box-shadow: 0 6px 28px rgba(8, 8, 22, 0.38);
 }
 
-.extra-card:hover::before,
 .outro-card:hover::before,
 .processo-card:hover::before,
 .pricing-card:hover::before {
@@ -2135,60 +2362,139 @@
 
 .extra-card {
   position: relative;
-  display: flex;
-  align-items: stretch;
-  gap: 12px;
-  height: 100%;
-  min-height: 0;
-  padding: 20px 20px 20px 16px;
-  border-radius: 14px;
+  display: grid;
+  grid-template-columns: minmax(220px, 45%) minmax(0, 55%);
+  min-height: clamp(280px, 34vw, 420px);
+  border-bottom: 1px solid var(--extra-divider-color);
+  overflow: visible;
 }
 
-.extra-card.scroll-reveal--played:hover {
-  transform: translateY(-2px);
+.extra-card:last-child {
+  border-bottom: 0;
 }
 
-.icon-box-extra {
+.extra-card-sparkle {
+  position: absolute;
+  left: 45%;
+  z-index: 3;
+  width: 22px;
+  height: 22px;
+  color: #E8E6FF;
+  filter:
+    drop-shadow(0 0 12px rgba(232, 230, 255, 0.55))
+    drop-shadow(0 0 20px rgba(56, 15, 233, 0.36));
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.extra-card-sparkle--top {
+  top: 0;
+}
+
+.extra-card-sparkle--bottom {
+  top: 100%;
+  display: none;
+}
+
+.extra-card:last-child .extra-card-sparkle--bottom {
+  display: block;
+}
+
+.extra-media {
   position: relative;
-  z-index: 1;
-  flex-shrink: 0;
-  align-self: flex-start;
-  width: 36px;
-  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #380FE9;
+  min-height: 100%;
+  border-right: 1px solid var(--extra-divider-color);
+  background:
+    radial-gradient(ellipse 70% 70% at 50% 50%, rgba(56, 15, 233, 0.12), transparent 64%),
+    linear-gradient(180deg, rgba(7, 7, 16, 0.88), rgba(13, 10, 36, 0.64));
+}
+
+.extra-media-icon {
+  width: clamp(64px, 9vw, 112px);
+  height: clamp(64px, 9vw, 112px);
+  color: rgba(240, 255, 31, 0.16);
+  stroke-width: 1.25;
 }
 
 .extra-card-body {
   position: relative;
-  z-index: 1;
   display: flex;
-  flex: 1;
   flex-direction: column;
-  gap: 4px;
+  justify-content: space-between;
+  gap: clamp(28px, 4vw, 56px);
   min-width: 0;
-  min-height: calc(2 * var(--text-sm) * 1.2 + 4px + 2 * var(--text-sm) * 1.55);
+  padding: clamp(32px, 4.8vw, 64px) clamp(28px, 5.5vw, 76px);
+  background:
+    radial-gradient(ellipse 70% 90% at 100% 0%, rgba(56, 15, 233, 0.18), transparent 62%),
+    rgba(13, 10, 36, 0.68);
+}
+
+.extra-card-copy {
+  max-width: 650px;
 }
 
 .extra-card h4 {
-  min-height: calc(2 * var(--text-sm) * 1.2);
-  display: flex;
-  align-items: flex-start;
   margin: 0;
-  font-size: var(--text-sm);
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 3vw, 2.7rem);
   font-weight: 600;
+  line-height: 1.08;
   color: #E8E6FF;
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
 }
 
 .extra-card p {
-  flex: 1;
-  margin: 0;
-  font-size: var(--text-sm);
-  color: #9090B0;
-  line-height: 1.55;
+  margin: clamp(18px, 2.4vw, 28px) 0 0;
+  max-width: 56ch;
+  font-size: clamp(1rem, 1.35vw, 1.24rem);
+  color: rgba(232, 230, 255, 0.74);
+  line-height: 1.45;
+}
+
+.extra-card-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: min(100%, 320px);
+  min-height: 56px;
+  padding: 14px 22px;
+  border: 1px solid rgba(240, 255, 31, 0.38);
+  border-radius: 999px;
+  background: rgba(10, 10, 20, 0.76);
+  color: #F0FF1F;
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.extra-card-cta:hover {
+  transform: translateY(-2px);
+  border-color: #F0FF1F;
+  background: #F0FF1F;
+  color: #380FE9;
+}
+
+.extra-card-cta:active {
+  transform: scale(0.98);
+}
+
+.extra-card-cta-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+}
+
+.extra-card-cta:hover .extra-card-cta-icon {
+  background: transparent;
 }
 
 
@@ -2570,24 +2876,28 @@
 .portfolio-cta {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 22px;
+  justify-content: center;
+  gap: 12px;
+  padding: 14px 22px;
   border-radius: 999px;
-  border: 1.5px solid #F0FF1F;
-  background: transparent;
+  border: 1px solid rgba(240, 255, 31, 0.38);
+  background: rgba(10, 10, 20, 0.76);
   color: #F0FF1F;
-  font-size: var(--text-sm);
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: none;
   text-decoration: none;
   width: fit-content;
-  transition: background 0.2s ease, transform 0.2s ease;
+  min-height: 56px;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .portfolio-cta.scroll-reveal--played:hover {
-  background: rgba(240, 255, 31, 0.08);
   transform: translateY(-2px);
+  border-color: #F0FF1F;
+  background: #F0FF1F;
+  color: #380FE9;
 }
 
 .portfolio-cta-arrow {
@@ -3345,7 +3655,7 @@
     transform: none !important;
     will-change: auto;
     height: auto;
-    padding-left: calc(var(--services-panel-pad-x) + 12px);
+    padding-inline: var(--services-panel-pad-x);
   }
 
   .service-card-inner {
@@ -3353,7 +3663,7 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
-    padding: 28px 0 36px;
+    padding: 28px 0 34px;
     align-items: flex-start;
   }
 
@@ -3383,7 +3693,7 @@
 
   .services-panel .service-title {
     padding-bottom: 0;
-    font-size: clamp(2.9rem, 8.5vw, 3.5rem);
+    font-size: clamp(2.75rem, 9.8vw, 4.05rem);
     line-height: 1.05;
     letter-spacing: -0.03em;
   }
@@ -3395,102 +3705,125 @@
   }
 
   .service-expand {
-    margin-top: 36px;
+    margin-top: 14px;
   }
 
   .service-expand-inner {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
     align-items: flex-start;
-    gap: 0;
+    gap: 24px;
+    width: 100%;
   }
 
   .service-row-detail {
-    display: contents;
+    --service-content-gap: 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
     max-width: none;
     padding-top: 0;
+    width: 100%;
+    height: auto;
   }
 
   .service-desc {
     order: 1;
-    margin: 0;
+    margin: var(--service-content-gap) 0 0;
     max-width: none;
     padding-top: 0;
     font-size: clamp(1.05rem, 3.6vw, 1.2rem);
     line-height: 1.55;
   }
 
+  .service-feature-list {
+    order: 2;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    width: 100%;
+    margin-top: var(--service-content-gap);
+    font-size: 0.98rem;
+    line-height: 1.45;
+  }
+
   .service-row-aside {
     order: 2;
+    display: flex;
     width: 100%;
     gap: 0;
-    align-items: flex-start;
-    justify-content: flex-start;
-    margin-top: 28px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0;
+    padding-top: 0;
+    height: auto;
   }
 
   .service-tags {
-    order: 3;
-    gap: 12px;
-    margin-top: 40px;
+    order: 0;
+    gap: 8px;
+    margin-top: 0;
   }
 
   .service-tag {
-    font-size: 0.9rem;
+    font-size: clamp(0.66rem, 2.4vw, 0.82rem);
     font-weight: 500;
-    padding: 8px 18px;
+    padding: 6px 12px;
     letter-spacing: 0.01em;
   }
 
   .service-row-aside .service-illustration {
-    display: none;
+    display: block;
+    width: min(92%, 360px);
+    max-height: min(360px, 46vh);
+    object-position: top center;
   }
 
   .services-cta-btn--inline {
-    margin-top: 0;
+    order: 3;
+    margin-top: var(--service-content-gap);
     margin-inline: 0;
     align-self: flex-start;
-    justify-content: flex-start;
-    width: fit-content;
-    max-width: max-content;
-    background: transparent;
-    color: #380FE9;
-    border: none;
-    border-radius: 0;
-    padding: 0;
-    font-size: 1.05rem;
+    justify-content: center;
+    width: min(100%, 330px);
+    max-width: 100%;
+    background: #111128;
+    color: #E8E6FF;
+    border: 1px solid rgba(56,15,233,0.14);
+    border-radius: 999px;
+    padding: 12px 12px 12px 18px;
+    font-size: 0.88rem;
     font-weight: 600;
     gap: 8px;
-    text-align: left;
+    text-align: center;
   }
 
   .services-cta-btn--inline:hover {
-    background: transparent;
-    transform: none;
-    color: #2a0bb5;
+    background: #380FE9;
+    transform: translateY(-2px);
+    color: #E8E6FF;
   }
 
   .services-cta-btn--inline:active {
-    transform: none;
+    transform: scale(0.97);
   }
 
   .services-cta-btn--inline .services-cta-arrow {
-    width: auto;
-    height: auto;
-    border-radius: 0;
-    background: transparent;
-    color: inherit;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(56,15,233,0.28);
+    color: #380FE9;
   }
 
   .services-cta-btn--inline:hover .services-cta-arrow {
-    background: transparent;
-    color: inherit;
-    transform: translateX(3px);
+    background: #F0FF1F;
+    color: #380FE9;
+    transform: translateX(2px);
   }
 
   .services-cta-btn--inline .services-cta-arrow svg {
-    width: 15px;
-    height: 15px;
+    width: 14px;
+    height: 14px;
   }
 
   .services-panel-footer {
@@ -3538,7 +3871,54 @@
 
   .outros-cards { grid-template-columns: repeat(2, 1fr); }
 
-  .extras-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .extra-card {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+  }
+
+  .extra-media {
+    min-height: clamp(160px, 34vw, 220px);
+    border-right: 0;
+    border-bottom: 1px solid var(--extra-divider-color);
+  }
+
+  .extra-card-sparkle {
+    left: 50%;
+  }
+
+  .extra-card-body {
+    gap: 28px;
+    padding: 28px 24px 32px;
+  }
+
+  .extra-card h4 {
+    font-size: clamp(1.45rem, 6vw, 2rem);
+  }
+
+  .extra-card p {
+    font-size: 1rem;
+  }
+
+  .extra-card-cta {
+    width: 100%;
+    min-height: 52px;
+  }
+
+  .products-deco {
+    width: 100vw;
+    max-width: none;
+    margin-inline: calc(50% - 50vw);
+    padding-inline: 20px;
+  }
+
+  .products-deco .section-deco-label {
+    width: 100%;
+    text-align: left;
+  }
+
+  .products-deco > .section-deco-draw {
+    width: 100%;
+  }
 
   .portfolio-browser-reveal {
     display: flex;
@@ -3588,6 +3968,22 @@
   .portfolio-info {
     align-items: center;
     text-align: center;
+  }
+
+  .outros-headline,
+  .portfolio-headline,
+  .pricing-headline,
+  .contato-headline,
+  .processo-header h2 {
+    font-size: clamp(2.25rem, 8.8vw, 3.25rem);
+    line-height: 1.06;
+    letter-spacing: -0.025em;
+  }
+
+  .portfolio-headline,
+  .pricing-headline,
+  .contato-headline {
+    max-width: min(100%, 680px);
   }
 
   .portfolio-desc {
@@ -3677,9 +4073,18 @@
     margin-inline: auto;
   }
 
+  .banner-copy-head {
+    align-items: center;
+    width: 100%;
+  }
+
   .banner-title,
   .banner-description {
     text-align: center;
+  }
+
+  .banner-description {
+    margin-inline: auto;
   }
 
   .banner-title {
@@ -3754,22 +4159,58 @@
 /* Mobile */
 @media (max-width: 480px) {
   .outros-cards { grid-template-columns: 1fr; }
-  .extras-grid { grid-template-columns: minmax(0, 1fr); }
+
+  .extra-media {
+    min-height: 150px;
+  }
+
+  .extra-card-body {
+    padding: 26px 20px 30px;
+  }
+
+  .extra-card-cta {
+    min-height: 50px;
+    font-size: 0.84rem;
+  }
+
+  .intro-headline {
+    font-size: clamp(2.15rem, 9.2vw, 2.85rem);
+    line-height: 1.08;
+    max-width: calc(100vw - 40px);
+  }
+
+  .intro-headline :deep(.title-line) {
+    white-space: normal;
+  }
+
+  .hero-pill {
+    gap: 7px;
+    margin-bottom: clamp(14px, 3svh, 24px);
+    padding: 8px 11px;
+    font-size: clamp(0.5rem, 2.35vw, 0.62rem);
+    letter-spacing: 0.06em;
+  }
+
+  .hero-pill-sparkle {
+    width: 7px;
+    height: 7px;
+  }
 
   .banner-inner {
     padding: calc(72px + env(safe-area-inset-top, 0px)) calc(20px + env(safe-area-inset-right, 0px)) calc(24px + env(safe-area-inset-bottom, 0px)) calc(20px + env(safe-area-inset-left, 0px));
   }
 
   .banner {
+    --hero-title: clamp(2.75rem, 13.6vw, 3.75rem);
     --hero-desc: clamp(0.9rem, 3.5vw, 1rem);
-    --hero-copy-width: min(85vw, 340px);
-    --hero-gap-title-desc: 0.875rem;
-    --hero-gap-desc-btn: 1.125rem;
-    --hero-front-top: clamp(88px, 14svh, 108px);
+    --hero-copy-width: calc(100vw - 40px);
+    --hero-gap-title-desc: clamp(1.75rem, 4svh, 2.4rem);
+    --hero-gap-desc-btn: clamp(2.25rem, 5svh, 3.4rem);
+    --hero-front-top: clamp(92px, 10svh, 116px);
     --hero-constellation-content-gap: 4px;
     --hero-constellation-lift: 0px;
     --hero-constellation-width: clamp(68vw, 78vw, 86vw);
-    --hero-title-line-height: 1;
+    --hero-title-line-height: 0.98;
     --hero-title-shadow:
       0 2px 20px rgba(0, 0, 0, 0.8),
       0 2px 8px rgba(0, 0, 0, 0.9);
@@ -3780,12 +4221,55 @@
   }
 
   .banner-title {
-    margin-top: clamp(12px, 2.5svh, 22px);
+    margin-top: 0;
+  }
+
+  .hero-front {
+    align-items: flex-start;
+    padding-inline: calc(20px + env(safe-area-inset-left, 0px)) calc(20px + env(safe-area-inset-right, 0px));
+  }
+
+  .banner-copy {
+    align-self: stretch;
+    align-items: flex-start;
+    max-width: var(--hero-copy-width);
+    text-align: left;
+    margin-inline: 0;
+  }
+
+  .banner-copy-head {
+    align-items: flex-start;
+  }
+
+  .banner-title,
+  .banner-description {
+    text-align: left;
+  }
+
+  .banner-description {
+    max-width: min(100%, 30rem);
+    margin-inline: 0;
+    line-height: 1.65;
+    color: rgba(232, 230, 255, 0.8);
+  }
+
+  .banner-footer {
+    align-items: stretch;
+    justify-content: flex-start;
+    width: 100%;
   }
 
   .banner-footer-buttons {
     flex-direction: column;
-    gap: clamp(8px, 1.5vh, 12px);
+    align-items: stretch;
+    justify-content: flex-start;
+    width: 100%;
+    gap: clamp(16px, 2.6svh, 24px);
+  }
+
+  .banner-footer-side {
+    width: 100%;
+    justify-content: stretch;
   }
 
   .banner-footer-side--right {
@@ -3802,9 +4286,26 @@
     --hero-constellation-sparkle-min-radius: 14px;
   }
 
-  .banner-footer-link,
+  .banner-footer .banner-footer-link,
+  .banner-footer .banner-footer-cta {
+    width: 100%;
+    min-width: 0;
+    min-height: clamp(48px, 6.4svh, 58px);
+    padding-block: clamp(13px, 1.9svh, 18px);
+    font-size: clamp(0.74rem, 3vw, 0.86rem);
+  }
+
+  .banner-footer-link {
+    border-color: rgba(240, 255, 31, 0.45);
+    background: #0A0A14;
+    color: #F0FF1F;
+  }
+
   .banner-footer-cta {
-    min-width: clamp(160px, 48vw, 220px);
+    border-color: rgba(240, 255, 31, 0.58);
+    box-shadow:
+      0 0 0 1px rgba(232, 230, 255, 0.08) inset,
+      0 0 34px rgba(240, 255, 31, 0.2);
   }
 
   .servicos,
@@ -3820,7 +4321,6 @@
     width: 100%;
     margin-left: 0;
   }
-  .processo-header h2 { font-size: 2.2rem; }
 
   .services-panel {
     --services-sticky-top: calc(4rem + 28px);

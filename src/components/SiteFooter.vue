@@ -6,9 +6,6 @@
     <div class="footer-inner">
       <div class="footer-top">
         <nav class="footer-nav" aria-label="Rodapé">
-          <a href="#servicos" @click.prevent="goToSection('servicos')">Serviços</a>
-          <a href="#processo" @click.prevent="goToSection('processo')">Processo</a>
-          <a href="#contato" @click.prevent="goToSection('contato')">Contato</a>
           <RouterLink to="/politica-de-privacidade">Política de Privacidade</RouterLink>
         </nav>
         <span class="footer-copy">© 2026</span>
@@ -18,6 +15,7 @@
         class="footer-logo-wrap"
         :style="{
           '--footer-logo-align-shift': `${footerLogoAlignShift}px`,
+          '--footer-logo-width-extend': `${footerLogoWidthExtend}px`,
         }"
       >
         <img
@@ -33,36 +31,16 @@
 </template>
 
 <script setup>
-import { nextTick } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
 import { useFooterLogoScale } from '../composables/useFooterLogoScale.js'
-import { scrollToHashWhenReady } from '../composables/useLenis.js'
 import LynxLogo from '../assets/LynxLogoLetras.png'
-
-const route = useRoute()
-const router = useRouter()
 
 const {
   wrapRef: footerLogoWrapRef,
   logoRef: footerLogoRef,
   alignShift: footerLogoAlignShift,
+  widthExtend: footerLogoWidthExtend,
   alignOverflow: footerLogoAlignOverflow,
 } = useFooterLogoScale()
-
-async function goToSection(sectionId) {
-  const hash = `#${sectionId}`
-
-  if (route.path !== '/') {
-    await router.push({ path: '/', hash })
-    return
-  }
-
-  window.history.replaceState(null, '', hash)
-  await nextTick()
-  requestAnimationFrame(() => {
-    scrollToHashWhenReady(hash)
-  })
-}
 </script>
 
 <style scoped>
@@ -131,9 +109,10 @@ async function goToSection(sectionId) {
 
 .footer-logo {
   display: block;
-  width: calc(100% + var(--footer-logo-align-shift, 0px));
+  width: calc(100% + var(--footer-logo-width-extend, 0px));
   height: auto;
   max-width: none;
+  transform: translateX(var(--footer-logo-align-shift, 0px));
   -webkit-user-drag: none;
   user-select: none;
   filter:

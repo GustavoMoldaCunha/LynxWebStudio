@@ -26,11 +26,18 @@
         <stop offset="62%" stop-color="#380FE9" stop-opacity="0.14" />
         <stop offset="100%" stop-color="#380FE9" stop-opacity="0" />
       </radialGradient>
-      <radialGradient id="constellation-sparkle-fill" cx="50%" cy="50%" r="72%">
+      <radialGradient id="constellation-star-core" cx="50%" cy="50%" r="50%">
         <stop offset="0%" stop-color="#ffffff" />
-        <stop offset="40%" stop-color="#eef1ff" />
-        <stop offset="78%" stop-color="#cfc9fc" />
-        <stop offset="100%" stop-color="#9078f0" />
+        <stop offset="12%" stop-color="#e8eeff" />
+        <stop offset="38%" stop-color="#6b4ff0" stop-opacity="0.72" />
+        <stop offset="62%" stop-color="#380FE9" stop-opacity="0.28" />
+        <stop offset="100%" stop-color="#380FE9" stop-opacity="0" />
+      </radialGradient>
+      <radialGradient id="constellation-sparkle-core" cx="50%" cy="50%" r="72%">
+        <stop offset="0%" stop-color="#ffffff" />
+        <stop offset="38%" stop-color="#f2f4ff" />
+        <stop offset="74%" stop-color="#dfdcff" />
+        <stop offset="100%" stop-color="#cfc9fc" />
       </radialGradient>
       <filter id="constellation-line-glow" x="-30%" y="-30%" width="160%" height="160%">
         <feGaussianBlur :stdDeviation="cursorLineGlowStdDeviation" result="blur" />
@@ -97,7 +104,7 @@
             <circle
               :cx="vertex.x"
               :cy="vertex.y"
-              :r="starGlowR"
+              :r="sparkleAuraRadius(vertex)"
               fill="url(#constellation-star-unified)"
             />
             <path
@@ -118,6 +125,7 @@ import {
   DECO_SPARKLE_ARM,
   DECO_SPARKLE_PATH,
   DECO_SPARKLE_VIEW_SIZE,
+  SPARKLE_GLOW_R_FACTOR,
 } from '../config/decoSparkle.js'
 import {
   HERO_CURSOR_VERTICES,
@@ -465,6 +473,11 @@ function decoStarTransform(vertex) {
   return `translate(${vertex.x} ${vertex.y}) scale(${scale}) translate(${-DECO_STAR_CENTER} ${-DECO_STAR_CENTER})`
 }
 
+function sparkleAuraRadius(vertex) {
+  const scale = decoStarScale.value * (vertex.sparkleScale ?? 1)
+  return +(scale * DECO_SPARKLE_ARM * SPARKLE_GLOW_R_FACTOR).toFixed(3)
+}
+
 function cancelLineDrawRaf() {
   if (lineDrawRafId) {
     window.cancelAnimationFrame(lineDrawRafId)
@@ -743,7 +756,10 @@ onUnmounted(() => {
 }
 
 .cursor-vertex-star {
-  fill: url(#constellation-sparkle-fill);
+  fill: url(#constellation-sparkle-core);
+  filter:
+    drop-shadow(0 0 4px rgba(255, 255, 255, 0.45))
+    drop-shadow(0 0 10px rgba(56, 15, 233, 0.32));
 }
 
 .hero-constellations :deep(.hero-star-twinkle) {

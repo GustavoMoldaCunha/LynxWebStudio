@@ -23,6 +23,16 @@ const { root: revealRootEl, revealed } = useScrollRevealOnce({
 const revealStyle = computed(() =>
   props.delay ? { '--scroll-reveal-delay': `${props.delay}ms` } : undefined,
 )
+
+function escapeHtml(text) {
+  const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }
+  return String(text).replace(/[&<>"']/g, (m) => map[m])
+}
+
+function formatTextForNoOrphans(text) {
+  const escaped = escapeHtml(text)
+  return escaped.replace(/\s+([^\s]+)$/, '&nbsp;$1')
+}
 </script>
 
 <template>
@@ -40,8 +50,8 @@ const revealStyle = computed(() =>
   >
     <span v-for="(line, lineIndex) in lines" :key="lineIndex" class="title-line">
       <template v-for="(part, partIndex) in line" :key="partIndex">
-        <span v-if="part.accentClass" :class="part.accentClass">{{ part.text }}</span>
-        <template v-else>{{ part.text }}</template>
+        <span v-if="part.accentClass" :class="part.accentClass" v-html="formatTextForNoOrphans(part.text)"></span>
+        <span v-else v-html="formatTextForNoOrphans(part.text)"></span>
       </template>
     </span>
   </component>
