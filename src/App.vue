@@ -18,10 +18,6 @@
     <div class="hero-front">
       <div class="banner-copy" :style="heroParallax.layers.copy">
         <div class="banner-copy-head">
-          <div class="hero-pill" aria-label="Estratégia digital orientada à conversão">
-            <DecoSparkle class="hero-pill-sparkle" aria-hidden="true" />
-            <span>Estratégia digital orientada à conversão</span>
-          </div>
           <TypingTitle
             tag="h1"
             class="banner-title"
@@ -288,8 +284,21 @@
         <DecoSparkle class="extra-card-sparkle extra-card-sparkle--top" aria-hidden="true" />
         <DecoSparkle class="extra-card-sparkle extra-card-sparkle--bottom" aria-hidden="true" />
 
-        <div class="extra-media" aria-hidden="true">
-          <component :is="item.icon" class="extra-media-icon" />
+        <div
+          class="extra-media"
+          :class="{ 'extra-media--image': item.image }"
+          aria-hidden="true"
+        >
+          <img
+            v-if="item.image"
+            :src="item.image"
+            alt=""
+            class="extra-media-image"
+            loading="lazy"
+            decoding="async"
+            draggable="false"
+          />
+          <component v-else :is="item.icon" class="extra-media-icon" />
         </div>
 
         <div class="extra-card-body">
@@ -311,7 +320,7 @@
       </ScrollReveal>
     </div>
 
-    <div class="outros-block">
+    <div v-if="false" class="outros-block">
       <div class="outros-top">
         <p class="outros-sub">
           [ outros serviços ]
@@ -836,36 +845,42 @@
         title: 'Site Institucional',
         desc: 'Apresente sua empresa, seus serviços e seus diferenciais em uma estrutura profissional, responsiva e fácil de navegar.',
         icon: Globe,
+        image: '/SiteInstitucional.png',
         contatoMensagem: 'Desejo criar um site institucional.'
       },
       {
         title: 'Landing Page',
         desc: 'Uma página objetiva para divulgar um serviço, produto, campanha ou direcionar visitantes para uma ação específica.',
         icon: Zap,
+        image: '/LandingPage.png',
         contatoMensagem: 'Desejo criar uma landing page.'
       },
       {
         title: 'Loja Virtual',
         desc: 'Catálogo, carrinho e pagamentos integrados para sua empresa vender produtos pela internet com uma experiência organizada.',
         icon: Settings,
+        image: '/E-commerce.png',
         contatoMensagem: 'Desejo criar uma loja virtual.'
       },
       {
         title: 'Link na Bio Personalizado',
         desc: 'Uma página exclusiva para reunir serviços, contatos, agendamentos e links importantes com a identidade da sua marca.',
         icon: Link2,
+        image: '/LinkBio.png',
         contatoMensagem: 'Desejo criar um link na bio personalizado.'
       },
       {
         title: 'Sistema Web',
         desc: 'Ferramentas personalizadas para organizar cadastros, atendimentos, agendas, relatórios e processos internos.',
         icon: Code2,
+        image: '/Sistema.png',
         contatoMensagem: 'Desejo desenvolver um sistema web.'
       },
       {
         title: 'Assistente Inteligente',
         desc: 'Um assistente integrado ao site para responder dúvidas frequentes, apresentar informações e direcionar o visitante ao contato correto.',
         icon: MessageCircle,
+        image: '/AssistenteInteligente.jpg',
         contatoMensagem: 'Desejo contratar um assistente inteligente.'
       }
     ]
@@ -1220,6 +1235,7 @@
 .hero-constellation-band {
   position: absolute;
   inset: 0;
+  z-index: 3;
   pointer-events: none;
   transform-origin: center center;
 }
@@ -1245,7 +1261,7 @@
   color: #E8E6FF;
   user-select: none;
   background: linear-gradient(to bottom, #0A061C 0%, #160A4A 52%, #370EE7 100%);
-  --hero-title: clamp(3rem, 0.85rem + 6.2vw, 6.4rem);
+  --hero-title: clamp(2.45rem, 0.72rem + 4.7vw, 4.9rem);
   --hero-title-line-height: 1.08;
   --hero-title-glow-bleed: clamp(12px, 0.18em, 22px);
   --hero-title-shadow:
@@ -1259,18 +1275,19 @@
     0 0 32px rgba(240, 255, 31, 0.34),
     0 0 56px rgba(240, 255, 31, 0.2),
     0 0 88px rgba(240, 255, 31, 0.1);
-  --hero-desc: clamp(1rem, 1.15vw, 1.2rem);
-  --hero-copy-left: clamp(48px, 12vw, 180px);
+  --hero-desc: clamp(1rem, 1.08vw, 1.16rem);
+  --hero-copy-left: clamp(32px, 8vw, 128px);
   --hero-copy-width: min(78vw, 760px);
-  --hero-gap-title-desc: clamp(1.25rem, 2vh, 1.75rem);
-  --hero-gap-desc-btn: clamp(2.5rem, 5vh, 4rem);
-  --hero-btn-font: clamp(0.8125rem, 0.75rem + 0.35vw, 0.9375rem);
-  --hero-btn-secondary-font: clamp(0.8125rem, 0.75rem + 0.35vw, 0.9375rem);
-  --hero-btn-pad-y: clamp(12px, 0.65rem + 0.8vw, 18px);
-  --hero-btn-pad-x: clamp(22px, 1rem + 2.5vw, 44px);
-  --hero-btn-secondary-pad-x: clamp(20px, 0.85rem + 2.2vw, 38px);
-  --hero-btn-min-h: clamp(44px, 2.5rem + 1.2vw, 56px);
-  --hero-btn-secondary-min-h: clamp(42px, 2.35rem + 1.1vw, 54px);
+  --hero-action-width: clamp(360px, 34vw, 448px);
+  --hero-gap-title-desc: clamp(1.45rem, 2.4vh, 2rem);
+  --hero-gap-desc-btn: clamp(2rem, 4vh, 3.1rem);
+  --hero-btn-font: clamp(0.75rem, 0.7rem + 0.28vw, 0.86rem);
+  --hero-btn-secondary-font: clamp(0.75rem, 0.7rem + 0.28vw, 0.86rem);
+  --hero-btn-pad-y: clamp(10px, 0.55rem + 0.65vw, 15px);
+  --hero-btn-pad-x: clamp(20px, 0.9rem + 2vw, 36px);
+  --hero-btn-secondary-pad-x: clamp(18px, 0.8rem + 1.8vw, 32px);
+  --hero-btn-min-h: clamp(42px, 2.35rem + 0.95vw, 52px);
+  --hero-btn-secondary-min-h: clamp(40px, 2.25rem + 0.9vw, 50px);
 }
 
 .banner::after {
@@ -1316,17 +1333,18 @@
   position: absolute;
   left: var(--hero-copy-left);
   top: 50%;
-  z-index: 4;
+  z-index: auto;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 0;
-  width: var(--hero-copy-width);
+  width: fit-content;
   max-width: calc(100vw - var(--hero-copy-left) - clamp(24px, 4vw, 48px));
+  padding: clamp(64px, 7vh, 92px) clamp(18px, 2vw, 26px);
   transform: translateY(calc(-50% - clamp(12px, 2.5vh, 48px))) translate3d(var(--hero-parallax-x, 0), var(--hero-parallax-y, 0), 0);
   text-align: left;
   pointer-events: none;
-  isolation: isolate;
+  box-sizing: border-box;
 }
 
 .banner-copy-head {
@@ -1339,41 +1357,9 @@
 }
 
 .banner-copy > * {
+  position: relative;
+  z-index: 4;
   pointer-events: auto;
-}
-
-.hero-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: clamp(7px, 0.7vw, 10px);
-  max-width: 100%;
-  margin: 0 0 clamp(16px, 2.3vh, 26px);
-  padding: clamp(7px, 0.55vw, 10px) clamp(12px, 1.15vw, 18px);
-  border: 1px solid rgba(240, 255, 31, 0.42);
-  border-radius: 999px;
-  background: #111128;
-  box-shadow:
-    inset 0 0 0 1px rgba(232, 230, 255, 0.08),
-    0 0 24px rgba(56, 15, 233, 0.28),
-    0 0 28px rgba(240, 255, 31, 0.1);
-  color: rgba(232, 230, 255, 0.94);
-  font-family: var(--font-body);
-  font-size: clamp(0.54rem, 0.39rem + 0.32vw, 0.72rem);
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: clamp(0.07em, 0.13vw, 0.13em);
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.hero-pill-sparkle {
-  width: clamp(6px, 0.48vw, 8px);
-  height: clamp(6px, 0.48vw, 8px);
-  flex: 0 0 auto;
-  color: #F0FF1F;
-  filter:
-    drop-shadow(0 0 6px rgba(240, 255, 31, 0.72))
-    drop-shadow(0 0 12px rgba(240, 255, 31, 0.28));
 }
 
 .banner-title {
@@ -1410,7 +1396,7 @@
 
 .banner-description {
   width: auto;
-  max-width: min(100%, 520px);
+  max-width: min(100%, var(--hero-action-width));
   margin: var(--hero-gap-title-desc) 0 0;
   padding: 0;
   text-align: left;
@@ -1450,7 +1436,7 @@
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
-  width: 100%;
+  width: auto;
   min-height: 0;
   flex-shrink: 0;
   margin-top: var(--hero-gap-desc-btn);
@@ -2263,7 +2249,7 @@
 }
 
 .extras-grid {
-  --extra-divider-color: rgba(232, 230, 255, 0.44);
+  --extra-divider-color: rgba(79, 70, 229, 0.58);
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   width: 100vw;
@@ -2363,26 +2349,46 @@
 .extra-card {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(220px, 45%) minmax(0, 55%);
+  grid-template-columns: minmax(220px, 40%) minmax(0, 60%);
   min-height: clamp(280px, 34vw, 420px);
-  border-bottom: 1px solid var(--extra-divider-color);
+  border-bottom: 0;
   overflow: visible;
 }
 
-.extra-card:last-child {
-  border-bottom: 0;
+.extra-card:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  height: 1px;
+  background: var(--extra-divider-color);
+  pointer-events: none;
+}
+
+.extra-card:first-child::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 2;
+  height: 1px;
+  background: var(--extra-divider-color);
+  pointer-events: none;
 }
 
 .extra-card-sparkle {
   position: absolute;
-  left: 45%;
+  left: 40%;
   z-index: 3;
-  width: 22px;
-  height: 22px;
-  color: #E8E6FF;
+  width: 28px;
+  height: 28px;
+  color: #4F46E5;
   filter:
-    drop-shadow(0 0 12px rgba(232, 230, 255, 0.55))
-    drop-shadow(0 0 20px rgba(56, 15, 233, 0.36));
+    drop-shadow(0 0 12px rgba(79, 70, 229, 0.58))
+    drop-shadow(0 0 20px rgba(79, 70, 229, 0.28));
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
@@ -2417,6 +2423,18 @@
   height: clamp(64px, 9vw, 112px);
   color: rgba(240, 255, 31, 0.16);
   stroke-width: 1.25;
+}
+
+.extra-media--image {
+  overflow: hidden;
+}
+
+.extra-media-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
 }
 
 .extra-card-body {
@@ -2565,7 +2583,6 @@
   position: relative;
   z-index: 1;
 }
-
 
 .outro-cta {
   display: inline-flex;
@@ -4061,7 +4078,7 @@
 
   .banner-copy {
     position: relative;
-    z-index: 2;
+    z-index: auto;
     top: auto;
     left: auto;
     transform: none;
@@ -4103,7 +4120,7 @@
 
   .banner-footer {
     position: relative;
-    z-index: 3;
+    z-index: 4;
     justify-content: center;
     align-items: center;
     margin-top: var(--hero-gap-desc-btn);
@@ -4128,7 +4145,7 @@
     right: auto;
     bottom: auto;
     left: 50%;
-    z-index: 1;
+    z-index: 3;
     transform: translateX(-50%) translateY(calc(-1 * var(--hero-constellation-lift, 0px)));
     flex-shrink: 0;
     width: var(--hero-constellation-width);
@@ -4181,19 +4198,6 @@
 
   .intro-headline :deep(.title-line) {
     white-space: normal;
-  }
-
-  .hero-pill {
-    gap: 7px;
-    margin-bottom: clamp(14px, 3svh, 24px);
-    padding: 8px 11px;
-    font-size: clamp(0.5rem, 2.35vw, 0.62rem);
-    letter-spacing: 0.06em;
-  }
-
-  .hero-pill-sparkle {
-    width: 7px;
-    height: 7px;
   }
 
   .banner-inner {
