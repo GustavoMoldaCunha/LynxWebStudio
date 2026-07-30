@@ -101,7 +101,6 @@
 
         <div class="vantagens-wrap">
           <div class="vantagens">
-            <div class="vantagens-empty-row" aria-hidden="true"></div>
             <article class="vantagem-card"
               v-for="(item, index) in vantagens"
               :key="item.title">
@@ -1033,9 +1032,7 @@
 
     function mostrarAvisoEmail() {
       const email = formEmail.value.trim()
-      if (!formEmailTocado.value && !email) return false
-      if (!email) return formEmailTocado.value
-      return !emailValido(email)
+      return email.length > 0 && !emailValido(email)
     }
 
     function onEmailInput(event) {
@@ -1670,42 +1667,12 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   width: 100%;
   overflow: visible;
+  border-top: 1px solid var(--vantagem-divider-color);
   border-bottom: 1px solid var(--vantagem-divider-color);
   background:
     radial-gradient(ellipse 70% 85% at 100% 0%, rgba(56, 15, 233, 0.18), transparent 58%),
     radial-gradient(ellipse 80% 70% at 0% 100%, rgba(240, 255, 31, 0.06), transparent 62%),
     rgba(10, 10, 20, 0.58);
-}
-
-.vantagens-empty-row {
-  position: relative;
-  grid-column: 1 / -1;
-  min-height: clamp(150px, 16vw, 220px);
-  border-bottom: 1px solid var(--vantagem-divider-color);
-  background:
-    radial-gradient(ellipse 50% 110% at 24% 50%, rgba(102, 154, 255, 0.14), transparent 68%),
-    radial-gradient(ellipse 60% 90% at 78% 30%, rgba(56, 15, 233, 0.16), transparent 66%),
-    rgba(13, 10, 36, 0.28);
-}
-
-.vantagens-empty-row::before,
-.vantagens-empty-row::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  z-index: 2;
-  width: 1px;
-  background: var(--vantagem-divider-color);
-  pointer-events: none;
-}
-
-.vantagens-empty-row::before {
-  left: 33.333%;
-}
-
-.vantagens-empty-row::after {
-  left: 66.666%;
 }
 
 .vantagem-card {
@@ -2447,7 +2414,7 @@
   position: relative;
   display: grid;
   grid-template-columns: minmax(220px, 40%) minmax(0, 60%);
-  min-height: clamp(280px, 34vw, 420px);
+  height: clamp(250px, 29vw, 360px);
   border-bottom: 0;
   overflow: visible;
 }
@@ -2539,13 +2506,13 @@
   isolation: isolate;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: clamp(28px, 4vw, 56px);
+  justify-content: flex-start;
+  gap: clamp(22px, 3vw, 40px);
   min-width: 0;
-  padding: clamp(32px, 4.8vw, 64px) clamp(28px, 5.5vw, 76px);
+  padding: clamp(26px, 3.6vw, 46px) clamp(26px, 4.8vw, 64px);
   background:
-    radial-gradient(ellipse 70% 90% at 100% 0%, rgba(56, 15, 233, 0.18), transparent 62%),
-    rgba(13, 10, 36, 0.68);
+    radial-gradient(ellipse 70% 90% at 100% 0%, rgba(56, 15, 233, 0.1), transparent 64%),
+    rgba(13, 10, 36, 0.58);
 }
 
 .extra-card-body::before {
@@ -2555,12 +2522,12 @@
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 34% 88% at 104% 50%, rgba(102, 154, 255, 0.42) 0%, rgba(35, 101, 255, 0.2) 34%, transparent 74%),
-    radial-gradient(ellipse 28% 78% at 100% 50%, rgba(232, 230, 255, 0.22) 0%, rgba(79, 70, 229, 0.22) 34%, transparent 74%),
-    linear-gradient(to left, rgba(102, 154, 255, 0.14) 0%, rgba(35, 101, 255, 0.06) 24%, rgba(10, 10, 20, 0) 100%);
+    radial-gradient(ellipse 34% 88% at 104% 50%, rgba(102, 154, 255, 0.22) 0%, rgba(35, 101, 255, 0.1) 34%, transparent 76%),
+    radial-gradient(ellipse 28% 78% at 100% 50%, rgba(232, 230, 255, 0.1) 0%, rgba(79, 70, 229, 0.12) 34%, transparent 76%),
+    linear-gradient(to left, rgba(102, 154, 255, 0.07) 0%, rgba(35, 101, 255, 0.03) 24%, rgba(10, 10, 20, 0) 100%);
   box-shadow:
-    inset -18px 0 30px rgba(102, 154, 255, 0.12),
-    inset -7px 0 14px rgba(232, 230, 255, 0.1);
+    inset -18px 0 30px rgba(102, 154, 255, 0.06),
+    inset -7px 0 14px rgba(232, 230, 255, 0.05);
 }
 
 .extra-card-body > * {
@@ -2575,7 +2542,7 @@
 .extra-card h4 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.7rem, 3vw, 2.7rem);
+  font-size: clamp(1.5rem, 2.55vw, 2.3rem);
   font-weight: 600;
   line-height: 1.08;
   color: #E8E6FF;
@@ -3147,17 +3114,66 @@
   z-index: 1;
 }
 
+.processo-card:nth-child(1)::after {
+  background:
+    radial-gradient(ellipse 88% 34% at 50% 104%, rgba(102, 154, 255, 0.26) 0%, rgba(35, 101, 255, 0.12) 34%, transparent 76%),
+    radial-gradient(ellipse 78% 28% at 50% 100%, rgba(232, 230, 255, 0.12) 0%, rgba(79, 70, 229, 0.12) 34%, transparent 76%),
+    linear-gradient(to bottom, rgba(10, 10, 20, 0) 0%, rgba(35, 101, 255, 0.03) 76%, rgba(102, 154, 255, 0.08) 100%);
+  box-shadow:
+    inset 0 -18px 30px rgba(102, 154, 255, 0.06),
+    inset 0 -7px 14px rgba(232, 230, 255, 0.05),
+    inset 12px 0 24px rgba(35, 101, 255, 0.04),
+    inset -12px 0 24px rgba(79, 70, 229, 0.04);
+}
+
+.processo-card:nth-child(2)::after {
+  background:
+    radial-gradient(ellipse 88% 34% at 50% -4%, rgba(102, 154, 255, 0.24) 0%, rgba(35, 101, 255, 0.1) 34%, transparent 76%),
+    radial-gradient(ellipse 78% 28% at 50% 0%, rgba(232, 230, 255, 0.1) 0%, rgba(79, 70, 229, 0.11) 34%, transparent 76%),
+    linear-gradient(to top, rgba(10, 10, 20, 0) 0%, rgba(35, 101, 255, 0.025) 76%, rgba(102, 154, 255, 0.07) 100%);
+  box-shadow:
+    inset 0 18px 30px rgba(102, 154, 255, 0.05),
+    inset 0 7px 14px rgba(232, 230, 255, 0.04),
+    inset 12px 0 24px rgba(35, 101, 255, 0.03),
+    inset -12px 0 24px rgba(79, 70, 229, 0.03);
+}
+
+.processo-card:nth-child(3)::after {
+  background:
+    radial-gradient(ellipse 34% 88% at -4% 50%, rgba(102, 154, 255, 0.24) 0%, rgba(35, 101, 255, 0.1) 34%, transparent 76%),
+    radial-gradient(ellipse 28% 78% at 0% 50%, rgba(232, 230, 255, 0.1) 0%, rgba(79, 70, 229, 0.11) 34%, transparent 76%),
+    linear-gradient(to right, rgba(102, 154, 255, 0.07) 0%, rgba(35, 101, 255, 0.025) 24%, rgba(10, 10, 20, 0) 100%);
+  box-shadow:
+    inset 18px 0 30px rgba(102, 154, 255, 0.05),
+    inset 7px 0 14px rgba(232, 230, 255, 0.04),
+    inset 0 -12px 24px rgba(35, 101, 255, 0.03),
+    inset 0 12px 24px rgba(79, 70, 229, 0.03);
+}
+
+.processo-card:nth-child(4)::after {
+  background:
+    radial-gradient(ellipse 34% 88% at 104% 50%, rgba(102, 154, 255, 0.24) 0%, rgba(35, 101, 255, 0.1) 34%, transparent 76%),
+    radial-gradient(ellipse 28% 78% at 100% 50%, rgba(232, 230, 255, 0.1) 0%, rgba(79, 70, 229, 0.11) 34%, transparent 76%),
+    linear-gradient(to left, rgba(102, 154, 255, 0.07) 0%, rgba(35, 101, 255, 0.025) 24%, rgba(10, 10, 20, 0) 100%);
+  box-shadow:
+    inset -18px 0 30px rgba(102, 154, 255, 0.05),
+    inset -7px 0 14px rgba(232, 230, 255, 0.04),
+    inset 0 -12px 24px rgba(35, 101, 255, 0.03),
+    inset 0 12px 24px rgba(79, 70, 229, 0.03);
+}
+
 .processo-numero {
   position: absolute;
   top: 12px;
   right: 16px;
-  font-size: 4.5rem;
+  font-size: clamp(5rem, 7.5vw, 6.25rem);
   font-weight: 700;
-  color: rgba(56,15,233,0.1);
+  color: rgba(102, 154, 255, 0.16);
   line-height: 1;
   pointer-events: none;
   user-select: none;
   z-index: 0;
+  text-shadow: 0 0 24px rgba(56, 15, 233, 0.18);
 }
 
 .processo-card h3 {
@@ -3608,9 +3624,9 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: clamp(58px, 6.5vw, 96px);
-  padding: clamp(28px, 3vw, 40px);
+  justify-content: space-between;
+  gap: clamp(24px, 3vw, 42px);
+  padding: clamp(24px, 2.5vw, 34px);
   border-radius: 18px;
   border: 1.5px solid rgba(255, 255, 255, 0.26);
   background:
@@ -3756,15 +3772,6 @@
   .vantagens {
     display: grid;
     grid-template-columns: 1fr;
-  }
-
-  .vantagens-empty-row {
-    min-height: clamp(120px, 34vw, 180px);
-  }
-
-  .vantagens-empty-row::before,
-  .vantagens-empty-row::after {
-    display: none;
   }
 
   .vantagem-card {
@@ -4126,6 +4133,7 @@
 
   .extra-card {
     grid-template-columns: minmax(0, 1fr);
+    height: auto;
     min-height: 0;
   }
 
