@@ -4,7 +4,7 @@
     <div class="navbar-glass" aria-hidden="true"></div>
     <div class="container">
       <RouterLink to="/">
-       <img src="../assets/LynxLogoLetras.png" alt="Logo Lynx" class="logo" draggable="false">
+       <img src="../assets/LynxLogoLetras.webp" alt="Logo Lynx" class="logo" draggable="false">
       </RouterLink>
 
       <!-- MENU DESKTOP -->

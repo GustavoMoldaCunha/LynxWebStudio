@@ -16,12 +16,15 @@ export const HERO_SKY_DESKTOP = {
   constellationLineClearance: 0.55,
   constellationInteriorClearance: 0.85,
   starfieldClip: { x: 0, y: 0, width: 100, height: 88 },
+  starfieldTextExclusion: [
+    { x: 9, y: 31, width: 38, height: 34, pad: 0.7 },
+  ],
   preserveAspectRatio: 'xMidYMid slice',
   constellation: {
     clip: { x: 47, y: 32, width: 53, height: 36 },
-    tx: 58,
+    tx: 54,
     ty: 30,
-    scale: 2,
+    scale: 1.53,
     starSizeScale: 1.5,
   },
 }
@@ -51,6 +54,9 @@ export const HERO_SKY_TABLET = {
   /* Constellation is CSS-positioned in a separate band; don't clear mid-sky. */
   starfieldIgnoreConstellation: true,
   starfieldClip: { x: 0, y: 0, width: 100, height: 88 },
+  starfieldTextExclusion: [
+    { x: 10, y: 10, width: 80, height: 54, pad: 1.8 },
+  ],
   preserveAspectRatio: 'xMidYMid slice',
   constellationPreserveAspectRatio: 'xMidYMid meet',
   constellationViewBox: { x: 32, y: 25, width: 38, height: 44 },
@@ -66,13 +72,19 @@ export const HERO_SKY_TABLET = {
 
 export const HERO_SKY_MOBILE = {
   id: 'mobile',
-  starCount: 155,
+  starCount: 230,
   starSeed: 91427,
   yMax: 99,
   ySpawnMin: 2,
-  ySpawnMax: 88,
+  ySpawnMax: 96,
   yUniform: true,
-  minSpacing: 2.15,
+  yBands: [
+    { share: 0.18, ySpawnMin: 1.5, ySpawnMax: 14 },
+    { share: 0.18, ySpawnMin: 14, ySpawnMax: 30 },
+    { share: 0.32, ySpawnMin: 30, ySpawnMax: 66 },
+    { share: 0.32, ySpawnMin: 66, ySpawnMax: 98 },
+  ],
+  minSpacing: 1.55,
   constellationClearance: 4.2,
   constellationLineClearance: 1.6,
   constellationInteriorClearance: 2.0,
@@ -80,10 +92,11 @@ export const HERO_SKY_MOBILE = {
   /* Constellation is CSS-positioned in a separate band; don't clear mid-sky. */
   starfieldIgnoreConstellation: true,
   starfieldSizeScale: 0.561,
-  glowShare: 0.08,
-  sparkleShare: 0.05,
+  glowShare: 0.075,
+  sparkleShare: 0.035,
   starfieldClip: { x: 0, y: 0, width: 100, height: 99 },
-  preserveAspectRatio: 'xMidYMid slice',
+  starfieldTextExclusion: [],
+  preserveAspectRatio: 'xMidYMin meet',
   constellationPreserveAspectRatio: 'xMidYMid meet',
   constellationViewBox: { x: 32, y: 25, width: 38, height: 44 },
   constellation: {
@@ -98,6 +111,43 @@ export const HERO_SKY_MOBILE = {
 
 const DESKTOP_HEIGHT_REF = 920
 const DESKTOP_HEIGHT_MIN = 600
+
+function scaleStarfieldRect(rect, scaleY) {
+  return {
+    ...rect,
+    y: +(rect.y * scaleY).toFixed(2),
+    height: +(rect.height * scaleY).toFixed(2),
+  }
+}
+
+function scaleStarfieldBand(band, scaleY) {
+  return {
+    ...band,
+    ySpawnMin: +(band.ySpawnMin * scaleY).toFixed(2),
+    ySpawnMax: +(band.ySpawnMax * scaleY).toFixed(2),
+  }
+}
+
+function fitMobileStarfield(layout, viewportWidth, viewportHeight) {
+  const viewBoxHeight = Math.max(
+    100,
+    Math.min(240, (100 * viewportHeight) / Math.max(1, viewportWidth)),
+  )
+  const scaleY = viewBoxHeight / 100
+
+  return {
+    ...layout,
+    starfieldViewBoxHeight: +viewBoxHeight.toFixed(2),
+    yMax: +(layout.yMax * scaleY).toFixed(2),
+    ySpawnMin: +(layout.ySpawnMin * scaleY).toFixed(2),
+    ySpawnMax: +(layout.ySpawnMax * scaleY).toFixed(2),
+    starfieldClip: scaleStarfieldRect(layout.starfieldClip, scaleY),
+    starfieldTextExclusion: layout.starfieldTextExclusion.map((rect) =>
+      scaleStarfieldRect(rect, scaleY),
+    ),
+    yBands: layout.yBands?.map((band) => scaleStarfieldBand(band, scaleY)),
+  }
+}
 
 function clamp01(value) {
   return Math.min(1, Math.max(0, value))
@@ -214,7 +264,9 @@ export function getHeroSkyLayout(
   viewportHeight = DESKTOP_HEIGHT_REF,
   navbarHeightPx = 88,
 ) {
-  if (viewportWidth <= 480) return HERO_SKY_MOBILE
+  if (viewportWidth <= 480) {
+    return fitMobileStarfield(HERO_SKY_MOBILE, viewportWidth, viewportHeight)
+  }
   if (viewportWidth <= 920) return HERO_SKY_TABLET
 
   return {

@@ -63,6 +63,39 @@ function sampleY(rand, spawnMin, spawnMax, options = {}) {
   return denseLimit + rand() * (spawnMax - denseLimit)
 }
 
+function sampleBandY(rand, bands, fallback) {
+  if (!bands?.length) return null
+
+  const totalShare = bands.reduce((sum, band) => sum + Math.max(0, band.share ?? 0), 0)
+  if (totalShare <= 0) return null
+
+  let pick = rand() * totalShare
+  for (const band of bands) {
+    pick -= Math.max(0, band.share ?? 0)
+    if (pick <= 0) {
+      return sampleY(
+        rand,
+        band.ySpawnMin ?? fallback.ySpawnMin,
+        band.ySpawnMax ?? fallback.ySpawnMax,
+        {
+          yUniform: band.yUniform ?? fallback.yUniform,
+          yDenseShare: band.yDenseShare ?? fallback.yDenseShare,
+          yDensePower: band.yDensePower ?? fallback.yDensePower,
+          yDenseSpan: band.yDenseSpan ?? fallback.yDenseSpan,
+        },
+      )
+    }
+  }
+
+  const last = bands[bands.length - 1]
+  return sampleY(
+    rand,
+    last.ySpawnMin ?? fallback.ySpawnMin,
+    last.ySpawnMax ?? fallback.ySpawnMax,
+    fallback,
+  )
+}
+
 function violatesSpacing(stars, candidate, minSpacing) {
   const candidateExtent = heroStarExtent(candidate)
 
@@ -85,6 +118,28 @@ function withinBounds({ x, y, extent }, yMax) {
   )
 }
 
+export function violatesHeroTextExclusion(candidate, layout) {
+  const exclusions = layout?.starfieldTextExclusion ?? []
+  if (!exclusions.length) return false
+
+  const extent = heroStarExtent(candidate)
+
+  return exclusions.some((rect) => {
+    const pad = rect.pad ?? 0
+    const x = rect.x - pad
+    const y = rect.y - pad
+    const right = rect.x + rect.width + pad
+    const bottom = rect.y + rect.height + pad
+
+    return (
+      candidate.x + extent >= x &&
+      candidate.x - extent <= right &&
+      candidate.y + extent >= y &&
+      candidate.y - extent <= bottom
+    )
+  })
+}
+
 export function generateHeroStarfield(layout, viewportWidth) {
   const {
     starCount: count = 210,
@@ -97,6 +152,7 @@ export function generateHeroStarfield(layout, viewportWidth) {
     yDensePower = 0.4,
     yDenseSpan = 0.82,
     yUniform = false,
+    yBands = null,
     minSpacing = 1.6,
     glowShare = GLOW_SHARE,
     sparkleShare = SPARKLE_SHARE,
@@ -121,7 +177,9 @@ export function generateHeroStarfield(layout, viewportWidth) {
     attempts += 1
 
     const x = rand() * 100
-    const y = sampleY(rand, ySpawnMin, ySpawnMax, ySampleOptions)
+    const y =
+      sampleBandY(rand, yBands, { ySpawnMin, ySpawnMax, ...ySampleOptions }) ??
+      sampleY(rand, ySpawnMin, ySpawnMax, ySampleOptions)
     const remaining = count - stars.length
     const glowRemaining = glowTarget - glowPlaced
     const sparkleRemaining = sparkleTarget - sparklePlaced
@@ -205,6 +263,11 @@ export function generateHeroStarfield(layout, viewportWidth) {
     }
 
     if (violatesSpacing(stars, candidate, minSpacing)) {
+      rollbackQuotas()
+      continue
+    }
+
+    if (violatesHeroTextExclusion(candidate, layout)) {
       rollbackQuotas()
       continue
     }

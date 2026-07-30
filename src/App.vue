@@ -45,12 +45,19 @@
           <div class="banner-footer-buttons">
             <div class="banner-footer-side banner-footer-side--left">
               <a class="scroll-btn scroll-btn--outline btn-link banner-footer-link" href="#servicos">
-                <span>Ver serviços</span>
+                <span>Ver soluções</span>
                 <ArrowDown :size="12" stroke-width="2.5" />
               </a>
             </div>
             <div class="banner-footer-side banner-footer-side--right">
-              <button class="scroll-btn banner-footer-cta" @click="scrollToContato">Peça agora</button>
+              <a
+                class="scroll-btn banner-footer-cta btn-link"
+                href="https://wa.me/5522981069554?text=Ol%C3%A1%2C%20gostaria%20de%20solicitar%20um%20or%C3%A7amento%20para%20meu%20projeto."
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Peça agora
+              </a>
             </div>
           </div>
         </ScrollReveal>
@@ -85,44 +92,50 @@
         <TypingTitle
           class="intro-headline"
           :lines="[
-            [{ text: 'Como nós podemos' }],
-            [
-              { text: 'ajudar', accentClass: 'accent' },
-              { text: ' o seu negócio' }
-            ]
+            [{ text: 'O que podemos' }],
+            [{ text: 'fazer pelo seu' }],
+            [{ text: 'negócio', accentClass: 'accent' }]
           ]"
         />
-        <p class="intro-sub">Investir em site responsivo, design atraente e velocidade gera vantagem competitiva</p>
+        <p class="intro-sub">Mais do que colocar sua empresa online, criamos uma estrutura para ela ser encontrada, transmitir confiança e gerar novas oportunidades.</p>
 
         <div class="vantagens-wrap">
           <div class="vantagens">
-            <div class="vantagem-bar"
-              v-for="item in vantagens"
+            <div class="vantagens-empty-row" aria-hidden="true"></div>
+            <article class="vantagem-card"
+              v-for="(item, index) in vantagens"
               :key="item.title">
-              <div class="vantagem-header">
-                <div class="icon-box">
-                  <component :is="item.icon" />
+              <DecoSparkle
+                v-if="index === 0"
+                class="vantagem-card-sparkle vantagem-card-sparkle--edge vantagem-card-sparkle--edge-left vantagem-card-sparkle--top"
+                aria-hidden="true"
+              />
+              <DecoSparkle
+                v-if="index === 0"
+                class="vantagem-card-sparkle vantagem-card-sparkle--edge vantagem-card-sparkle--edge-left vantagem-card-sparkle--bottom"
+                aria-hidden="true"
+              />
+              <DecoSparkle class="vantagem-card-sparkle vantagem-card-sparkle--top" aria-hidden="true" />
+              <DecoSparkle class="vantagem-card-sparkle vantagem-card-sparkle--bottom" aria-hidden="true" />
+              <DecoSparkle
+                v-if="index === vantagens.length - 1"
+                class="vantagem-card-sparkle vantagem-card-sparkle--edge vantagem-card-sparkle--edge-right vantagem-card-sparkle--top"
+                aria-hidden="true"
+              />
+              <DecoSparkle
+                v-if="index === vantagens.length - 1"
+                class="vantagem-card-sparkle vantagem-card-sparkle--edge vantagem-card-sparkle--edge-right vantagem-card-sparkle--bottom"
+                aria-hidden="true"
+              />
+              <div class="vantagem-body">
+                <div class="vantagem-header">
+                  <h3>{{ item.title }}</h3>
                 </div>
-                <h3>{{ item.title }}</h3>
-                <span class="vantagem-chevron" aria-hidden="true">
-                  <ChevronDown />
-                </span>
+                <p>{{ item.desc }}</p>
               </div>
-              <p>{{ item.desc }}</p>
-            </div>
+            </article>
           </div>
         </div>
-      </div>
-
-      <div class="intro-decoracao direita">
-        <SectionDecoDraw observe-target=".intro-wrapper" reverse>
-          <template #star>
-            <DecoSparkle class="deco-angulo deco-sparkle" />
-          </template>
-          <template #line>
-            <SectionDecoLine class="barra-lateral" orientation="vertical" reverse />
-          </template>
-        </SectionDecoDraw>
       </div>
 
     </div>
@@ -147,7 +160,7 @@
               <SectionDecoLine class="section-deco-line" />
             </template>
           </SectionDecoDraw>
-          <span class="section-deco-label">[ formatos de consultoria ]</span>
+          <span class="section-deco-label">[ soluções ]</span>
         </div>
       </div>
 
@@ -485,8 +498,7 @@
             :delay="720"
           >
             {{ projetos[activeProject].ctaLabel ?? 'Visitar site' }}
-            <ArrowUpRight v-if="projetos[activeProject].ctaArrowUp" class="portfolio-cta-arrow" aria-hidden="true" />
-            <span v-else aria-hidden="true">→</span>
+            <ArrowRight class="portfolio-cta-arrow" aria-hidden="true" />
           </ScrollReveal>
 
           <ScrollReveal class="portfolio-dots" :delay="840" role="tablist" aria-label="Projetos do portfólio">
@@ -570,7 +582,7 @@
     </section>
 
   <!---------------------- PRICING --------------------->
-  <section class="pricing" id="pricing">
+  <section v-if="SHOW_PRICING_SECTION" class="pricing" id="pricing">
     <div class="pricing-wrapper">
 
       <div class="pricing-header">
@@ -642,136 +654,74 @@
   <!---------------------- CONTATO --------------------->
   <section class="contato" id="contato" data-section="contato">
     <div class="contato-inner">
-      <!-- Lado esquerdo -->
-        <div class="contato-left">
-          <TypingTitle
-            class="contato-headline"
-            :lines="[
-              [{ text: 'Vamos Conversar' }],
-              [{ text: 'E Conectar', accentClass: 'contato-accent' }]
-            ]"
-          />
-          
-          <p class="contato-desc">
-            Conte-nos sobre o seu projeto e daremos o primeiro passo juntos.
-          </p>
-
-          <div class="contato-info">
-            <div class="contato-form-group">
-              <span class="contato-label">WhatsApp</span>
-              <div class="contato-input-shell contato-info-card">
-                <a
-                  class="contato-info-link"
-                  href="https://wa.me/5522981069554?text=Olá, gostaria de mais informações."
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span class="contato-info-text">+55 (22) 98106-9554</span>
-                  <ArrowRight class="contato-info-arrow" aria-hidden="true" />
-                </a>
-              </div>
-            </div>
-
-            <div class="contato-form-group">
-              <span class="contato-label">E-mail</span>
-              <div class="contato-input-shell contato-info-card">
-                <a
-                  class="contato-info-link"
-                  href="mailto:contato@lynx.app.br?subject=Contato%20pelo%20site%20LYNX&body=Olá,%20gostaria%20de%20mais%20informações."
-                >
-                  <span class="contato-info-text">contato@lynx.app.br</span>
-                  <ArrowRight class="contato-info-arrow" aria-hidden="true" />
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      
       <form class="contato-form-wrap" @submit.prevent="enviarFormulario">
-        <div class="contato-form-group">
-          <label class="contato-label" for="contato-nome">Nome</label>
-          <div class="contato-input-shell">
+        <h2 class="contato-form-title">
+          Tem alguma pergunta?<br>
+          Vamos conversar
+        </h2>
+
+        <div class="contato-form-row">
+          <div class="contato-form-group">
+            <label class="contato-label" for="contato-nome">Nome*</label>
             <input
               id="contato-nome"
               v-model="formNome"
               class="contato-input"
               type="text"
               name="nome"
-              placeholder="Seu nome"
+              placeholder="Digite seu nome"
               :disabled="formLoading"
               required
             />
           </div>
-        </div>
 
-        <div class="contato-form-group">
-          <label class="contato-label" for="contato-email">E-mail</label>
-          <div
-            class="contato-input-shell"
-            :class="{ 'contato-input-shell--invalid': mostrarAvisoEmail() }"
-          >
+          <div class="contato-form-group">
+            <label class="contato-label" for="contato-email">E-mail*</label>
             <input
               id="contato-email"
               :value="formEmail"
               class="contato-input"
+              :class="{ 'contato-input--invalid': mostrarAvisoEmail() }"
               type="email"
               name="email"
               inputmode="email"
               autocomplete="email"
-              placeholder="seu@email.com"
+              placeholder="Digite seu e-mail"
               :disabled="formLoading"
               required
               @input="onEmailInput"
               @blur="formEmailTocado = true"
             />
           </div>
-          <p
-            v-if="mostrarAvisoEmail()"
-            class="contato-feedback contato-feedback--aviso"
-            role="status"
-          >
-            Informe um e-mail válido com @ e domínio (ex.: nome@empresa.com).
-          </p>
         </div>
 
-        <div class="contato-form-group">
-          <label class="contato-label" for="contato-telefone">Telefone / Whatsapp</label>
-          <div class="contato-input-shell">
-            <input
-              id="contato-telefone"
-              v-model="formTelefone"
-              class="contato-input"
-              type="tel"
-              name="telefone"
-              placeholder="+55 (22) 00000-0000"
-              :disabled="formLoading"
-              required
-            />
-          </div>
-        </div>
+        <p
+          v-if="mostrarAvisoEmail()"
+          class="contato-feedback contato-feedback--aviso"
+          role="status"
+        >
+          Informe um e-mail válido com @ e domínio (ex.: nome@empresa.com).
+        </p>
 
         <div class="contato-form-group">
-          <label class="contato-label" for="contato-detalhes">Detalhes</label>
-          <div class="contato-input-shell contato-input-shell--textarea">
-            <textarea
-              id="contato-detalhes"
-              v-model="formDetalhes"
-              class="contato-input contato-textarea"
-              name="mensagem"
-              placeholder="Conte-nos sobre o seu negócio e o que você precisa..."
-              rows="5"
-              :disabled="formLoading"
-              required
-            ></textarea>
-          </div>
+          <label class="contato-label" for="contato-detalhes">Mensagem*</label>
+          <textarea
+            id="contato-detalhes"
+            v-model="formDetalhes"
+            class="contato-input contato-textarea"
+            name="mensagem"
+            placeholder="Digite sua mensagem"
+            rows="4"
+            :disabled="formLoading"
+            required
+          ></textarea>
         </div>
 
         <p v-if="formErro" class="contato-feedback contato-feedback--erro" role="alert">
           {{ formErro }}
         </p>
 
-        <div class="btn-constellation-contato">
+        <div class="contato-actions">
           <button
             class="contato-submit"
             :class="{ 'contato-submit--success': formEnviado }"
@@ -780,10 +730,52 @@
           >
             <span v-if="formLoading">Enviando...</span>
             <span v-else-if="formEnviado">✓ Enviado com sucesso!</span>
-            <span v-else>Enviar Solicitação</span>
+            <span v-else>Enviar</span>
+            <span class="contato-submit-icon" aria-hidden="true">
+              <ArrowUpRight />
+            </span>
           </button>
+          <p class="contato-privacy">Ao enviar, você concorda com nossa Política de Privacidade.</p>
         </div>
       </form>
+
+      <div class="contato-links" aria-label="Canais de contato">
+        <a
+          class="contato-channel-card"
+          :href="INSTAGRAM_URL"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span class="contato-channel-main">
+            <span class="contato-channel-icon">
+              <Instagram aria-hidden="true" />
+            </span>
+            <span class="contato-channel-name">Instagram</span>
+          </span>
+          <span class="contato-channel-action">
+            <span class="contato-channel-arrow"><ArrowUpRight aria-hidden="true" /></span>
+            Abrir perfil
+          </span>
+        </a>
+
+        <a
+          class="contato-channel-card"
+          href="https://wa.me/5522981069554?text=Ol%C3%A1%2C%20gostaria%20de%20mais%20informa%C3%A7%C3%B5es."
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span class="contato-channel-main">
+            <span class="contato-channel-icon">
+              <MessageCircle aria-hidden="true" />
+            </span>
+            <span class="contato-channel-name">WhatsApp</span>
+          </span>
+          <span class="contato-channel-action">
+            <span class="contato-channel-arrow"><ArrowUpRight aria-hidden="true" /></span>
+            Iniciar conversa
+          </span>
+        </a>
+      </div>
     </div>
   </section>
   </main>
@@ -810,34 +802,31 @@
     import { useHeroMobileMinHeight } from './composables/useHeroMobileMinHeight.js'
     import { useHeroParallax } from './composables/useHeroParallax.js'
     import { useServiceStackScroll } from './composables/useServiceStackScroll.js'
-    import LynxLogo from './assets/LynxLogoLetras.png'
+    import LynxLogo from './assets/LynxLogoLetras.webp'
     import GeoaxisPreview from './assets/geoaxisambiental.com.br.webp'
     import VictormolPreview from './assets/www.victormol.com.br_.webp'
-    import { SlidersHorizontal, Globe, ShieldCheck, Eye, 
-             MessageCircle, Zap, Settings, Instagram, 
-             Link2, Code2, ArrowUpRight, ArrowRight, ArrowDown, ChevronDown } from 'lucide-vue-next'
+    import { Globe, MessageCircle, Zap, Settings, Instagram, 
+             Link2, Code2, ArrowUpRight, ArrowRight, ArrowDown } from 'lucide-vue-next'
+
+    const SHOW_PRICING_SECTION = false
+    const INSTAGRAM_URL = 'https://www.instagram.com/lynxwebstudio'
 
     const vantagens = [
       {
-        title: 'Seu negócio visível todos os dias',
-        desc: 'Seu site trabalha 24h por você, atraindo clientes mesmo fora do horário comercial.',
-        icon: Eye
+        title: 'Seja encontrado por novos clientes',
+        desc: 'Tenha uma presença profissional no Google e permita que pessoas que já procuram pelos seus serviços encontrem sua empresa com facilidade.',
+        icon: Globe,
       },
       {
-        title: 'Credibilidade e Profissionalismo',
-        desc: 'Seu site transmite profissionalismo e segurança, fazendo sua empresa parecer mais confiável desde o primeiro contato.',
-        icon: ShieldCheck
+        title: 'Transforme visitas em contatos',
+        desc: 'Organizamos informações, serviços e chamadas para ação para que o visitante entenda rapidamente sua empresa e saiba qual é o próximo passo.',
+        icon: MessageCircle,
       },
       {
-        title: 'Alcance fora das redes sociais',
-        desc: 'Você não depende de algoritmos — seu site garante presença online estável e acesso direto aos seus clientes.',
-        icon: Globe
+        title: 'Evolua seu site junto com o negócio',
+        desc: 'Comece com o que sua empresa precisa hoje e adicione novas páginas, integrações e automações conforme ela evolui.',
+        icon: Settings,
       },
-      {
-        title: 'Controle total do seu negócio online',
-        desc: 'Você decide como apresentar sua marca, seus serviços e sua comunicação, sem limitações de plataformas externas.',
-        icon: SlidersHorizontal
-      }
     ]
 
     const extras = [
@@ -845,42 +834,42 @@
         title: 'Site Institucional',
         desc: 'Apresente sua empresa, seus serviços e seus diferenciais em uma estrutura profissional, responsiva e fácil de navegar.',
         icon: Globe,
-        image: '/SiteInstitucional.png',
+        image: '/SiteInstitucional.webp',
         contatoMensagem: 'Desejo criar um site institucional.'
       },
       {
         title: 'Landing Page',
         desc: 'Uma página objetiva para divulgar um serviço, produto, campanha ou direcionar visitantes para uma ação específica.',
         icon: Zap,
-        image: '/LandingPage.png',
+        image: '/LandingPage.webp',
         contatoMensagem: 'Desejo criar uma landing page.'
       },
       {
         title: 'Loja Virtual',
         desc: 'Catálogo, carrinho e pagamentos integrados para sua empresa vender produtos pela internet com uma experiência organizada.',
         icon: Settings,
-        image: '/E-commerce.png',
+        image: '/E-commerce.webp',
         contatoMensagem: 'Desejo criar uma loja virtual.'
       },
       {
         title: 'Link na Bio Personalizado',
         desc: 'Uma página exclusiva para reunir serviços, contatos, agendamentos e links importantes com a identidade da sua marca.',
         icon: Link2,
-        image: '/LinkBio.png',
+        image: '/LinkBio.webp',
         contatoMensagem: 'Desejo criar um link na bio personalizado.'
       },
       {
         title: 'Sistema Web',
         desc: 'Ferramentas personalizadas para organizar cadastros, atendimentos, agendas, relatórios e processos internos.',
         icon: Code2,
-        image: '/Sistema.png',
+        image: '/Sistema.webp',
         contatoMensagem: 'Desejo desenvolver um sistema web.'
       },
       {
         title: 'Assistente Inteligente',
         desc: 'Um assistente integrado ao site para responder dúvidas frequentes, apresentar informações e direcionar o visitante ao contato correto.',
         icon: MessageCircle,
-        image: '/AssistenteInteligente.jpg',
+        image: '/AssistenteInteligente.webp',
         contatoMensagem: 'Desejo contratar um assistente inteligente.'
       }
     ]
@@ -935,7 +924,7 @@
           'WhatsApp, formulário e chamadas para contato',
           'SEO técnico, domínio, publicação e suporte inicial',
         ],
-        image: '/Preview1.png',
+        image: '/Preview1.webp',
         contatoMensagem: 'Desejo contratar a Consultoria de Entrada.',
       },
       {
@@ -952,7 +941,7 @@
           'Métricas e treinamento de uso',
           'Suporte após a publicação',
         ],
-        image: '/Preview2.png',
+        image: '/Preview2.webp',
         contatoMensagem: 'Desejo contratar a Consultoria Profissional.',
       },
       {
@@ -968,7 +957,7 @@
           'Planejamento técnico personalizado',
           'Acompanhamento após o lançamento',
         ],
-        image: '/Preview3.png',
+        image: '/Preview3.webp',
         contatoMensagem: 'Desejo contratar a Consultoria Avançada.',
       }
     ]
@@ -1059,8 +1048,8 @@
       formErro.value = ''
       formEmailTocado.value = true
 
-      if (!formNome.value.trim() || !formEmail.value.trim() || !formTelefone.value.trim() || !formDetalhes.value.trim()) {
-        formErro.value = 'Preencha nome, e-mail, telefone e detalhes.'
+      if (!formNome.value.trim() || !formEmail.value.trim() || !formDetalhes.value.trim()) {
+        formErro.value = 'Preencha nome, e-mail e mensagem.'
         return
       }
 
@@ -1152,7 +1141,7 @@
         threshold: 0.2
       })
 
-      document.querySelectorAll('.vantagem-bar').forEach(item => revealObserver.observe(item))
+      document.querySelectorAll('.vantagem-card').forEach(item => revealObserver.observe(item))
     })
     
 </script>
@@ -1218,11 +1207,11 @@
   mask-image: linear-gradient(to top, #000 42%, transparent 100%);
   opacity: 0.6;
   pointer-events: none;
-  z-index: 1;
+  z-index: 0;
 }
 
 .hero-sky :deep(.hero-starfield) {
-  z-index: 0;
+  z-index: 2;
 }
 
 .hero-front {
@@ -1260,16 +1249,14 @@
   isolation: isolate;
   color: #E8E6FF;
   user-select: none;
-  background: linear-gradient(to bottom, #0A061C 0%, #160A4A 52%, #370EE7 100%);
+  background:
+    linear-gradient(to bottom, rgba(10, 6, 28, 0.18) 0%, rgba(22, 10, 74, 0.08) 48%, rgba(55, 14, 231, 0.18) 100%),
+    url('/hero-abstract-bg.webp') center / cover no-repeat,
+    linear-gradient(to bottom, #0A061C 0%, #160A4A 52%, #370EE7 100%);
   --hero-title: clamp(2.45rem, 0.72rem + 4.7vw, 4.9rem);
   --hero-title-line-height: 1.08;
   --hero-title-glow-bleed: clamp(12px, 0.18em, 22px);
-  --hero-title-shadow:
-    0 0 18px rgba(232, 230, 255, 0.2),
-    0 0 36px rgba(56, 15, 233, 0.12),
-    0 0 56px rgba(8, 8, 18, 0.48),
-    0 0 112px rgba(8, 8, 18, 0.28),
-    0 2px 24px rgba(8, 8, 18, 0.38);
+  --hero-title-shadow: none;
   --hero-title-accent-shadow:
     0 0 16px rgba(240, 255, 31, 0.52),
     0 0 32px rgba(240, 255, 31, 0.34),
@@ -1505,7 +1492,8 @@
 
 .scroll-btn {
   padding: 12px 28px;
-  background: #F0FF1F;
+  background:
+    linear-gradient(135deg, #F6FF62 0%, #F0FF1F 45%, #C9D70F 100%);
   color: #0A0A00;
   border: 1.5px solid #F0FF1F;
   border-radius: 999px;
@@ -1526,13 +1514,15 @@
 .scroll-btn:active { transform: scale(0.97); }
 
 .scroll-btn--outline {
-  background: #0A0A14;
+  background:
+    linear-gradient(135deg, rgba(56, 15, 233, 0.24) 0%, rgba(10, 10, 20, 0.96) 48%, rgba(240, 255, 31, 0.08) 100%);
   color: #F0FF1F;
   border-color: rgba(240, 255, 31, 0.45);
 }
 
 .scroll-btn--outline:hover {
-  background: #111128;
+  background:
+    linear-gradient(135deg, rgba(56, 15, 233, 0.34) 0%, #111128 46%, rgba(240, 255, 31, 0.13) 100%);
   border-color: #F0FF1F;
   transform: translateY(-2px);
   box-shadow: 0 0 24px rgba(240, 255, 31, 0.38), 0 8px 28px rgba(240, 255, 31, 0.32);
@@ -1545,7 +1535,7 @@
 
 .servicos {
   background: #0A0A14;
-  padding: var(--section-pad-y) var(--section-pad-x);
+  padding: clamp(112px, 11vw, 168px) var(--section-pad-x) clamp(128px, 12vw, 184px);
   /* Avoid overflow clip — it breaks position:sticky in Chromium */
   overflow: visible;
   position: relative;
@@ -1575,10 +1565,12 @@
 
 
 .intro-wrapper {
+  min-height: auto;
   display: flex;
   justify-content: space-between;
   align-items: stretch;
   gap: 0;
+  padding-block: clamp(16px, 3vw, 40px);
 }
 
 .secao-label {
@@ -1620,23 +1612,24 @@
 }
 
 .intro-centro {
+  position: relative;
   flex: 1;
-  max-width: 900px;
+  max-width: 1120px;
   text-align: center;
 }
 
 .intro-headline {
-  font-size: clamp(2.1rem, 5vw, 4.5rem);
+  font-size: clamp(2.1rem, 4vw, 3.7rem);
   font-weight: 700;
   color: #E8E6FF;
   line-height: 1.06;
   width: fit-content;
   max-width: 100%;
-  margin-inline: auto;
+  margin-inline: 0 auto;
   margin-bottom: 16px;
   letter-spacing: -0.025em;
   overflow: visible;
-  text-align: center;
+  text-align: left;
 }
 
 .intro-headline :deep(.title-line) {
@@ -1645,147 +1638,254 @@
   overflow: visible;
 }
 
+.intro-headline :deep(.accent),
+.outros-headline :deep(.accent),
+.portfolio-headline :deep(.portfolio-accent),
+.pricing-headline :deep(.pricing-accent) {
+  text-shadow:
+    0 0 14px rgba(240, 255, 31, 0.48),
+    0 0 28px rgba(240, 255, 31, 0.28),
+    0 0 52px rgba(240, 255, 31, 0.14);
+}
+
 .intro-sub {
-  font-size: 1rem;
+  font-size: clamp(1rem, 1.35vw, 1.18rem);
   color: #9090B0;
-  line-height: 1.75;
-  max-width: 520px;
-  margin: 0 auto 48px;
-  text-align: center;
+  line-height: 1.72;
+  max-width: 760px;
+  margin: 0;
+  text-align: left;
 }
 
 .vantagens-wrap {
   position: relative;
-  --vantagem-compact-h: 68px;
-  --vantagem-expand-h: 84px;
-  --vantagem-gap: 8px;
-  --vantagem-count: 4;
-  height: calc(
-    var(--vantagem-count) * var(--vantagem-compact-h) +
-    (var(--vantagem-count) - 1) * var(--vantagem-gap) +
-    var(--vantagem-expand-h)
-  );
+  width: 100%;
+  margin-top: clamp(68px, 9vh, 116px);
 }
 
 .vantagens {
-  display: flex;
-  flex-direction: column;
-  gap: var(--vantagem-gap);
+  --vantagem-divider-color: rgba(79, 70, 229, 0.58);
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   width: 100%;
+  overflow: visible;
+  border-bottom: 1px solid var(--vantagem-divider-color);
+  background:
+    radial-gradient(ellipse 70% 85% at 100% 0%, rgba(56, 15, 233, 0.18), transparent 58%),
+    radial-gradient(ellipse 80% 70% at 0% 100%, rgba(240, 255, 31, 0.06), transparent 62%),
+    rgba(10, 10, 20, 0.58);
 }
 
-.vantagem-bar {
+.vantagens-empty-row {
   position: relative;
-  display: flex;
-  flex-direction: column;
+  grid-column: 1 / -1;
+  min-height: clamp(150px, 16vw, 220px);
+  border-bottom: 1px solid var(--vantagem-divider-color);
+  background:
+    radial-gradient(ellipse 50% 110% at 24% 50%, rgba(102, 154, 255, 0.14), transparent 68%),
+    radial-gradient(ellipse 60% 90% at 78% 30%, rgba(56, 15, 233, 0.16), transparent 66%),
+    rgba(13, 10, 36, 0.28);
+}
+
+.vantagens-empty-row::before,
+.vantagens-empty-row::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+  width: 1px;
+  background: var(--vantagem-divider-color);
+  pointer-events: none;
+}
+
+.vantagens-empty-row::before {
+  left: 33.333%;
+}
+
+.vantagens-empty-row::after {
+  left: 66.666%;
+}
+
+.vantagem-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   align-items: stretch;
-  gap: 0;
-  padding: 16px 20px;
-  border-radius: 14px;
   width: 100%;
-  min-height: var(--vantagem-compact-h);
+  min-height: clamp(260px, 24vw, 340px);
   opacity: 0;
   transform: translateY(16px);
   z-index: 1;
-  cursor: pointer;
+  overflow: visible;
+}
+
+.vantagem-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 88% 34% at 50% 104%, rgba(102, 154, 255, 0.52) 0%, rgba(35, 101, 255, 0.24) 33%, transparent 72%),
+    radial-gradient(ellipse 78% 28% at 50% 100%, rgba(232, 230, 255, 0.32) 0%, rgba(79, 70, 229, 0.28) 34%, transparent 72%),
+    linear-gradient(to bottom, rgba(10, 10, 20, 0) 0%, rgba(35, 101, 255, 0.08) 76%, rgba(102, 154, 255, 0.18) 100%);
+  box-shadow:
+    inset 0 -22px 34px rgba(102, 154, 255, 0.18),
+    inset 0 -8px 14px rgba(232, 230, 255, 0.16),
+    inset 14px 0 28px rgba(35, 101, 255, 0.12),
+    inset -14px 0 28px rgba(79, 70, 229, 0.12);
+}
+
+.vantagem-card:nth-of-type(2)::before {
+  background:
+    radial-gradient(ellipse 88% 34% at 50% -4%, rgba(102, 154, 255, 0.52) 0%, rgba(35, 101, 255, 0.24) 33%, transparent 72%),
+    radial-gradient(ellipse 78% 28% at 50% 0%, rgba(232, 230, 255, 0.32) 0%, rgba(79, 70, 229, 0.28) 34%, transparent 72%),
+    linear-gradient(to top, rgba(10, 10, 20, 0) 0%, rgba(35, 101, 255, 0.08) 76%, rgba(102, 154, 255, 0.18) 100%);
+  box-shadow:
+    inset 0 22px 34px rgba(102, 154, 255, 0.18),
+    inset 0 8px 14px rgba(232, 230, 255, 0.16),
+    inset 14px 0 28px rgba(35, 101, 255, 0.12),
+    inset -14px 0 28px rgba(79, 70, 229, 0.12);
+}
+
+.vantagem-card:nth-of-type(1) {
+  z-index: 4;
+}
+
+.vantagem-card:nth-of-type(2) {
+  z-index: 3;
+}
+
+.vantagem-card:nth-of-type(3) {
+  z-index: 2;
+}
+
+.vantagem-card:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  width: 1px;
+  background: var(--vantagem-divider-color);
+  pointer-events: none;
 }
 
 .vantagem-header {
   display: flex;
-  align-items: center;
-  gap: 16px;
+  flex-direction: row;
+  align-items: flex-start;
   width: 100%;
   min-width: 0;
   position: relative;
   z-index: 1;
 }
 
-.vantagem-chevron {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: auto;
-  flex-shrink: 0;
-  color: #380FE9;
-  transition: transform 0.3s ease;
-}
-
-.vantagem-chevron svg {
-  width: 22px;
-  height: 22px;
-}
-
-.vantagem-bar:hover .vantagem-chevron {
-  transform: rotate(180deg);
-}
-
-.vantagem-bar.show { opacity: 1; transform: translateY(0); }
-
-.vantagem-bar.show:hover {
-  transform: translateY(-2px);
-  z-index: 2;
-}
+.vantagem-card.show { opacity: 1; transform: translateY(0); }
 
 /* Staggered reveal */
-.vantagem-bar:nth-child(1) { transition-delay: 0.05s; }
-.vantagem-bar:nth-child(2) { transition-delay: 0.12s; }
-.vantagem-bar:nth-child(3) { transition-delay: 0.20s; }
-.vantagem-bar:nth-child(4) { transition-delay: 0.28s; }
+.vantagem-card:nth-of-type(1) { transition-delay: 0.05s; }
+.vantagem-card:nth-of-type(2) { transition-delay: 0.12s; }
+.vantagem-card:nth-of-type(3) { transition-delay: 0.20s; }
 
-.icon-box {
-  position: relative;
-  z-index: 1;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #380FE9;
-  flex-shrink: 0;
-}
-
-.icon-box svg {
-  width: 24px;
-  height: 24px;
-}
-
-.vantagem-bar h3 {
+.vantagem-card h3 {
   margin: 0;
-  flex: 1;
   min-width: 0;
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: clamp(1.22rem, 1.55vw, 1.62rem);
+  line-height: 1.1;
+  font-weight: 700;
   color: #E8E6FF;
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
+  text-align: left;
 }
 
 /* Expand description on hover — expansion stays within reserved wrap height */
-.vantagem-bar p {
+.vantagem-card p {
   position: relative;
   z-index: 1;
-  max-height: 0;
-  opacity: 0;
-  overflow: hidden;
-  margin: 0;
-  font-size: var(--text-sm);
-  color: #9090B0;
-  line-height: 1.72;
-  transition: max-height 0.3s ease 0.05s, opacity 0.3s ease 0.05s, margin 0.3s ease;
+  margin: clamp(18px, 1.9vw, 26px) 0 0;
+  max-width: 34ch;
+  font-size: clamp(0.9rem, 0.95vw, 1rem);
+  color: rgba(232, 230, 255, 0.74);
+  line-height: 1.55;
+  text-align: left;
 }
 
-.vantagem-bar:hover p {
-  max-height: 80px;
-  opacity: 1;
-  margin-top: 4px;
+.vantagem-body {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-width: 0;
+  padding: clamp(28px, 3.4vw, 46px) clamp(22px, 3vw, 40px);
+  background:
+    radial-gradient(ellipse 70% 90% at 100% 0%, rgba(56, 15, 233, 0.16), transparent 62%),
+    rgba(13, 10, 36, 0.58);
 }
 
+.vantagem-card:first-of-type .vantagem-body {
+  background:
+    linear-gradient(to right, #0A0A14 0%, rgba(10, 10, 20, 0.82) 12%, rgba(10, 10, 20, 0) 34%),
+    radial-gradient(ellipse 70% 90% at 100% 0%, rgba(56, 15, 233, 0.16), transparent 62%),
+    rgba(13, 10, 36, 0.58);
+}
+
+.vantagem-card:last-of-type .vantagem-body {
+  background:
+    linear-gradient(to left, #0A0A14 0%, rgba(10, 10, 20, 0.82) 12%, rgba(10, 10, 20, 0) 34%),
+    radial-gradient(ellipse 70% 90% at 100% 0%, rgba(56, 15, 233, 0.16), transparent 62%),
+    rgba(13, 10, 36, 0.58);
+}
+
+.vantagem-card-sparkle {
+  position: absolute;
+  left: 100%;
+  z-index: 12;
+  width: 28px;
+  height: 28px;
+  color: #4F46E5;
+  filter:
+    drop-shadow(0 0 12px rgba(79, 70, 229, 0.58))
+    drop-shadow(0 0 20px rgba(79, 70, 229, 0.28));
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.vantagem-card-sparkle--top {
+  top: 0;
+}
+
+.vantagem-card-sparkle--bottom {
+  top: 100%;
+}
+
+.vantagem-card-sparkle--edge-left {
+  left: 0;
+}
+
+.vantagem-card-sparkle--edge-right {
+  left: 100%;
+}
+
+.vantagem-card:last-of-type .vantagem-card-sparkle--bottom:not(.vantagem-card-sparkle--edge) {
+  display: none;
+}
+
+.vantagem-card:last-of-type .vantagem-card-sparkle:not(.vantagem-card-sparkle--edge) {
+  display: none;
+}
 
 .services-track {
   --services-track-h: 400vh;
   position: relative;
   width: 100%;
   height: var(--services-track-h);
-  margin-top: 80px;
+  margin-top: clamp(112px, 12vw, 168px);
   margin-bottom: 64px;
 }
 
@@ -2265,7 +2365,6 @@
 }
 
 .outro-card,
-.vantagem-bar,
 .processo-card,
 .pricing-card {
   overflow: hidden;
@@ -2280,7 +2379,6 @@
 }
 
 .outro-card::before,
-.vantagem-bar::before,
 .processo-card::before,
 .pricing-card::before {
   content: '';
@@ -2303,6 +2401,26 @@
   z-index: 0;
 }
 
+.outro-card::after,
+.processo-card::after,
+.pricing-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 88% 34% at 50% 104%, rgba(102, 154, 255, 0.42) 0%, rgba(35, 101, 255, 0.2) 34%, transparent 74%),
+    radial-gradient(ellipse 78% 28% at 50% 100%, rgba(232, 230, 255, 0.22) 0%, rgba(79, 70, 229, 0.22) 34%, transparent 74%),
+    linear-gradient(to bottom, rgba(10, 10, 20, 0) 0%, rgba(35, 101, 255, 0.06) 76%, rgba(102, 154, 255, 0.14) 100%);
+  box-shadow:
+    inset 0 -18px 30px rgba(102, 154, 255, 0.12),
+    inset 0 -7px 14px rgba(232, 230, 255, 0.1),
+    inset 12px 0 24px rgba(35, 101, 255, 0.08),
+    inset -12px 0 24px rgba(79, 70, 229, 0.08);
+}
+
 .outro-card:hover,
 .processo-card:hover,
 .pricing-card:hover {
@@ -2310,17 +2428,6 @@
     radial-gradient(ellipse 90% 80% at 0% 0%, rgba(138, 138, 255, 0.12) 0%, transparent 58%),
     radial-gradient(ellipse 90% 80% at 100% 100%, rgba(138, 138, 255, 0.12) 0%, transparent 58%),
     #0D0A24;
-}
-
-.vantagem-bar.show:hover {
-  background:
-    radial-gradient(ellipse 90% 80% at 0% 0%, rgba(91, 58, 255, 0.1) 0%, transparent 58%),
-    radial-gradient(ellipse 90% 80% at 100% 100%, rgba(91, 58, 255, 0.1) 0%, transparent 58%),
-    #100D2A;
-}
-
-.vantagem-bar.show:hover {
-  box-shadow: 0 6px 28px rgba(8, 8, 22, 0.38);
 }
 
 .outro-card:hover::before,
@@ -2331,19 +2438,9 @@
     linear-gradient(315deg, rgba(138, 138, 255, 0.52) 0%, rgba(138, 138, 255, 0) 42%);
 }
 
-.vantagem-bar.show:hover::before {
-  background:
-    linear-gradient(135deg, rgba(91, 58, 255, 0.62) 0%, rgba(138, 138, 255, 0) 42%),
-    linear-gradient(315deg, rgba(91, 58, 255, 0.62) 0%, rgba(138, 138, 255, 0) 42%);
-}
-
-.vantagem-bar {
-  transition: opacity 0.55s ease, transform 0.55s ease, background 0.2s ease, box-shadow 0.2s ease;
+.vantagem-card {
+  transition: opacity 0.55s ease, transform 0.55s ease;
   box-shadow: 0 0 0 transparent;
-}
-
-.vantagem-bar::before {
-  transition: background 0.2s ease;
 }
 
 .extra-card {
@@ -2439,6 +2536,7 @@
 
 .extra-card-body {
   position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -2448,6 +2546,26 @@
   background:
     radial-gradient(ellipse 70% 90% at 100% 0%, rgba(56, 15, 233, 0.18), transparent 62%),
     rgba(13, 10, 36, 0.68);
+}
+
+.extra-card-body::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 34% 88% at 104% 50%, rgba(102, 154, 255, 0.42) 0%, rgba(35, 101, 255, 0.2) 34%, transparent 74%),
+    radial-gradient(ellipse 28% 78% at 100% 50%, rgba(232, 230, 255, 0.22) 0%, rgba(79, 70, 229, 0.22) 34%, transparent 74%),
+    linear-gradient(to left, rgba(102, 154, 255, 0.14) 0%, rgba(35, 101, 255, 0.06) 24%, rgba(10, 10, 20, 0) 100%);
+  box-shadow:
+    inset -18px 0 30px rgba(102, 154, 255, 0.12),
+    inset -7px 0 14px rgba(232, 230, 255, 0.1);
+}
+
+.extra-card-body > * {
+  position: relative;
+  z-index: 1;
 }
 
 .extra-card-copy {
@@ -3008,6 +3126,7 @@
 .processo-card {
   position: relative;
   padding: 32px;
+  min-height: 260px;
   border-radius: 16px;
   box-shadow: 0 0 0 transparent;
   transition: transform 0.22s ease, background 0.22s ease, box-shadow 0.22s ease;
@@ -3253,244 +3372,201 @@
 .contato {
   position: relative;
   min-height: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   padding: var(--section-pad-y) var(--section-pad-x);
-  background-image: url('./assets/formbg.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: scroll;
+  background: #0A0A14;
+  overflow: hidden;
 }
 
-.contato::after {
+.contato::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(5,10,40,0.52);
+  background:
+    radial-gradient(ellipse 70% 45% at 50% 0%, rgba(56, 15, 233, 0.16), transparent 68%),
+    linear-gradient(to bottom, rgba(232, 230, 255, 0.04), transparent 22%);
   z-index: 0;
+  pointer-events: none;
 }
 
 .contato-inner {
   position: relative;
   z-index: 1;
-  display: flex;
-  align-items: flex-start;
-  gap: 80px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  gap: 16px;
   width: 100%;
   max-width: var(--section-max-width);
   margin: 0 auto;
 }
 
-.contato-left {
-  flex: 1 1 0;
+.contato-form-wrap {
+  position: relative;
   min-width: 0;
-  color: #fff;
+  min-height: clamp(460px, 43vw, 610px);
+  padding: clamp(34px, 4.2vw, 56px);
+  display: grid;
+  align-content: center;
+  gap: clamp(26px, 3.2vw, 44px);
+  border-radius: 16px;
+  border: 1px solid rgba(232, 230, 255, 0.16);
+  background:
+    radial-gradient(ellipse 74% 52% at 10% 0%, rgba(56, 15, 233, 0.24), transparent 66%),
+    radial-gradient(ellipse 58% 48% at 92% 16%, rgba(240, 255, 31, 0.09), transparent 70%),
+    linear-gradient(145deg, rgba(17, 17, 40, 0.98) 0%, rgba(8, 8, 22, 0.98) 58%, rgba(10, 10, 20, 0.98) 100%);
+  color: #E8E6FF;
+  box-shadow:
+    0 18px 58px rgba(0, 0, 0, 0.36),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  overflow: hidden;
 }
 
-.contato-headline {
-  font-size: clamp(2.2rem, 4vw, 3.5rem);
-  font-weight: 700;
-  line-height: 1.12;
-  letter-spacing: -0.025em;
-  margin: 0 0 16px 0;
-  color: #fff;
+.contato-form-wrap::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: clamp(34px, 4.2vw, 56px);
+  right: clamp(34px, 4.2vw, 56px);
+  height: 1px;
+  background: linear-gradient(90deg, #380FE9, rgba(240, 255, 31, 0.9), rgba(232, 230, 255, 0));
+  opacity: 0.85;
+  pointer-events: none;
 }
 
-.contato-desc {
-  font-size: 1rem;
-  color: rgba(255,255,255,0.6);
-  line-height: 1.72;
-  margin-bottom: 32px;
-}
-
-.contato-info {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  max-width: 360px;
-}
-
-.contato-info-card:hover::before {
-  border-color: rgba(240, 255, 31, 0.55);
-  background: rgba(10, 10, 20, 0.48);
-}
-
-.contato-info-link {
+.contato-form-wrap > * {
   position: relative;
   z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  width: 100%;
-  padding: 12px 16px;
-  border-radius: 10px;
-  color: #fff;
-  font-size: 0.95rem;
-  font-family: inherit;
-  text-decoration: none;
-  box-sizing: border-box;
-  transition: color 0.2s ease;
 }
 
-.contato-info-text {
-  min-width: 0;
-  flex: 1;
-  color: var(--accent-yellow);
+.contato-form-title {
+  max-width: 560px;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3.55rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: 0;
+  color: #E8E6FF;
 }
 
-.contato-info-arrow {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-  stroke: currentColor;
-  fill: none;
-  transition: transform 0.2s ease, color 0.2s ease;
-}
-
-.contato-info-link:hover {
-  color: #F0FF1F;
-}
-
-.contato-info-link:hover .contato-info-arrow {
-  transform: translateX(3px);
-}
-
-.contato-form-wrap {
-  flex: 1 1 0;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+.contato-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(24px, 4vw, 56px);
+  align-items: start;
 }
 
 .contato-form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  min-width: 0;
 }
 
 .contato-label {
-  font-size: var(--text-sm);
+  display: block;
+  margin-bottom: 10px;
+  font-size: 0.76rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #fff;
-}
-
-.contato-input-shell {
-  position: relative;
-  isolation: isolate;
-  border-radius: 10px;
-}
-
-.contato-input-shell::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  border-radius: inherit;
-  background: rgba(10, 10, 20, 0.38);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  backdrop-filter: blur(24px) saturate(180%);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28);
-  border: 1.5px solid rgba(255, 255, 255, 0.22);
-  pointer-events: none;
-  transition: border-color 0.22s ease, background 0.22s ease, box-shadow 0.22s ease;
-}
-
-@supports not (
-  (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))
-) {
-  .contato-input-shell::before {
-    background: rgba(10, 10, 20, 0.92);
-  }
-}
-
-.contato-input-shell:focus-within::before {
-  border-color: rgba(240, 255, 31, 0.75);
-  background: rgba(10, 10, 20, 0.48);
-  box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.28),
-    0 0 0 3px rgba(240, 255, 31, 0.12);
-}
-
-.contato-input-shell--invalid::before {
-  border-color: rgba(255, 140, 140, 0.85);
-}
-
-.contato-input-shell--invalid:focus-within::before {
-  border-color: rgba(255, 140, 140, 0.95);
-  box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.28),
-    0 0 0 3px rgba(255, 140, 140, 0.14);
-}
-
-.contato-input-shell:has(:disabled)::before {
-  opacity: 0.72;
+  color: rgba(240, 255, 31, 0.82);
 }
 
 .contato-input {
-  position: relative;
-  z-index: 1;
   width: 100%;
-  padding: 12px 16px;
-  border-radius: 10px;
-  border: none;
-  background: transparent;
-  color: #fff;
-  font-size: 0.95rem;
+  min-height: 54px;
+  padding: 15px 16px;
+  border: 1px solid rgba(232, 230, 255, 0.14);
+  border-radius: 12px;
+  background: rgba(232, 230, 255, 0.055);
+  color: #F6F5FF;
+  font-size: 1rem;
   font-family: inherit;
   outline: none;
   box-sizing: border-box;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
 }
 
-.contato-input::placeholder { color: rgba(255,255,255,0.28); }
+.contato-input::placeholder { color: rgba(232, 230, 255, 0.42); }
 
 .contato-input:focus {
-  outline: none;
+  border-color: rgba(240, 255, 31, 0.68);
+  background: rgba(232, 230, 255, 0.085);
+  box-shadow:
+    0 0 0 3px rgba(240, 255, 31, 0.08),
+    0 0 28px rgba(56, 15, 233, 0.16);
+}
+
+.contato-input--invalid {
+  border-color: rgba(255, 117, 117, 0.82);
+  box-shadow: 0 0 0 3px rgba(255, 117, 117, 0.1);
 }
 
 .contato-input:disabled {
   cursor: not-allowed;
-  color: rgba(255, 255, 255, 0.55);
+  opacity: 0.62;
 }
 
 .contato-textarea {
-  resize: vertical;
-  min-height: 120px;
+  min-height: 132px;
+  resize: none;
 }
 
-.btn-constellation-contato { /* Botão */
-  position: relative;
+.contato-actions {
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  margin-top: 4px;
+  align-items: center;
+  gap: 20px;
+  margin-top: 2px;
 }
 
 .contato-submit {
-  width: 100%;
-  padding: 14px 24px;
-  border-radius: 10px;
-  border: none;
-  background: #F0FF1F;
-  color: #0A0A00;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 56px;
+  padding: 8px 8px 8px 28px;
+  border-radius: 999px;
+  border: 1px solid rgba(240, 255, 31, 0.5);
+  background:
+    linear-gradient(135deg, #F6FF62 0%, #F0FF1F 50%, #C9D70F 100%);
+  color: #111128;
   font-size: 0.95rem;
   font-weight: 700;
   font-family: inherit;
-  letter-spacing: 0.04em;
+  letter-spacing: 0;
   text-transform: uppercase;
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.18s ease, box-shadow 0.2s ease;
+  box-shadow:
+    0 14px 30px rgba(0, 0, 0, 0.22),
+    0 0 32px rgba(240, 255, 31, 0.16);
+  transition: background 0.2s ease, transform 0.18s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.contato-submit-icon,
+.contato-channel-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: #111128;
+  color: #F0FF1F;
+  flex-shrink: 0;
+}
+
+.contato-submit-icon svg,
+.contato-channel-arrow svg,
+.contato-channel-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.4;
 }
 
 .contato-submit:hover {
-  background: #F5FF5A;
+  border-color: rgba(240, 255, 31, 0.84);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(240,255,31,0.28);
+  box-shadow:
+    0 18px 36px rgba(0, 0, 0, 0.3),
+    0 0 40px rgba(240, 255, 31, 0.22);
 }
 
 .contato-submit:active { transform: scale(0.98); }
@@ -3505,10 +3581,94 @@
 .contato-submit--success[disabled] {
   opacity: 1;
   cursor: default;
-  background: #F0FF1F;
-  color: #0A0A00;
+  border-color: rgba(56, 232, 97, 0.48);
+  background: rgba(56, 232, 97, 0.14);
+  color: #DFFFE6;
   transform: none;
   box-shadow: none;
+}
+
+.contato-privacy {
+  max-width: 250px;
+  margin: 0;
+  color: rgba(232, 230, 255, 0.58);
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+.contato-links {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 16px;
+  min-height: clamp(460px, 43vw, 610px);
+}
+
+.contato-channel-card {
+  position: relative;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(58px, 6.5vw, 96px);
+  padding: clamp(28px, 3vw, 40px);
+  border-radius: 18px;
+  border: 1.5px solid rgba(255, 255, 255, 0.26);
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 18%, rgba(56, 15, 233, 0.1), transparent 66%),
+    rgba(5, 5, 16, 0.92);
+  color: #E8E6FF;
+  text-decoration: none;
+  overflow: hidden;
+  box-shadow: 0 18px 58px rgba(0, 0, 0, 0.28);
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.contato-channel-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(232, 230, 255, 0.48);
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 18%, rgba(56, 15, 233, 0.16), transparent 66%),
+    rgba(7, 7, 20, 0.96);
+}
+
+.contato-channel-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  align-self: flex-start;
+}
+
+.contato-channel-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(232, 230, 255, 0.56);
+  color: #E8E6FF;
+}
+
+.contato-channel-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #E8E6FF;
+  text-transform: uppercase;
+}
+
+.contato-channel-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: rgba(232, 230, 255, 0.72);
+  font-size: 0.95rem;
+}
+
+.contato-channel-arrow {
+  width: 34px;
+  height: 34px;
+  background: #E8E6FF;
+  color: #0A0A14;
 }
 
 .contato-feedback {
@@ -3518,11 +3678,11 @@
 }
 
 .contato-feedback--erro {
-  color: #ffb4b4;
+  color: #FF8E8E;
 }
 
 .contato-feedback--aviso {
-  color: #ffd28a;
+  color: #F0FF1F;
 }
 
 
@@ -3567,11 +3727,75 @@
   .processo,
   .pricing,
   .portfolio {
+    padding-top: 88px;
     padding-bottom: 80px;
   }
 
   .intro-decoracao { display: none; }
-  .intro-wrapper { flex-direction: column; }
+  .intro-wrapper {
+    min-height: auto;
+    flex-direction: column;
+    padding-block: 0;
+  }
+
+  .intro-centro {
+    max-width: 100%;
+  }
+
+  .intro-headline,
+  .intro-sub {
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .vantagens-wrap {
+    min-height: 0;
+    margin-top: 48px;
+  }
+
+  .vantagens {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .vantagens-empty-row {
+    min-height: clamp(120px, 34vw, 180px);
+  }
+
+  .vantagens-empty-row::before,
+  .vantagens-empty-row::after {
+    display: none;
+  }
+
+  .vantagem-card {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: auto;
+  }
+
+  .vantagem-card:not(:last-child)::after {
+    top: auto;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    width: auto;
+    height: 1px;
+  }
+
+  .vantagem-card-sparkle {
+    left: 50%;
+  }
+
+  .vantagem-card-sparkle--edge {
+    display: none;
+  }
+
+  .vantagem-card:last-of-type .vantagem-card-sparkle--bottom {
+    display: block;
+  }
+
+  .vantagem-card:last-of-type .vantagem-card-sparkle--top {
+    display: block;
+  }
 
   .outros-top {
     flex-direction: column;
@@ -3593,42 +3817,21 @@
 /* Tablet small */
 @media (max-width: 860px) {
   .contato-inner {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 40px;
-    min-width: 0;
+    grid-template-columns: 1fr;
   }
 
-  .contato-left {
-    flex: none;
-    width: 100%;
-    text-align: left;
+  .contato-form-wrap,
+  .contato-links {
+    min-height: auto;
   }
 
-  .contato-info {
-    align-items: flex-start;
-    width: 100%;
-    max-width: none;
-    margin-inline: 0;
+  .contato-links {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: none;
   }
 
-  .contato-info .contato-form-group {
-    align-items: flex-start;
-    width: fit-content;
-    max-width: 100%;
-  }
-
-  .contato-info-card {
-    width: fit-content;
-    max-width: 100%;
-  }
-
-  .contato-info-link {
-    width: auto;
-  }
-
-  .contato-info-text {
-    flex: 0 1 auto;
+  .contato-channel-card {
+    min-height: 220px;
   }
 
   .contato-form-wrap { width: 100%; max-width: none; }
@@ -3679,9 +3882,13 @@
     height: auto;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding: 28px 0 34px;
+    gap: 2px;
+    padding: 28px 0 56px;
     align-items: flex-start;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
   }
 
   .service-row-top {
@@ -3692,7 +3899,7 @@
   .service-num {
     font-size: 1rem;
     font-weight: 700;
-    color: #380FE9;
+    color: rgba(10, 10, 20, 0.45);
     letter-spacing: 0;
   }
 
@@ -3709,10 +3916,12 @@
   }
 
   .services-panel .service-title {
+    order: 0;
     padding-bottom: 0;
-    font-size: clamp(2.75rem, 9.8vw, 4.05rem);
-    line-height: 1.05;
+    font-size: clamp(2.625rem, 11.6vw, 3rem);
+    line-height: 0.95;
     letter-spacing: -0.03em;
+    max-width: 100%;
   }
 
   .service-new-badge {
@@ -3722,22 +3931,17 @@
   }
 
   .service-expand {
+    display: contents;
     margin-top: 14px;
   }
 
   .service-expand-inner {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    align-items: flex-start;
-    gap: 24px;
-    width: 100%;
+    display: contents;
   }
 
   .service-row-detail {
     --service-content-gap: 22px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    display: contents;
     max-width: none;
     padding-top: 0;
     width: 100%;
@@ -3745,61 +3949,70 @@
   }
 
   .service-desc {
-    order: 1;
-    margin: var(--service-content-gap) 0 0;
+    order: 2;
+    margin: 32px 0 0;
     max-width: none;
     padding-top: 0;
-    font-size: clamp(1.05rem, 3.6vw, 1.2rem);
-    line-height: 1.55;
+    font-size: 18px;
+    line-height: 1.5;
+    text-wrap: pretty;
   }
 
   .service-feature-list {
-    order: 2;
+    order: 3;
     grid-template-columns: minmax(0, 1fr);
-    gap: 12px;
+    gap: 16px;
     width: 100%;
-    margin-top: var(--service-content-gap);
-    font-size: 0.98rem;
+    margin-top: 28px;
+    font-size: 17px;
     line-height: 1.45;
+    text-wrap: pretty;
+  }
+
+  .service-feature-list li {
+    display: grid;
+    grid-template-columns: 6px minmax(0, 1fr);
+    column-gap: 9px;
+    align-items: start;
+    padding-left: 0;
+    max-width: 100%;
+  }
+
+  .service-feature-list li::before {
+    position: static;
+    grid-column: 1;
+    margin-top: 0.52em;
   }
 
   .service-row-aside {
-    order: 2;
+    order: 1;
     display: flex;
     width: 100%;
     gap: 0;
     align-items: center;
     justify-content: center;
-    margin-top: 0;
+    margin-top: 20px;
     padding-top: 0;
     height: auto;
+    max-width: 100%;
   }
 
   .service-tags {
-    order: 0;
-    gap: 8px;
-    margin-top: 0;
-  }
-
-  .service-tag {
-    font-size: clamp(0.66rem, 2.4vw, 0.82rem);
-    font-weight: 500;
-    padding: 6px 12px;
-    letter-spacing: 0.01em;
+    display: none;
   }
 
   .service-row-aside .service-illustration {
     display: block;
-    width: min(92%, 360px);
-    max-height: min(360px, 46vh);
+    width: min(70%, 275px);
+    max-height: min(275px, 36vh);
     object-position: top center;
   }
 
   .services-cta-btn--inline {
-    order: 3;
-    margin-top: var(--service-content-gap);
-    margin-inline: 0;
-    align-self: flex-start;
+    order: 4;
+    margin-top: 36px;
+    margin-inline: auto;
+    align-self: center;
     justify-content: center;
     width: min(100%, 330px);
     max-width: 100%;
@@ -3807,7 +4020,8 @@
     color: #E8E6FF;
     border: 1px solid rgba(56,15,233,0.14);
     border-radius: 999px;
-    padding: 12px 12px 12px 18px;
+    min-height: 64px;
+    padding: 10px 12px 10px 18px;
     font-size: 0.88rem;
     font-weight: 600;
     gap: 8px;
@@ -3886,7 +4100,29 @@
   .processo-card-wide,
   .processo-card-cta { grid-column: span 1; }
 
+  .processo-card {
+    min-height: 230px;
+  }
+
   .outros-cards { grid-template-columns: repeat(2, 1fr); }
+
+  .contato-form-wrap {
+    padding: 32px 24px;
+  }
+
+  .contato-form-row,
+  .contato-links {
+    grid-template-columns: 1fr;
+  }
+
+  .contato-actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .contato-channel-card {
+    min-height: 190px;
+  }
 
   .extra-card {
     grid-template-columns: minmax(0, 1fr);
@@ -3990,7 +4226,6 @@
   .outros-headline,
   .portfolio-headline,
   .pricing-headline,
-  .contato-headline,
   .processo-header h2 {
     font-size: clamp(2.25rem, 8.8vw, 3.25rem);
     line-height: 1.06;
@@ -3998,8 +4233,7 @@
   }
 
   .portfolio-headline,
-  .pricing-headline,
-  .contato-headline {
+  .pricing-headline {
     max-width: min(100%, 680px);
   }
 
@@ -4020,7 +4254,7 @@
     --hero-copy-width: min(78vw, 560px);
     --hero-gap-title-desc: clamp(1rem, 2.5vh, 1.5rem);
     --hero-gap-desc-btn: clamp(1.5rem, 3.5vh, 2.25rem);
-    --hero-front-top: clamp(96px, 11svh, 128px);
+    --hero-front-top: clamp(72px, 8svh, 96px);
     --hero-front-bottom: 0px;
     --hero-constellation-content-gap: 10px;
     --hero-constellation-lift: 0px;
@@ -4028,14 +4262,10 @@
     --hero-constellation-width: clamp(44vw, 52vw, 480px);
     --hero-title-line-height: 1.02;
     min-height: var(--hero-mobile-min-height, 100svh);
-    /* Keep mid-sky darker so constellation lines stay readable */
-    background: linear-gradient(
-      to bottom,
-      #0A061C 0%,
-      #10082E 48%,
-      #160A4A 72%,
-      #24108A 100%
-    );
+    background:
+      linear-gradient(to bottom, rgba(10, 6, 28, 0.2) 0%, rgba(19, 8, 60, 0.1) 52%, rgba(42, 15, 184, 0.16) 100%),
+      url('/hero-abstract-bg.webp') center / cover no-repeat,
+      linear-gradient(to bottom, #0A061C 0%, #13083C 52%, #2A0FB8 100%);
   }
 
   .hero-sky::before {
@@ -4105,7 +4335,7 @@
   }
 
   .banner-title {
-    margin-top: clamp(8px, 1.5svh, 16px);
+    margin-top: 0;
   }
 
   .banner-description {
@@ -4191,13 +4421,53 @@
   }
 
   .intro-headline {
-    font-size: clamp(2.15rem, 9.2vw, 2.85rem);
+    font-size: clamp(1.95rem, 8.4vw, 2.6rem);
     line-height: 1.08;
     max-width: calc(100vw - 40px);
   }
 
   .intro-headline :deep(.title-line) {
     white-space: normal;
+  }
+
+  .vantagem-card {
+    grid-template-columns: 1fr;
+  }
+
+  .vantagem-card::before,
+  .vantagem-card:nth-of-type(2)::before {
+    background:
+      linear-gradient(to right, #0A0A14 0%, rgba(10, 10, 20, 0.82) 7%, rgba(10, 10, 20, 0) 22%, rgba(10, 10, 20, 0) 78%, rgba(10, 10, 20, 0.82) 93%, #0A0A14 100%),
+      radial-gradient(ellipse 130% 58% at 50% 106%, rgba(102, 154, 255, 0.28) 0%, rgba(35, 101, 255, 0.14) 38%, transparent 82%),
+      radial-gradient(ellipse 112% 46% at 50% 100%, rgba(232, 230, 255, 0.14) 0%, rgba(79, 70, 229, 0.18) 36%, transparent 82%),
+      linear-gradient(to bottom, rgba(10, 10, 20, 0) 0%, rgba(35, 101, 255, 0.05) 78%, rgba(102, 154, 255, 0.12) 100%);
+    box-shadow:
+      inset 0 -18px 30px rgba(102, 154, 255, 0.12),
+      inset 0 -7px 14px rgba(232, 230, 255, 0.1);
+  }
+
+  .vantagem-body {
+    padding: 36px 28px 42px;
+  }
+
+  .vantagem-card:first-of-type .vantagem-body,
+  .vantagem-card:nth-of-type(2) .vantagem-body,
+  .vantagem-card:last-of-type .vantagem-body {
+    background:
+      linear-gradient(to right, #0A0A14 0%, rgba(10, 10, 20, 0.82) 7%, rgba(10, 10, 20, 0) 22%, rgba(10, 10, 20, 0) 78%, rgba(10, 10, 20, 0.82) 93%, #0A0A14 100%),
+      radial-gradient(ellipse 96% 110% at 100% 0%, rgba(56, 15, 233, 0.12), transparent 68%),
+      rgba(13, 10, 36, 0.58);
+  }
+
+  .vantagem-card h3 {
+    font-size: clamp(1.25rem, 5.8vw, 1.62rem);
+    line-height: 1.08;
+  }
+
+  .vantagem-card p {
+    margin-top: 16px;
+    font-size: 0.95rem;
+    line-height: 1.52;
   }
 
   .banner-inner {
@@ -4210,17 +4480,13 @@
     --hero-copy-width: calc(100vw - 40px);
     --hero-gap-title-desc: clamp(1.75rem, 4svh, 2.4rem);
     --hero-gap-desc-btn: clamp(2.25rem, 5svh, 3.4rem);
-    --hero-front-top: clamp(92px, 10svh, 116px);
+    --hero-front-top: clamp(76px, 8svh, 94px);
     --hero-constellation-content-gap: 4px;
     --hero-constellation-lift: 0px;
     --hero-constellation-width: clamp(68vw, 78vw, 86vw);
     --hero-title-line-height: 0.98;
-    --hero-title-shadow:
-      0 2px 20px rgba(0, 0, 0, 0.8),
-      0 2px 8px rgba(0, 0, 0, 0.9);
+    --hero-title-shadow: none;
     --hero-title-accent-shadow:
-      0 2px 20px rgba(0, 0, 0, 0.8),
-      0 2px 8px rgba(0, 0, 0, 0.9),
       0 0 18px rgba(240, 255, 31, 0.42);
   }
 
@@ -4301,12 +4567,15 @@
 
   .banner-footer-link {
     border-color: rgba(240, 255, 31, 0.45);
-    background: #0A0A14;
+    background:
+      linear-gradient(135deg, rgba(56, 15, 233, 0.24) 0%, rgba(10, 10, 20, 0.96) 48%, rgba(240, 255, 31, 0.08) 100%);
     color: #F0FF1F;
   }
 
   .banner-footer-cta {
     border-color: rgba(240, 255, 31, 0.58);
+    background:
+      linear-gradient(135deg, #F6FF62 0%, #F0FF1F 45%, #C9D70F 100%);
     box-shadow:
       0 0 0 1px rgba(232, 230, 255, 0.08) inset,
       0 0 34px rgba(240, 255, 31, 0.2);
@@ -4318,6 +4587,22 @@
   .portfolio,
   .contato {
     padding-bottom: 80px;
+  }
+
+  .contato-form-wrap {
+    border-radius: 14px;
+    padding: 28px 20px;
+  }
+
+  .contato-submit {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .contato-channel-card {
+    min-height: 168px;
+    border-radius: 14px;
+    padding: 24px 20px;
   }
 
   .portfolio-header { flex-direction: column; align-items: flex-start; gap: 8px; }

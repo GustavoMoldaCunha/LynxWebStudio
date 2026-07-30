@@ -39,6 +39,11 @@
         <stop offset="74%" stop-color="#dfdcff" />
         <stop offset="100%" stop-color="#cfc9fc" />
       </radialGradient>
+      <linearGradient id="constellation-glass-frame" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#0A0A14" stop-opacity="0.28" />
+        <stop offset="54%" stop-color="#0A0A14" stop-opacity="0.38" />
+        <stop offset="100%" stop-color="#0A0A14" stop-opacity="0.3" />
+      </linearGradient>
       <filter id="constellation-line-glow" x="-30%" y="-30%" width="160%" height="160%">
         <feGaussianBlur :stdDeviation="cursorLineGlowStdDeviation" result="blur" />
         <feMerge>
@@ -57,6 +62,17 @@
           '--cursor-path-stroke-px': cursorPathStrokePx,
         }"
       >
+        <rect
+          v-if="SHOW_GLASS_FRAME"
+          class="constellation-glass-frame"
+          :x="glassFrameRect.x"
+          :y="glassFrameRect.y"
+          :width="glassFrameRect.width"
+          :height="glassFrameRect.height"
+          :rx="glassFrameRect.radius"
+          :ry="glassFrameRect.radius"
+        />
+
         <defs>
           <clipPath :id="leftShaftClipId">
             <rect
@@ -178,6 +194,7 @@ const svgRef = ref(null)
 const svgWidthPx = ref(0)
 const leftShaftPathRef = ref(null)
 const leftShaftRevealHeight = ref(0)
+const SHOW_GLASS_FRAME = false
 
 const segmentPathRefs = new Map()
 const lineDrawTimers = []
@@ -247,6 +264,17 @@ const cursorGeometry = computed(() => {
 const cursorVertices = computed(() => cursorGeometry.value.vertices)
 const cursorSegments = computed(() => cursorGeometry.value.segments)
 const cursorLeftShaft = computed(() => cursorGeometry.value.leftShaft)
+
+const glassFrameRect = computed(() => {
+  const anchor = cursorVertices.value[1]
+  return {
+    x: anchor.x - 10.2,
+    y: anchor.y - 0.6,
+    width: 10.6,
+    height: 8.9,
+    radius: 0.55,
+  }
+})
 
 function constellationFloors() {
   const boost = constellationLayout.value.starMinBoost ?? 1
@@ -753,6 +781,17 @@ onUnmounted(() => {
   vector-effect: non-scaling-stroke;
   stroke-width: var(--cursor-path-stroke-px, 6px);
   filter: none;
+}
+
+.constellation-glass-frame {
+  fill: url(#constellation-glass-frame);
+  stroke: rgba(255, 255, 255, 0.22);
+  stroke-width: 1.5px;
+  vector-effect: non-scaling-stroke;
+  opacity: 1;
+  filter:
+    drop-shadow(0 4px 24px rgba(0, 0, 0, 0.28))
+    drop-shadow(0 0 18px rgba(232, 230, 255, 0.08));
 }
 
 .cursor-vertex-star {

@@ -12,3 +12,11 @@
 <script setup>
 import { DECO_SPARKLE_PATH } from '../config/decoSparkle.js'
 </script>
+
+<style scoped>
+svg {
+  filter:
+    drop-shadow(0 0 8px rgba(79, 70, 229, 0.56))
+    drop-shadow(0 0 16px rgba(79, 70, 229, 0.24));
+}
+</style>

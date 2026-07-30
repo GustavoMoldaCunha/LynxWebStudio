@@ -3,7 +3,7 @@
   <svg
     ref="svgRef"
     class="hero-starfield"
-    viewBox="0 0 100 100"
+    :viewBox="starfieldViewBox"
     :preserveAspectRatio="layout.preserveAspectRatio"
     aria-hidden="true"
   >
@@ -136,7 +136,10 @@ import {
   SPARKLE_GLOW_R_FACTOR,
 } from '../config/decoSparkle.js'
 import { useHeroSkyLayout } from '../composables/useHeroSkyLayout.js'
-import { generateHeroStarfield } from '../utils/generateHeroStarfield.js'
+import {
+  generateHeroStarfield,
+  violatesHeroTextExclusion,
+} from '../utils/generateHeroStarfield.js'
 import {
   applyStarfieldFloors,
   fallbackMinPx,
@@ -170,6 +173,9 @@ const svgRef = ref(null)
 const svgWidthPx = ref(0)
 
 const clipId = computed(() => `starfield-bounds-${layout.value.id}`)
+const starfieldViewBox = computed(
+  () => `0 0 ${STARFIELD_VIEWBOX_WIDTH} ${layout.value.starfieldViewBoxHeight ?? 100}`,
+)
 
 const stars = computed(() => generateHeroStarfield(layout.value, viewportWidth.value))
 
@@ -193,11 +199,12 @@ const flooredStars = computed(() => {
     { sparkleArmMaxPx: layout.value.sparkleArmMaxPx },
   ).filter(
     (star) =>
-      layout.value.starfieldIgnoreConstellation ||
-      !violatesHeroConstellation(star, layout.value, {
-        viewportWidth: width,
-        svgWidthPx: width,
-      }),
+      !violatesHeroTextExclusion(star, layout.value) &&
+      (layout.value.starfieldIgnoreConstellation ||
+        !violatesHeroConstellation(star, layout.value, {
+          viewportWidth: width,
+          svgWidthPx: width,
+        })),
   )
 })
 

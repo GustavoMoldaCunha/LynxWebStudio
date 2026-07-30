@@ -40,10 +40,6 @@ function parseBody(data) {
     return { error: 'Informe um e-mail válido com @ e domínio (ex.: nome@empresa.com).' }
   }
 
-  if (!telefone || telefone.length < 8) {
-    return { error: 'Informe um telefone ou WhatsApp válido.' }
-  }
-
   if (!mensagem || mensagem.length < 10) {
     return { error: 'Descreva seu projeto com pelo menos 10 caracteres.' }
   }

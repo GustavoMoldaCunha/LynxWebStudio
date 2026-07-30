@@ -32,7 +32,7 @@
 
 <script setup>
 import { useFooterLogoScale } from '../composables/useFooterLogoScale.js'
-import LynxLogo from '../assets/LynxLogoLetras.png'
+import LynxLogo from '../assets/LynxLogoLetras.webp'
 
 const {
   wrapRef: footerLogoWrapRef,
