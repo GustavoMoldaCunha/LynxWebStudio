@@ -17,7 +17,7 @@ export const HERO_SKY_DESKTOP = {
   constellationInteriorClearance: 0.85,
   starfieldClip: { x: 0, y: 0, width: 100, height: 88 },
   starfieldTextExclusion: [
-    { x: 9, y: 31, width: 38, height: 34, pad: 0.7 },
+    { x: 8.5, y: 31, width: 29, height: 34, pad: 0.55 },
   ],
   preserveAspectRatio: 'xMidYMid slice',
   constellation: {
@@ -267,10 +267,16 @@ export function getHeroSkyLayout(
   if (viewportWidth <= 480) {
     return fitMobileStarfield(HERO_SKY_MOBILE, viewportWidth, viewportHeight)
   }
+  if (viewportWidth <= 1180 && viewportHeight > viewportWidth) {
+    return fitMobileStarfield(HERO_SKY_MOBILE, viewportWidth, viewportHeight)
+  }
   if (viewportWidth <= 920) return HERO_SKY_TABLET
+
+  const desktopDensityBoost = Math.max(0, Math.min(70, Math.round((viewportWidth - 1920) / 24)))
 
   return {
     ...HERO_SKY_DESKTOP,
+    starCount: HERO_SKY_DESKTOP.starCount + desktopDensityBoost,
     constellation: fitDesktopConstellation(
       HERO_SKY_DESKTOP.constellation,
       viewportWidth,

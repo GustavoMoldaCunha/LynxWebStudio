@@ -44,7 +44,14 @@
         <stop offset="54%" stop-color="#0A0A14" stop-opacity="0.38" />
         <stop offset="100%" stop-color="#0A0A14" stop-opacity="0.3" />
       </linearGradient>
-      <filter id="constellation-line-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <filter
+        id="constellation-line-glow"
+        filterUnits="userSpaceOnUse"
+        x="-20"
+        y="-20"
+        width="140"
+        height="140"
+      >
         <feGaussianBlur :stdDeviation="cursorLineGlowStdDeviation" result="blur" />
         <feMerge>
           <feMergeNode in="blur" />
@@ -59,7 +66,6 @@
         :transform="constellationTransform"
         :style="{
           '--cursor-path-stroke-width': cursorPathStrokeWidth,
-          '--cursor-path-stroke-px': cursorPathStrokePx,
         }"
       >
         <rect
@@ -73,19 +79,8 @@
           :ry="glassFrameRect.radius"
         />
 
-        <defs>
-          <clipPath :id="leftShaftClipId">
-            <rect
-              :x="LEFT_SHAFT_CLIP.x"
-              :y="LEFT_SHAFT_CLIP.y"
-              :width="LEFT_SHAFT_CLIP.width"
-              :height="leftShaftRevealHeight"
-            />
-          </clipPath>
-        </defs>
-
         <path
-          v-for="segment in cursorGeometry.segments"
+          v-for="segment in cursorSegments"
           :key="segment.id"
           :ref="(el) => setSegmentPathRef(segment.id, el)"
           :data-segment-id="segment.id"
@@ -94,17 +89,6 @@
           stroke-linejoin="round"
           stroke-linecap="round"
           :d="segment.d"
-        />
-
-        <path
-          ref="leftShaftPathRef"
-          :data-segment-id="cursorGeometry.leftShaft.id"
-          class="cursor-path cursor-path--left-shaft"
-          fill="none"
-          stroke-linejoin="round"
-          stroke-linecap="round"
-          :clip-path="`url(#${leftShaftClipId})`"
-          :d="cursorGeometry.leftShaft.d"
         />
 
         <g
@@ -173,9 +157,7 @@ const VERTEX_COUNT = HERO_CURSOR_VERTICES.length
 const STARS_END_S =
   (VERTEX_COUNT - 1) * STAR_STAGGER_S + STAR_REVEAL_DURATION_S
 
-const LEFT_SHAFT_DRAW_DURATION_S = 0.85
-
-const LINES_END_S = STARS_END_S + LINE_DRAW_DURATION_S + LEFT_SHAFT_DRAW_DURATION_S
+const LINES_END_S = STARS_END_S + LINE_DRAW_DURATION_S
 
 const props = defineProps({
   parallaxX: {
@@ -192,8 +174,6 @@ const { layout, viewportWidth } = useHeroSkyLayout()
 
 const svgRef = ref(null)
 const svgWidthPx = ref(0)
-const leftShaftPathRef = ref(null)
-const leftShaftRevealHeight = ref(0)
 const SHOW_GLASS_FRAME = false
 
 const segmentPathRefs = new Map()
@@ -209,19 +189,6 @@ function setSegmentPathRef(id, el) {
   } else {
     segmentPathRefs.delete(id)
   }
-}
-
-function getLeftShaftPath() {
-  const fromRef = leftShaftPathRef.value
-  if (fromRef?.isConnected) return fromRef
-
-  const fromDom = svgRef.value?.querySelector(`[data-segment-id="${cursorLeftShaft.value.id}"]`)
-  if (fromDom) {
-    leftShaftPathRef.value = fromDom
-    return fromDom
-  }
-
-  return null
 }
 
 function getSegmentPath(id) {
@@ -245,14 +212,6 @@ const boundsClipUrl = computed(() =>
   useBoundsClip.value ? `url(#${clipId.value})` : 'none',
 )
 
-const leftShaftClipId = computed(() => `left-shaft-reveal-${layout.value.id}`)
-
-const LEFT_SHAFT_CLIP = computed(() => ({
-  x: cursorVertices.value[0].x - 1.5,
-  y: cursorVertices.value[0].y,
-  width: 3,
-}))
-
 const constellationLayout = computed(() => layout.value.constellation)
 
 const cursorGeometry = computed(() => {
@@ -262,8 +221,10 @@ const cursorGeometry = computed(() => {
 })
 
 const cursorVertices = computed(() => cursorGeometry.value.vertices)
-const cursorSegments = computed(() => cursorGeometry.value.segments)
-const cursorLeftShaft = computed(() => cursorGeometry.value.leftShaft)
+const cursorSegments = computed(() => [
+  cursorGeometry.value.leftShaft,
+  ...cursorGeometry.value.segments,
+])
 
 const glassFrameRect = computed(() => {
   const anchor = cursorVertices.value[1]
@@ -443,8 +404,6 @@ function cursorStrokeScreenPx() {
   return CURSOR_PATH_STROKE_BASE_PX + t * (CURSOR_PATH_STROKE_MAX_PX - CURSOR_PATH_STROKE_BASE_PX)
 }
 
-const cursorPathStrokePx = computed(() => `${cursorStrokeScreenPx().toFixed(2)}px`)
-
 const cursorPathStrokeWidth = computed(() => {
   const pxPerLocal = constellationPxPerLocalUnit()
   if (!pxPerLocal) return '0.19'
@@ -572,49 +531,7 @@ function countReadySegmentPaths() {
 }
 
 function countReadyDrawPaths() {
-  return countReadySegmentPaths() + (getLeftShaftPath() ? 1 : 0)
-}
-
-function animateLeftShaftReveal(durationMs) {
-  const start = performance.now()
-  const fullHeight = cursorLeftShaft.value.length
-
-  function tick(now) {
-    const t = Math.min(1, (now - start) / durationMs)
-    leftShaftRevealHeight.value = fullHeight * easeInOutQuad(t)
-
-    if (t < 1) {
-      lineDrawAnimRafs.push(window.requestAnimationFrame(tick))
-      return
-    }
-
-    leftShaftRevealHeight.value = fullHeight
-  }
-
-  lineDrawAnimRafs.push(window.requestAnimationFrame(tick))
-}
-
-function setupLeftShaftDraw(reducedMotion) {
-  if (!getLeftShaftPath()) return false
-
-  leftShaftRevealHeight.value = 0
-
-  if (reducedMotion) {
-    leftShaftRevealHeight.value = cursorLeftShaft.value.length
-    return true
-  }
-
-  const delayMs = (STARS_END_S + LINE_DRAW_DURATION_S) * 1000
-  const durationMs = LEFT_SHAFT_DRAW_DURATION_S * 1000
-
-  lineDrawTimers.push(
-    window.setTimeout(() => {
-      if (!getLeftShaftPath()) return
-      animateLeftShaftReveal(durationMs)
-    }, delayMs),
-  )
-
-  return true
+  return countReadySegmentPaths()
 }
 
 function scheduleLineDrawRetry(rafAttempt) {
@@ -629,7 +546,7 @@ function scheduleLineDrawRetry(rafAttempt) {
 function setupLineDraw(rafAttempt = 0) {
   clearLineDrawTimers()
 
-  if (countReadyDrawPaths() < cursorSegments.value.length + 1) {
+  if (countReadyDrawPaths() < cursorSegments.value.length) {
     scheduleLineDrawRetry(rafAttempt)
     return
   }
@@ -651,11 +568,6 @@ function setupLineDraw(rafAttempt = 0) {
   }
 
   if (segmentDraws.length < cursorSegments.value.length) {
-    scheduleLineDrawRetry(rafAttempt)
-    return
-  }
-
-  if (!setupLeftShaftDraw(reducedMotion)) {
     scheduleLineDrawRetry(rafAttempt)
     return
   }
@@ -705,8 +617,6 @@ function setupLineDraw(rafAttempt = 0) {
         const path = getSegmentPath(segment.id)
         if (path) finalizeSegmentStroke(path)
       }
-
-      leftShaftRevealHeight.value = cursorLeftShaft.value.length
     }, (LINES_END_S + 0.2) * 1000),
   )
 }
@@ -775,12 +685,6 @@ onUnmounted(() => {
   stroke-linejoin: round;
   filter: url(#constellation-line-glow);
   opacity: 0.96;
-}
-
-.cursor-path--left-shaft {
-  vector-effect: non-scaling-stroke;
-  stroke-width: var(--cursor-path-stroke-px, 6px);
-  filter: none;
 }
 
 .constellation-glass-frame {

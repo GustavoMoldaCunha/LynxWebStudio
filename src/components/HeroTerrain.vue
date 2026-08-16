@@ -121,6 +121,12 @@
   z-index: 3;
 }
 
+@media (orientation: portrait) and (min-width: 921px) and (max-width: 1180px) {
+  .hero-terrain {
+    z-index: 5;
+  }
+}
+
 @media (max-width: 920px) {
   .hero-terrain__layer--back {
     max-height: clamp(100px, 28vh, 280px);

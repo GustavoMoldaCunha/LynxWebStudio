@@ -219,16 +219,6 @@
                           {{ feature }}
                         </li>
                       </ul>
-                      <button
-                        type="button"
-                        class="services-cta-btn services-cta-btn--inline"
-                        @click="solicitarServico(service)"
-                      >
-                        Solicitar orçamento
-                        <span class="services-cta-arrow">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                        </span>
-                      </button>
                     </div>
 
                     <div
@@ -1415,6 +1405,70 @@
   }
 }
 
+@media (orientation: portrait) and (min-width: 921px) and (max-width: 1180px) {
+  .banner {
+    --hero-title: clamp(4.2rem, 7.2vw, 4.75rem);
+    --hero-desc: clamp(1.08rem, 2vw, 1.22rem);
+    --hero-action-width: min(56vw, 520px);
+    --hero-gap-title-desc: clamp(1.35rem, 2.1vh, 1.8rem);
+    --hero-gap-desc-btn: clamp(2rem, 3vh, 2.8rem);
+    --hero-front-top: clamp(76px, 6svh, 92px);
+    --hero-constellation-content-gap: clamp(0.75rem, 1.4svh, 1.25rem);
+    background:
+      linear-gradient(to bottom, rgba(10, 6, 28, 0.18) 0%, rgba(22, 10, 74, 0.08) 48%, rgba(55, 14, 231, 0.18) 100%),
+      url('/hero-abstract-bg.webp') center bottom / auto 130% no-repeat,
+      linear-gradient(to bottom, #0A061C 0%, #160A4A 52%, #370EE7 100%);
+  }
+
+  .hero-front {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding:
+      var(--hero-front-top)
+      clamp(48px, 8vw, 96px)
+      0;
+    overflow: visible;
+  }
+
+  .banner-copy {
+    position: relative;
+    top: auto;
+    left: auto;
+    z-index: 4;
+    width: min(72vw, 620px);
+    max-width: calc(100vw - 2 * clamp(48px, 8vw, 96px));
+    align-self: center;
+    transform: translate3d(var(--hero-parallax-x, 0), var(--hero-parallax-y, 0), 0);
+    padding: clamp(28px, 3.4svh, 48px) 0;
+  }
+
+  .hero-constellation-band {
+    position: relative;
+    inset: auto;
+    z-index: 3;
+    flex-shrink: 0;
+    width: clamp(300px, 34vw, 360px);
+    max-width: calc(100vw - 2 * clamp(48px, 8vw, 96px));
+    margin-top: var(--hero-constellation-content-gap);
+    aspect-ratio: 1 / 1.15;
+    overflow: visible;
+    transform: translate3d(var(--hero-parallax-x, 0), var(--hero-parallax-y, 0), 0);
+    --hero-constellation-star-min-radius: 20px;
+    --hero-constellation-sparkle-min-radius: 11px;
+  }
+
+  .hero-constellation-band :deep(.hero-constellations) {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: 100%;
+  }
+}
+
 .banner-footer {
   position: relative;
   display: flex;
@@ -2241,27 +2295,6 @@
   width: min(100%, 500px);
   max-height: min(560px, 62vh);
   object-position: top center;
-}
-
-.services-cta-btn--inline {
-  width: min(100%, 330px);
-  max-width: 100%;
-  margin-top: var(--service-content-gap);
-  align-self: flex-start;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 12px 12px 18px;
-  font-size: 0.88rem;
-}
-
-.services-cta-btn--inline .services-cta-arrow {
-  width: 24px;
-  height: 24px;
-}
-
-.services-cta-btn--inline .services-cta-arrow svg {
-  width: 14px;
-  height: 14px;
 }
 
 /* Panel CTA button */
@@ -4013,55 +4046,6 @@
     width: min(70%, 275px);
     max-height: min(275px, 36vh);
     object-position: top center;
-  }
-
-  .services-cta-btn--inline {
-    order: 4;
-    margin-top: 36px;
-    margin-inline: auto;
-    align-self: center;
-    justify-content: center;
-    width: min(100%, 330px);
-    max-width: 100%;
-    background: #111128;
-    color: #E8E6FF;
-    border: 1px solid rgba(56,15,233,0.14);
-    border-radius: 999px;
-    min-height: 64px;
-    padding: 10px 12px 10px 18px;
-    font-size: 0.88rem;
-    font-weight: 600;
-    gap: 8px;
-    text-align: center;
-  }
-
-  .services-cta-btn--inline:hover {
-    background: #380FE9;
-    transform: translateY(-2px);
-    color: #E8E6FF;
-  }
-
-  .services-cta-btn--inline:active {
-    transform: scale(0.97);
-  }
-
-  .services-cta-btn--inline .services-cta-arrow {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: rgba(56,15,233,0.28);
-    color: #380FE9;
-  }
-
-  .services-cta-btn--inline:hover .services-cta-arrow {
-    background: #F0FF1F;
-    color: #380FE9;
-    transform: translateX(2px);
-  }
-
-  .services-cta-btn--inline .services-cta-arrow svg {
-    width: 14px;
-    height: 14px;
   }
 
   .services-panel-footer {
