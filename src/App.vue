@@ -139,22 +139,21 @@
     </div>
 
     <div ref="servicesRef" class="services-static" aria-label="Soluções disponíveis">
+      <div ref="servicesLayoutRef" class="services-static__pin">
       <div class="services-backdrop" aria-hidden="true">
         <div class="services-backdrop__stage">
           <img
             class="services-backdrop__image"
-            src="/services-background.webp"
-            srcset="/services-background-mobile.webp 836w, /services-background.webp 1672w"
-            sizes="80vw"
-            width="1672"
-            height="941"
+            src="/services-background.jpg"
+            width="1200"
+            height="600"
             alt=""
             loading="lazy"
             decoding="async"
           />
         </div>
       </div>
-      <div ref="servicesLayoutRef" class="services-static__layout">
+      <div class="services-static__layout">
         <nav class="services-static__list" aria-label="Etapas de solução">
           <button
             v-for="(service, index) in services"
@@ -171,7 +170,11 @@
         </nav>
 
         <div class="services-static__card-shell">
-          <article class="services-static__card" aria-live="polite">
+          <article v-for="(activeServiceData, index) in services" :key="activeServiceData.num"
+            class="services-static__card"
+            :style="serviceCardStyle(index)"
+            :aria-hidden="activeService !== index"
+            :inert="activeService !== index">
             <div class="services-static__decor" aria-hidden="true">
               <SectionDecoDraw orientation="horizontal" observe-target=".services-static__card">
                 <template #star>
@@ -184,11 +187,7 @@
             </div>
 
             <div class="services-static__contents">
-            <div v-for="(activeServiceData, index) in services" :key="activeServiceData.num"
-              class="services-static__card-content"
-              :style="{ opacity: serviceOpacity(index), pointerEvents: activeService === index ? 'auto' : 'none' }"
-              :aria-hidden="activeService !== index"
-              :inert="activeService !== index">
+            <div class="services-static__card-content">
               <div class="services-static__meta">
                 <span class="services-static__number">{{ activeServiceData.num }}.</span>
                 <h3 class="services-static__card-title">{{ activeServiceData.title }}</h3>
@@ -217,6 +216,8 @@
           </article>
         </div>
       </div>
+
+    </div>
 
     </div>
 
@@ -743,7 +744,7 @@
     import SectionDecoLine from './components/SectionDecoLine.vue'
     import SiteFooter from './components/SiteFooter.vue'
     import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
-    import { scrollTo } from './composables/useLenis'
+    import { scrollTo, getLenis } from './composables/useLenis'
     import { useHeroMobileMinHeight } from './composables/useHeroMobileMinHeight.js'
     import { useHeroParallax } from './composables/useHeroParallax.js'
     import LynxLogo from './assets/LynxLogoLetras.webp'
@@ -864,6 +865,7 @@
     ]
 
     const activeService = ref(0)
+    const serviceProgress = ref(0)
     const servicesRef = ref(null)
     const servicesLayoutRef = ref(null)
     let serviceResizeObserver = null
@@ -873,8 +875,20 @@
     const reducedServiceMotion = ref(false)
     let serviceMotionQuery = null
 
-    function serviceOpacity(index) {
-      return activeService.value === index ? 1 : 0
+    function serviceCardStyle(index) {
+      const distance = index - serviceProgress.value
+      // Fade out completely before the next card appears, keeping text legible.
+      const phase = Math.min(1, Math.abs(distance) * 2)
+      const eased = phase * phase * (3 - 2 * phase)
+      const opacity = 1 - eased
+      const offset = Math.sign(distance) * eased * 40
+      const active = activeService.value === index
+      return {
+        opacity: reducedServiceMotion.value ? Number(active) : opacity,
+        visibility: (reducedServiceMotion.value ? active : opacity > 0) ? 'visible' : 'hidden',
+        pointerEvents: active ? 'auto' : 'none',
+        transform: reducedServiceMotion.value ? 'none' : `translate3d(0, ${offset}px, 0)`,
+      }
     }
 
     function scrollToService(index) {
@@ -882,7 +896,12 @@
       if (!track) return
       const target = window.scrollY + track.getBoundingClientRect().top
         - serviceStickyTop + index * serviceSegment
-      window.scrollTo({ top: target, behavior: reducedServiceMotion.value ? 'instant' : 'smooth' })
+      const lenis = getLenis()
+      if (lenis) {
+        lenis.scrollTo(target, { lerp: 0, duration: 0.28, immediate: reducedServiceMotion.value })
+      } else {
+        window.scrollTo({ top: target, behavior: reducedServiceMotion.value ? 'instant' : 'smooth' })
+      }
     }
 
     function updateServiceFromViewport() {
@@ -890,9 +909,12 @@
       if (!track) return
       const progress = Math.max(0, Math.min(services.length - 1,
         (serviceStickyTop - track.getBoundingClientRect().top) / serviceSegment))
+      // Browser scroll positions are rounded to pixels; settle the visual exactly.
+      const nearest = Math.round(progress)
+      serviceProgress.value = Math.abs(progress - nearest) * serviceSegment <= 1 ? nearest : progress
       const current = Math.floor(progress)
       activeService.value = Math.min(services.length - 1,
-        current + (progress - current >= 0.825 ? 1 : 0))
+        current + (progress - current >= 0.5 ? 1 : 0))
     }
 
     function scheduleServiceUpdate() {
@@ -914,25 +936,19 @@
       track.style.setProperty('--services-available-height', `${availableHeight}px`)
       track.classList.toggle('services-static--compact', availableHeight < 600)
       track.classList.toggle('services-static--dense', availableHeight < 490)
-      // Keep the panel below the navbar. Exceptionally small viewports can scroll
-      // its content rather than moving its heading behind the navigation.
-      const needsInnerScroll = layout.scrollHeight > availableHeight + 1
-      track.classList.toggle('services-static--overflow', needsInnerScroll)
-      layout.toggleAttribute('data-lenis-prevent', needsInnerScroll)
+      // Tall mobile panels enter fully through page scrolling before they pin.
+      serviceStickyTop = Math.min(serviceStickyTop + 24, window.innerHeight - layout.offsetHeight - margin)
       serviceSegment = Math.max(320, window.innerHeight * 0.7)
       layout.style.top = `${serviceStickyTop}px`
       track.style.setProperty('--services-panel-height', `${layout.offsetHeight}px`)
       track.style.setProperty('--services-panel-top', `${serviceStickyTop}px`)
-      // Reserve only the two transitions; release the sticky panel after the last card.
-      track.style.height = `${layout.offsetHeight + (services.length - 1) * serviceSegment}px`
-      const imageHeight = track.clientWidth * 0.8 * 941 / 1672
-      const imageOffset = Math.max(0, layout.offsetHeight - imageHeight * 0.55)
-      const products = track.nextElementSibling
-      const existingGap = products
-        ? Math.max(0, products.getBoundingClientRect().top - track.getBoundingClientRect().bottom - 24)
-        : 0
+      // Keep the final card pinned briefly after both transitions have finished.
+      const finalCardHold = Math.min(480, Math.max(240, window.innerHeight * 0.45))
+      track.style.height = `${layout.offsetHeight + (services.length - 1) * serviceSegment + finalCardHold}px`
+      track.style.setProperty('--services-image-width', `${track.clientWidth}px`)
+      const card = layout.querySelector('.services-static__card-shell')
+      const imageOffset = card.getBoundingClientRect().bottom - layout.getBoundingClientRect().top
       track.style.setProperty('--services-image-offset', `${imageOffset}px`)
-      track.style.setProperty('--services-image-room', `${existingGap}px`)
       updateServiceFromViewport()
     }
 
@@ -946,6 +962,8 @@
       serviceMotionQuery.addEventListener('change', updateServiceMotion)
       serviceResizeObserver = new ResizeObserver(measureServices)
       serviceResizeObserver.observe(servicesLayoutRef.value)
+      serviceResizeObserver.observe(servicesRef.value.querySelector('.services-static__card'))
+      serviceResizeObserver.observe(servicesRef.value.querySelector('.services-backdrop__image'))
       window.addEventListener('scroll', scheduleServiceUpdate, { passive: true })
       window.addEventListener('resize', measureServices)
       measureServices()
@@ -1663,24 +1681,23 @@
   z-index: 0;
 }
 
-/* Clip only this layer, never the track or its sticky content. */
 .services-backdrop {
   position: absolute;
-  inset: 0 0 auto;
-  height: calc(100% + var(--services-image-room, 0px));
+  inset: 0 auto auto 50%;
+  width: var(--services-image-width, 100%);
+  transform: translateX(-50%);
+  height: auto;
   padding-top: var(--services-image-offset, 0px);
   box-sizing: border-box;
-  clip-path: inset(0);
-  mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 40px), transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 40px), transparent 100%);
   pointer-events: none;
   z-index: 0;
 }
 
 .services-backdrop__stage {
-  position: sticky;
-  top: calc(var(--services-panel-top, 100px) + var(--services-image-offset, 0px));
+  position: relative;
+  background: #0A0A14;
   height: auto;
+  overflow: visible;
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -1688,23 +1705,14 @@
 
 .services-backdrop__image {
   display: block;
+  mix-blend-mode: screen;
   width: 80%;
   height: auto;
-  /* Fade to the section color without blurring or cropping the source image. */
+  flex-shrink: 0;
   mask-image:
     linear-gradient(to right, transparent, #000 8%, #000 92%, transparent),
-    linear-gradient(to bottom, transparent, #000 10%, #000 94%, transparent);
+    linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent);
   mask-composite: intersect;
-}
-
-.services-backdrop__stage::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 10%;
-  width: 80%;
-  aspect-ratio: 1672 / 941;
-  background: rgba(10, 10, 20, 0.18);
 }
 
 .servicos > * {
@@ -1768,7 +1776,7 @@
 .intro-centro {
   position: relative;
   flex: 1;
-  max-width: 1120px;
+  max-width: 1280px;
   text-align: center;
 }
 
@@ -2009,16 +2017,21 @@
 .services-static {
   position: relative;
   isolation: isolate;
-  width: min(100%, 1280px);
+  width: min(100%, var(--section-max-width));
   height: auto;
   margin: clamp(72px, 9vw, 120px) auto 0;
   padding: 0 clamp(16px, 3vw, 28px);
 }
 
-.services-static__layout {
+.services-static__pin {
   position: sticky;
-  z-index: 1;
   top: 100px;
+  isolation: isolate;
+}
+
+.services-static__layout {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: minmax(240px, 340px) minmax(0, 1fr);
   gap: clamp(22px, 2.5vw, 42px);
@@ -2084,12 +2097,17 @@
 
 .services-static__card-shell {
   position: relative;
+  display: grid;
+  overflow: clip;
   min-width: 0;
   align-self: start;
 }
 
 .services-static__card {
   --service-card-padding: 24px;
+  grid-area: 1 / 1;
+  min-width: 0;
+  will-change: opacity, transform;
   position: relative;
   display: grid;
   grid-template-rows: auto 1fr;
@@ -2115,7 +2133,10 @@
 }
 
 .services-static__contents {
+  position: relative;
   display: grid;
+  min-height: 0;
+  overflow: clip;
 }
 
 .services-static__card-content {
@@ -2127,11 +2148,6 @@
   padding: calc(64px - 2 * var(--service-card-padding)) var(--service-card-padding) var(--service-card-padding);
   box-sizing: border-box;
   background: transparent;
-  transition: opacity 0.22s ease;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .services-static__card-content { transition: none; }
 }
 
 @media (max-width: 920px) {
@@ -2344,7 +2360,7 @@
 
 .products-deco {
   width: min(100%, var(--section-max-width));
-  margin: clamp(64px, 8vw, 108px) auto clamp(28px, 4vw, 48px);
+  margin: clamp(144px, 14vw, 188px) auto clamp(28px, 4vw, 48px);
   padding-inline: var(--services-panel-pad-x, 48px);
 }
 
@@ -2383,19 +2399,12 @@
   .services-static--compact .services-static__card { --service-card-padding: 20px; }
 }
 
-.services-static--overflow .services-static__layout {
-  max-height: var(--services-available-height);
-  overflow-y: auto;
-  overscroll-behavior-y: auto;
-  scrollbar-width: thin;
-}
-
 .products-deco .section-deco-label {
   color: #380FE9;
 }
 
 .extras-grid {
-  --extra-divider-color: rgba(79, 70, 229, 0.58);
+  --extra-divider-color: #380FE9;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   width: 100vw;
@@ -2404,9 +2413,8 @@
   border-top: 1px solid var(--extra-divider-color);
   border-bottom: 1px solid var(--extra-divider-color);
   background:
-    radial-gradient(ellipse 70% 85% at 100% 0%, rgba(56, 15, 233, 0.22), transparent 58%),
-    radial-gradient(ellipse 80% 70% at 0% 100%, rgba(240, 255, 31, 0.07), transparent 62%),
-    rgba(10, 10, 20, 0.72);
+    radial-gradient(ellipse 70% 85% at 100% 0%, rgba(55, 48, 163, 0.12), transparent 58%),
+    rgba(10, 11, 25, 0.78);
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
 }
 
@@ -2490,12 +2498,14 @@
 }
 
 .extra-card {
+  --extra-divider-color: #380FE9;
   position: relative;
   display: grid;
   grid-template-columns: minmax(220px, 40%) minmax(0, 60%);
   height: clamp(250px, 29vw, 360px);
   border-bottom: 0;
   overflow: visible;
+  background: transparent;
 }
 
 .extra-card:not(:last-child)::after {
@@ -2528,10 +2538,10 @@
   z-index: 3;
   width: 28px;
   height: 28px;
-  color: #4F46E5;
+  color: #380FE9;
   filter:
-    drop-shadow(0 0 12px rgba(79, 70, 229, 0.58))
-    drop-shadow(0 0 20px rgba(79, 70, 229, 0.28));
+    drop-shadow(0 0 12px rgba(56, 15, 233, 0.3))
+    drop-shadow(0 0 20px rgba(56, 15, 233, 0.12));
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
@@ -2557,8 +2567,8 @@
   min-height: 100%;
   border-right: 1px solid var(--extra-divider-color);
   background:
-    radial-gradient(ellipse 70% 70% at 50% 50%, rgba(56, 15, 233, 0.12), transparent 64%),
-    linear-gradient(180deg, rgba(7, 7, 16, 0.88), rgba(13, 10, 36, 0.64));
+    radial-gradient(ellipse 70% 70% at 50% 50%, rgba(65, 61, 172, 0.1), transparent 64%),
+    linear-gradient(180deg, rgba(10, 11, 24, 0.88), rgba(15, 17, 39, 0.64));
 }
 
 .extra-media-icon {
@@ -2589,9 +2599,7 @@
   gap: clamp(22px, 3vw, 40px);
   min-width: 0;
   padding: clamp(26px, 3.6vw, 46px) clamp(26px, 4.8vw, 64px);
-  background:
-    radial-gradient(ellipse 70% 90% at 100% 0%, rgba(56, 15, 233, 0.1), transparent 64%),
-    rgba(13, 10, 36, 0.58);
+  background: transparent;
 }
 
 .extra-card-body::before {
@@ -2600,13 +2608,18 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background:
-    radial-gradient(ellipse 34% 88% at 104% 50%, rgba(102, 154, 255, 0.22) 0%, rgba(35, 101, 255, 0.1) 34%, transparent 76%),
-    radial-gradient(ellipse 28% 78% at 100% 50%, rgba(232, 230, 255, 0.1) 0%, rgba(79, 70, 229, 0.12) 34%, transparent 76%),
-    linear-gradient(to left, rgba(102, 154, 255, 0.07) 0%, rgba(35, 101, 255, 0.03) 24%, rgba(10, 10, 20, 0) 100%);
+  background: rgba(10, 10, 20, 0.38);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
   box-shadow:
-    inset -18px 0 30px rgba(102, 154, 255, 0.06),
-    inset -7px 0 14px rgba(232, 230, 255, 0.05);
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.22),
+    0 4px 24px rgba(0, 0, 0, 0.28);
+}
+
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .extra-card-body::before {
+    background: rgba(10, 10, 20, 0.92);
+  }
 }
 
 .extra-card-body > * {
