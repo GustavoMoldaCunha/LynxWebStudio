@@ -937,7 +937,7 @@
       track.classList.toggle('services-static--compact', availableHeight < 600)
       track.classList.toggle('services-static--dense', availableHeight < 490)
       // Tall mobile panels enter fully through page scrolling before they pin.
-      serviceStickyTop = Math.min(serviceStickyTop + 24, window.innerHeight - layout.offsetHeight - margin)
+      serviceStickyTop = Math.min(serviceStickyTop + 48, window.innerHeight - layout.offsetHeight - margin)
       serviceSegment = Math.max(320, window.innerHeight * 0.7)
       layout.style.top = `${serviceStickyTop}px`
       track.style.setProperty('--services-panel-height', `${layout.offsetHeight}px`)
@@ -2098,7 +2098,7 @@
 .services-static__card-shell {
   position: relative;
   display: grid;
-  overflow: clip;
+  overflow: visible;
   min-width: 0;
   align-self: start;
 }
@@ -2152,7 +2152,7 @@
 
 @media (max-width: 920px) {
   .services-static__layout { grid-template-columns: minmax(0, 1fr); gap: 20px; }
-  .services-static__list { gap: 4px; }
+  .services-static__list { display: none; }
   .services-static__title { font-size: clamp(1.3rem, 4vw, 2rem); }
   .services-static__item { padding-block: 8px; }
   .services-static__card-title { font-size: clamp(2.2rem, 8vw, 3.5rem); }
