@@ -56,13 +56,14 @@ body {
   padding: 0;
   width: 100%;
   max-width: 100%;
-  overflow-x: visible;
+  /* Clip reveal animations without creating a scroll container for sticky. */
+  overflow-x: clip;
 }
 
 #app {
   width: 100%;
   max-width: 100%;
-  overflow-x: clip;
+  overflow-x: visible;
 }
 
 img,

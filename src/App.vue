@@ -38,7 +38,7 @@
             :threshold="0"
             :delay="120"
           >
-            Lynx é um estúdio de DESIGN e DESENVOLVIMENTO WEB que transforma presença digital em clientes, com sites de alto padrão e atendimento automatizado por IA.
+            Transformamos sua presença digital em clientes com sites de alto padrão e atendimento automatizado por IA.
           </ScrollReveal>
         </div>
         <ScrollReveal tag="div" class="banner-footer" :threshold="0" :delay="220">
@@ -139,129 +139,71 @@
 
     </div>
 
-    <div
-      ref="servicesTrack"
-      class="services-track"
-      :class="{ 'services-track--static': isMobileStack }"
-    >
-    <div
-      ref="servicesPanel"
-      class="services-panel"
-      :class="{ 'services-panel--static': isMobileStack }"
-    >
-      <div class="services-panel-header">
-        <div class="section-deco services-panel-deco">
-          <SectionDecoDraw orientation="horizontal" observe-target=".services-panel">
-            <template #star>
-              <DecoSparkle class="section-deco-sparkle" />
-            </template>
-            <template #line>
-              <SectionDecoLine class="section-deco-line" />
-            </template>
-          </SectionDecoDraw>
-          <span class="section-deco-label">[ soluções ]</span>
-        </div>
-      </div>
+    <div ref="servicesRef" class="services-static" aria-label="Soluções disponíveis">
+      <div ref="servicesLayoutRef" class="services-static__layout">
+        <nav class="services-static__list" aria-label="Etapas de solução">
+          <button
+            v-for="(service, index) in services"
+            :key="service.title"
+            type="button"
+            class="services-static__item"
+            :class="{ 'is-active': activeService === index }"
+            :aria-current="activeService === index ? 'step' : 'false'"
+            @click="scrollToService(index)"
+          >
+            <span class="services-static__num">{{ service.num }}.</span>
+            <span class="services-static__title">{{ service.title }}</span>
+          </button>
+        </nav>
 
-      <div
-        ref="servicesStage"
-        class="services-stage"
-        :class="{ 'services-stage--static': isMobileStack }"
-      >
-      <div
-        ref="servicesStackList"
-        class="services-stack"
-        :class="{ 'services-stack--static': isMobileStack }"
-      >
-        <article
-          v-for="(service, index) in listaServicos"
-          :key="service.num"
-          class="service-card"
-          :class="{
-            'service-card--last': index === listaServicos.length - 1,
-            'service-card--collapsed': !isMobileStack && cardMotion[index]?.collapsed,
-            'service-card--static': isMobileStack,
-          }"
-          :style="isMobileStack
-            ? undefined
-            : {
-                zIndex: cardMotion[index]?.zIndex ?? index + 1,
-                transform: cardMotion[index]?.transform ?? (index === 0 ? 'translate3d(0,0,0)' : 'translate3d(0,100%,0)'),
-                '--service-card-stack-offset': cardMotion[index]?.stackOffset ?? '0px',
-              }"
-        >
-          <div class="service-card-inner">
-            <div class="service-row-top">
-              <span class="service-num">{{ service.num }}</span>
+        <div class="services-static__card-shell">
+          <article class="services-static__card" aria-live="polite">
+            <div class="services-static__decor" aria-hidden="true">
+              <SectionDecoDraw orientation="horizontal" observe-target=".services-static__card">
+                <template #star>
+                  <DecoSparkle class="section-deco-sparkle" />
+                </template>
+                <template #line>
+                  <SectionDecoLine class="section-deco-line" />
+                </template>
+              </SectionDecoDraw>
             </div>
 
-            <div class="service-row-body">
-              <div class="service-row-main">
-                <h3 class="service-title">
-                  {{ service.title }}
-                  <span v-if="service.isNew" class="service-new-badge">NOVO</span>
-                </h3>
+            <div class="services-static__contents">
+            <div v-for="(activeServiceData, index) in services" :key="activeServiceData.num"
+              class="services-static__card-content"
+              :style="{ opacity: serviceOpacity(index), pointerEvents: activeService === index ? 'auto' : 'none' }"
+              :aria-hidden="activeService !== index"
+              :inert="activeService !== index">
+              <div class="services-static__meta">
+                <span class="services-static__number">{{ activeServiceData.num }}.</span>
+                <h3 class="services-static__card-title">{{ activeServiceData.title }}</h3>
+              </div>
 
-                <div class="service-expand">
-                  <div class="service-expand-inner">
-                    <div
-                      class="service-row-detail"
-                      :class="{ 'service-row-detail--with-list': service.features?.length }"
-                    >
-                      <div class="service-tags">
-                        <span v-for="tag in service.tags" :key="tag" class="service-tag">
-                          {{ tag }}
-                        </span>
-                      </div>
-                      <p class="service-desc">{{ service.desc }}</p>
-                      <ul v-if="service.features?.length" class="service-feature-list">
-                        <li v-for="feature in service.features" :key="feature">
-                          {{ feature }}
-                        </li>
-                      </ul>
-                    </div>
+              <div class="services-static__tags">
+                <span v-for="tag in activeServiceData.tags" :key="tag" class="services-static__tag">{{ tag }}</span>
+              </div>
 
-                    <div
-                      class="service-row-aside"
-                      :class="{ 'service-row-aside--preview': service.image?.startsWith('/Preview') }"
-                    >
-                      <img
-                        class="service-illustration"
-                        :class="{ 'service-illustration--preview': service.image?.startsWith('/Preview') }"
-                        :src="service.image"
-                        :alt="`Ilustração de ${service.title}`"
-                        loading="lazy"
-                      />
-                    </div>
-                  </div>
-                </div>
+              <p class="services-static__description">
+                {{ activeServiceData.description }}
+              </p>
+
+              <ul class="services-static__features">
+                <li v-for="feature in activeServiceData.features" :key="feature">{{ feature }}</li>
+              </ul>
+
+              <div class="services-static__cta-row">
+                <button type="button" class="services-static__cta">
+                  {{ activeServiceData.ctaLabel }}
+                  <ArrowUpRight class="services-static__cta-arrow" aria-hidden="true" />
+                </button>
               </div>
             </div>
-          </div>
-        </article>
-      </div>
+            </div>
+          </article>
+        </div>
       </div>
 
-      <div class="services-panel-footer">
-        <div class="services-footer-left section-deco">
-          <SectionDecoDraw orientation="horizontal" observe-target=".services-panel">
-            <template #star>
-              <DecoSparkle class="section-deco-sparkle" />
-            </template>
-            <template #line>
-              <SectionDecoLine class="section-deco-line" />
-            </template>
-          </SectionDecoDraw>
-          <p class="services-footer-text">Para pedidos específicos, por favor nos contate.</p>
-        </div>
-        <button class="services-cta-btn" @click="scrollToContato">
-          Comece seu Projeto Agora
-          <span class="services-cta-arrow">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-          </span>
-        </button>
-      </div>
-    </div>
     </div>
 
     <div class="products-deco section-deco">
@@ -786,11 +728,10 @@
     import SectionDecoDraw from './components/SectionDecoDraw.vue'
     import SectionDecoLine from './components/SectionDecoLine.vue'
     import SiteFooter from './components/SiteFooter.vue'
-    import { ref, onMounted, nextTick } from 'vue'
+    import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
     import { scrollTo } from './composables/useLenis'
     import { useHeroMobileMinHeight } from './composables/useHeroMobileMinHeight.js'
     import { useHeroParallax } from './composables/useHeroParallax.js'
-    import { useServiceStackScroll } from './composables/useServiceStackScroll.js'
     import LynxLogo from './assets/LynxLogoLetras.webp'
     import GeoaxisPreview from './assets/geoaxisambiental.com.br.webp'
     import VictormolPreview from './assets/www.victormol.com.br_.webp'
@@ -863,6 +804,136 @@
       }
     ]
 
+    const services = [
+      {
+        num: '01',
+        title: 'Consultoria de Entrada',
+        tags: ['Landing page', 'Link na bio', 'Site one page'],
+        description: 'Para profissionais e pequenos negócios que precisam iniciar com uma presença digital clara e profissional.',
+        features: [
+          'Diagnóstico e organização das informações',
+          'Landing page, link na bio ou site one page',
+          'Direção visual alinhada à marca',
+          'Design responsivo e contato direto',
+        ],
+        ctaLabel: 'Comece seu Projeto Agora',
+        variant: 'entrada',
+      },
+      {
+        num: '02',
+        title: 'Consultoria Profissional',
+        tags: ['Site institucional', 'Estratégia', 'UX'],
+        description: 'Para empresas que querem reforçar autoridade, comunicar melhor seus serviços e converter visitas em oportunidades.',
+        features: [
+          'Estrutura de navegação e mensagens estratégicas',
+          'Conteúdo pensado para conversão',
+          'Formulários, WhatsApp e CTAs mais claros',
+          'SEO, responsividade e identidade forte',
+        ],
+        ctaLabel: 'Solicitar Diagnóstico',
+        variant: 'profissional',
+      },
+      {
+        num: '03',
+        title: 'Consultoria Avançada',
+        tags: ['Automação', 'Sistemas', 'IA'],
+        description: 'Para negócios que já têm presença digital e querem otimizar atendimento, reduzir retrabalho e escalar conversão.',
+        features: [
+          'Fluxos de automação para WhatsApp',
+          'Integrações com CRM e ferramentas internas',
+          'Assistentes de atendimento com IA',
+          'Estratégia para crescimento e otimização',
+        ],
+        ctaLabel: 'Falar com Especialista',
+        variant: 'avancada',
+      },
+    ]
+
+    const activeService = ref(0)
+    const servicesRef = ref(null)
+    const servicesLayoutRef = ref(null)
+    let serviceResizeObserver = null
+    let serviceFrame = 0
+    let serviceSegment = 1
+    let serviceStickyTop = 100
+    const reducedServiceMotion = ref(false)
+    let serviceMotionQuery = null
+
+    function serviceOpacity(index) {
+      return activeService.value === index ? 1 : 0
+    }
+
+    function scrollToService(index) {
+      const track = servicesRef.value
+      if (!track) return
+      const target = window.scrollY + track.getBoundingClientRect().top
+        - serviceStickyTop + index * serviceSegment
+      window.scrollTo({ top: target, behavior: reducedServiceMotion.value ? 'instant' : 'smooth' })
+    }
+
+    function updateServiceFromViewport() {
+      const track = servicesRef.value
+      if (!track) return
+      const progress = Math.max(0, Math.min(services.length - 1,
+        (serviceStickyTop - track.getBoundingClientRect().top) / serviceSegment))
+      const current = Math.floor(progress)
+      activeService.value = Math.min(services.length - 1,
+        current + (progress - current >= 0.825 ? 1 : 0))
+    }
+
+    function scheduleServiceUpdate() {
+      if (serviceFrame) return
+      serviceFrame = requestAnimationFrame(() => {
+        serviceFrame = 0
+        updateServiceFromViewport()
+      })
+    }
+
+    function measureServices() {
+      const track = servicesRef.value
+      const layout = servicesLayoutRef.value
+      if (!track || !layout) return
+      const navbarHeight = document.querySelector('.navbar')?.getBoundingClientRect().height ?? 76
+      const margin = window.innerHeight < 600 ? 16 : 24
+      serviceStickyTop = navbarHeight + margin
+      const availableHeight = Math.max(120, window.innerHeight - serviceStickyTop - margin)
+      track.style.setProperty('--services-available-height', `${availableHeight}px`)
+      track.classList.toggle('services-static--compact', availableHeight < 600)
+      track.classList.toggle('services-static--dense', availableHeight < 490)
+      // Keep the panel below the navbar. Exceptionally small viewports can scroll
+      // its content rather than moving its heading behind the navigation.
+      const needsInnerScroll = layout.scrollHeight > availableHeight + 1
+      track.classList.toggle('services-static--overflow', needsInnerScroll)
+      layout.toggleAttribute('data-lenis-prevent', needsInnerScroll)
+      serviceSegment = Math.max(320, window.innerHeight * 0.7)
+      layout.style.top = `${serviceStickyTop}px`
+      track.style.height = `${layout.offsetHeight + (services.length - 1 + 0.5) * serviceSegment}px`
+      updateServiceFromViewport()
+    }
+
+    function updateServiceMotion() {
+      reducedServiceMotion.value = serviceMotionQuery.matches
+    }
+
+    onMounted(() => {
+      serviceMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+      updateServiceMotion()
+      serviceMotionQuery.addEventListener('change', updateServiceMotion)
+      serviceResizeObserver = new ResizeObserver(measureServices)
+      serviceResizeObserver.observe(servicesLayoutRef.value)
+      window.addEventListener('scroll', scheduleServiceUpdate, { passive: true })
+      window.addEventListener('resize', measureServices)
+      measureServices()
+    })
+
+    onBeforeUnmount(() => {
+      serviceResizeObserver?.disconnect()
+      serviceMotionQuery?.removeEventListener('change', updateServiceMotion)
+      cancelAnimationFrame(serviceFrame)
+      window.removeEventListener('scroll', scheduleServiceUpdate)
+      window.removeEventListener('resize', measureServices)
+    })
+
     const outrosServicos = [
       {
         icon: MessageCircle,
@@ -898,69 +969,6 @@
     const formEnviado = ref(false)
     const formLoading = ref(false)
     const formErro = ref('')
-
-    const listaServicos = [
-      {
-        num: '01.',
-        title: 'Consultoria de Entrada',
-        tags: ['LANDING PAGE', 'LINK NA BIO', 'SITE ONE PAGE'],
-        desc: 'Para profissionais e pequenos negócios que precisam iniciar com uma presença digital clara, profissional e fácil de acessar.',
-        features: [
-          'Diagnóstico e organização das informações',
-          'Landing page, site one page ou link na bio',
-          'Direção visual alinhada à marca',
-          'Design responsivo para todos os dispositivos',
-          'WhatsApp, formulário e chamadas para contato',
-          'SEO técnico, domínio, publicação e suporte inicial',
-        ],
-        image: '/Preview1.webp',
-        contatoMensagem: 'Desejo contratar a Consultoria de Entrada.',
-      },
-      {
-        num: '02.',
-        title: 'Consultoria Profissional',
-        tags: ['SITE INSTITUCIONAL', 'LOJA VIRTUAL', 'REFORMULAÇÃO'],
-        desc: 'Para empresas que precisam apresentar melhor seus serviços ou produtos, fortalecer sua credibilidade e oferecer uma experiência completa ao público.',
-        features: [
-          'Site institucional completo ou loja virtual',
-          'Planejamento e organização do conteúdo',
-          'Páginas internas e seções estratégicas',
-          'Formulários e integrações',
-          'SEO técnico e alta performance',
-          'Métricas e treinamento de uso',
-          'Suporte após a publicação',
-        ],
-        image: '/Preview2.webp',
-        contatoMensagem: 'Desejo contratar a Consultoria Profissional.',
-      },
-      {
-        num: '03.',
-        title: 'Consultoria Avançada',
-        tags: ['SISTEMA WEB', 'AUTOMAÇÕES', 'ASSISTENTE COM IA'],
-        desc: 'Para negócios que precisam conectar sua presença digital a processos, atendimentos e ferramentas específicas da empresa.',
-        features: [
-          'Sistema web ou área administrativa',
-          'Login, áreas restritas e banco de dados',
-          'Cadastros, agendas e formulários avançados',
-          'Integrações, automações e assistente inteligente',
-          'Planejamento técnico personalizado',
-          'Acompanhamento após o lançamento',
-        ],
-        image: '/Preview3.webp',
-        contatoMensagem: 'Desejo contratar a Consultoria Avançada.',
-      }
-    ]
-
-    const {
-      trackRef: servicesTrack,
-      panelRef: servicesPanel,
-      stageRef: servicesStage,
-      listRef: servicesStackList,
-      cardMotion,
-      isMobileStack,
-    } = useServiceStackScroll({
-      getCount: () => listaServicos.length,
-    })
 
     const projetos = ref([
       {
@@ -1129,6 +1137,10 @@
       })
 
       document.querySelectorAll('.vantagem-card').forEach(item => revealObserver.observe(item))
+
+    })
+
+    onBeforeUnmount(() => {
     })
     
 </script>
@@ -1235,12 +1247,13 @@
   overflow: hidden;
   isolation: isolate;
   color: #E8E6FF;
-  user-select: none;
+  user-select: text;
+  -webkit-user-select: text;
   background:
     linear-gradient(to bottom, rgba(10, 6, 28, 0.18) 0%, rgba(22, 10, 74, 0.08) 48%, rgba(55, 14, 231, 0.18) 100%),
     url('/hero-abstract-bg.webp') center / cover no-repeat,
     linear-gradient(to bottom, #0A061C 0%, #160A4A 52%, #370EE7 100%);
-  --hero-title: clamp(2.45rem, 0.72rem + 4.7vw, 4.9rem);
+  --hero-title: clamp(2.2rem, 0.68rem + 4.3vw, 4.5rem);
   --hero-title-line-height: 1.08;
   --hero-title-glow-bleed: clamp(12px, 0.18em, 22px);
   --hero-title-shadow: none;
@@ -1249,7 +1262,7 @@
     0 0 32px rgba(240, 255, 31, 0.34),
     0 0 56px rgba(240, 255, 31, 0.2),
     0 0 88px rgba(240, 255, 31, 0.1);
-  --hero-desc: clamp(1rem, 1.08vw, 1.16rem);
+  --hero-desc: clamp(1.08rem, 1.22vw, 1.3rem);
   --hero-copy-left: clamp(32px, 8vw, 128px);
   --hero-copy-width: min(78vw, 760px);
   --hero-action-width: clamp(360px, 34vw, 448px);
@@ -1328,6 +1341,8 @@
   align-items: flex-start;
   width: fit-content;
   max-width: 100%;
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 .banner-copy > * {
@@ -1378,6 +1393,25 @@
   line-height: 1.65;
   letter-spacing: 0.01em;
   color: rgba(232, 230, 255, 0.88);
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+@media (max-height: 760px) {
+  .banner-copy {
+    top: 56%;
+  }
+}
+
+@media (max-height: 620px) {
+  .banner-copy {
+    top: 60%;
+    padding-top: clamp(28px, 4vh, 46px);
+  }
+
+  .banner-title {
+    line-height: 0.98;
+  }
 }
 
 @media (orientation: portrait) and (min-width: 921px) {
@@ -1901,447 +1935,387 @@
   display: none;
 }
 
-.services-track {
-  --services-track-h: 400vh;
+/* ─── EXTRAS GRID ────────────────────────────────────────── */
+
+.services-static {
   position: relative;
-  width: 100%;
-  height: var(--services-track-h);
-  margin-top: clamp(112px, 12vw, 168px);
-  margin-bottom: 64px;
-}
-
-.services-track--static {
+  width: min(100%, 1280px);
   height: auto;
+  margin: clamp(72px, 9vw, 120px) auto 0;
+  padding: 0 clamp(16px, 3vw, 28px);
 }
 
-.services-panel {
-  --services-sticky-top: calc(5rem + 40px);
-  --service-panel-header-h: 2.75rem;
-  --service-title-stack-h: 4.75rem;
-  --services-panel-pad-x: 44px;
-  --services-panel-pad-y-top: 40px;
-  --services-panel-pad-y-bottom: 32px;
-  --services-stage-h: clamp(420px, 48vh, 560px);
-  --service-expand-mt: 4px;
-  --service-detail-pt: 4px;
-  --service-desc-mt: clamp(40px, 5vh, 72px);
-  --service-title-scale: 1;
-  width: 100%;
-  background: #E8E6FF;
-  border-radius: 24px;
-  padding: 0;
+.services-static__layout {
   position: sticky;
-  top: var(--services-sticky-top);
-  z-index: 2;
-  overflow: hidden;
-  font-family: inherit;
+  top: 100px;
+  display: grid;
+  grid-template-columns: minmax(240px, 340px) minmax(0, 1fr);
+  gap: clamp(22px, 2.5vw, 42px);
+  align-items: start;
+}
+
+.services-static__list {
   display: flex;
   flex-direction: column;
+  gap: 14px;
 }
 
-.services-panel--static {
-  position: static;
-  top: auto;
-  /* Keep overflow hidden so border-radius clips children */
-  overflow: hidden;
-}
-
-.services-panel-header {
+.services-static__item {
   display: flex;
-  justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 0;
-  padding: var(--services-panel-pad-y-top) var(--services-panel-pad-x) 12px;
-  border-bottom: 1px solid rgba(10, 10, 20, 0.12);
-  position: relative;
-  z-index: 40;
-  background: #E8E6FF;
-  flex-shrink: 0;
+  gap: 18px;
+  width: 100%;
+  padding: 12px 0 12px 16px;
+  background: transparent;
+  border: 0;
+  border-left: 2px solid transparent;
+  color: rgba(232, 230, 255, 0.7);
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.2s ease, border-left-color 0.2s ease, opacity 0.2s ease;
 }
 
-.services-panel-deco,
-.services-footer-left {
-  flex: 1;
+.services-static__item:hover,
+.services-static__item:focus-visible {
+  color: rgba(243, 242, 255, 0.92);
+}
+
+.services-static__item.is-active {
+  border-left-color: rgba(232, 230, 255, 0.85);
+  color: #F3F2FF;
+}
+
+.services-static__num {
+  min-width: 3ch;
+  padding-top: 0.18em;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(232, 230, 255, 0.56);
+}
+
+.services-static__title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 2.15vw, 3.1rem);
+  line-height: 0.96;
+  letter-spacing: -0.06em;
+  font-weight: 600;
+  color: inherit;
+  transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+
+.services-static__item.is-active .services-static__title {
+  color: var(--accent-yellow);
+  text-shadow: 0 0 14px rgba(240, 255, 31, 0.24);
+}
+
+.services-static__card-shell {
+  position: relative;
   min-width: 0;
+  align-self: start;
 }
 
-.services-panel-footer {
+.services-static__card {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: min(500px, var(--services-available-height, 500px));
+  background:
+    radial-gradient(ellipse 88% 34% at 50% 104%, rgba(102, 154, 255, 0.26) 0%, rgba(35, 101, 255, 0.12) 34%, transparent 74%),
+    radial-gradient(ellipse 90% 80% at 0% 0%, rgba(138, 138, 255, 0.08) 0%, transparent 58%),
+    radial-gradient(ellipse 90% 80% at 100% 100%, rgba(138, 138, 255, 0.08) 0%, transparent 58%),
+    #0D0A24;
+  border: 1px solid rgba(138, 138, 255, 0.2);
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.22), inset 0 -18px 30px rgba(102, 154, 255, 0.08);
+}
+
+.services-static__decor {
+  position: relative;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 24px;
-  margin-top: 0;
-  padding: 24px var(--services-panel-pad-x) var(--services-panel-pad-y-bottom);
-  border-top: 1px solid rgba(10,10,20,0.1);
-  position: relative;
-  z-index: 50;
-  background: #E8E6FF;
-  flex-shrink: 0;
-}
-
-.services-footer-left {
-  color: rgba(10,10,20,0.5);
-}
-
-.services-footer-text {
-  font-size: var(--text-sm);
-  color: rgba(10,10,20,0.5);
-  line-height: 1.5;
-  margin: 0;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.services-stage {
-  position: relative;
-  height: var(--services-stage-h);
-  overflow: hidden;
-  background: #E8E6FF;
-  flex-shrink: 0;
-}
-
-.services-stage--static {
-  height: auto;
-  overflow: visible;
-  flex-shrink: 1;
-}
-
-.services-stack {
-  position: absolute;
-  inset: 0;
-}
-
-.services-stack--static {
-  position: static;
-  inset: auto;
-  display: flex;
-  flex-direction: column;
-}
-
-.service-card {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: #E8E6FF;
-  border-top: 1px solid rgba(10, 10, 20, 0.14);
-  padding-inline: var(--services-panel-pad-x);
-  margin: 0;
-  overflow: hidden;
-  transform: translate3d(0, 0, 0);
-  will-change: transform;
-}
-
-.service-card--static {
-  position: static;
-  inset: auto;
-  overflow: visible;
-  transform: none !important;
-  will-change: auto;
-  height: auto;
-}
-
-.service-card:first-child {
-  border-top: none;
-}
-
-.service-card-inner {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 16px 0 28px;
-  overflow: visible;
-  height: calc(100% - var(--service-card-stack-offset, 0px));
+  width: 100%;
+  padding: 20px 24px 0;
   box-sizing: border-box;
 }
 
-.service-card--static .service-card-inner {
-  height: auto;
+.services-static__contents {
+  display: grid;
+}
+
+.services-static__card-content {
+  grid-area: 1 / 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 24px 28px;
+  box-sizing: border-box;
+  background: transparent;
+  transition: opacity 0.22s ease;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .services-track {
-    height: auto;
-  }
-
-  .services-panel {
-    position: static;
-    top: auto;
-    overflow: hidden;
-  }
-
-  .services-stage {
-    height: auto;
-    overflow: visible;
-  }
-
-  .services-stack {
-    position: static;
-    inset: auto;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .service-card {
-    position: static;
-    inset: auto;
-    overflow: visible;
-    transform: none !important;
-    will-change: auto;
-    height: auto;
-  }
-
-  .service-card-inner {
-    height: auto;
-  }
+  .services-static__card-content { transition: none; }
 }
 
-.service-row-top {
-  margin-bottom: 2px;
-  line-height: 1;
+@media (max-width: 920px) {
+  .services-static__layout { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .services-static__list { gap: 4px; }
+  .services-static__title { font-size: clamp(1.3rem, 4vw, 2rem); }
+  .services-static__item { padding-block: 8px; }
+  .services-static__card-title { font-size: clamp(2.2rem, 8vw, 3.5rem); }
+  .services-static__card-content { padding-inline: 20px; }
+  .services-static__decor { padding-inline: 20px; }
+  .services-static .services-static__mockup { width: 100px; }
+  .services-static .services-static__cta-row { gap: 10px; flex-wrap: wrap; }
+  .services-static__cta { padding: 12px; }
 }
 
-.service-num {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: rgba(10, 10, 20, 0.45);
-  letter-spacing: 0.04em;
-  transition: opacity 0.12s ease;
-}
-
-.service-row-body {
+.services-static__meta {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  min-height: 0;
+  gap: 10px;
 }
 
-.service-row-main {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-}
-
-.service-expand {
-  display: block;
-  flex: 1;
-  min-height: 0;
-  margin-top: var(--service-expand-mt, 10px);
-}
-
-.service-expand-inner {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(340px, min(460px, 36%));
-  gap: 28px clamp(36px, 5vw, 72px);
-  align-items: stretch;
-  height: 100%;
-  min-height: 0;
-}
-
-.service-row-aside {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: flex-end;
-  min-width: 0;
-  gap: clamp(16px, 2.2vh, 24px);
-  height: 100%;
-}
-
-.service-row-aside--preview {
-  justify-content: flex-start;
-  padding-top: clamp(18px, 3.5vh, 42px);
-}
-
-.services-panel .service-title {
-  font-family: var(--font-display);
+.services-static__number {
+  font-size: 0.72rem;
   font-weight: 700;
-  color: #380FE9;
-  font-size: calc(clamp(3.25rem, 6.8vw, 5.25rem) * var(--service-title-scale, 1));
-  letter-spacing: -0.03em;
-  line-height: 1.12;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.services-static__card-title {
   margin: 0;
-  /* Keep descenders inside the title box so the stack cut can sit flush */
-  padding-bottom: calc(0.22em * var(--service-title-scale, 1));
-  display: block;
-  transition: opacity 0.12s ease;
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 4vw, 5rem);
+  line-height: 0.92;
+  letter-spacing: -0.06em;
+  color: #F5F3FF;
 }
 
-.service-card--collapsed .service-title {
-  opacity: 0.42;
-  padding-bottom: calc(0.34em * var(--service-title-scale, 1));
+.services-static__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
-.service-card--collapsed .service-num {
-  opacity: 0.4;
-}
-
-.service-card--collapsed .service-new-badge {
-  opacity: 0.55;
-}
-
-.service-new-badge {
+.services-static__tag {
   display: inline-flex;
   align-items: center;
-  font-family: var(--font-body, sans-serif);
-  font-size: clamp(0.65rem, 1.2vw, 0.85rem);
+  justify-content: center;
+  padding: 7px 12px;
+  border: 1px solid rgba(138, 138, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(56, 15, 233, 0.08);
+  color: rgba(232, 230, 255, 0.84);
+  font-size: 0.66rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #E8E6FF;
-  background: #380FE9;
-  border-radius: 999px;
-  padding: 0.5em 0.95em;
-  line-height: 1;
-  white-space: nowrap;
-  vertical-align: middle;
-  margin-left: 0.35em;
-  transform: translateY(-0.12em);
-  transition: opacity 0.12s ease;
 }
 
-.service-row-detail {
-  --service-content-gap: clamp(22px, 3vh, 34px);
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  padding-top: var(--service-detail-pt, 12px);
-  min-height: 0;
-  height: 100%;
-  max-width: none;
-}
-
-.service-tags {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
+.services-static__description {
   margin: 0;
+  max-width: 32rem;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: clamp(0.98rem, 1.15vw, 1.18rem);
+  line-height: 1.45;
 }
 
-.service-tag {
-  font-size: var(--text-sm);
-  font-weight: 500;
-  color: #E8E6FF;
-  border: 1px solid #380FE9;
-  border-radius: 999px;
-  padding: 3px 12px;
-  background: #380FE9;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.service-desc {
-  font-size: clamp(1.02rem, 1.36vw, 1.2rem);
-  color: rgba(10,10,20,0.6);
-  line-height: 1.6;
-  margin: clamp(56px, 8vh, 96px) 0 0;
-  max-width: 34rem;
-  padding-top: 0;
-}
-
-.service-row-detail--with-list .service-desc {
-  margin-top: var(--service-content-gap);
-  max-width: 38rem;
-}
-
-.service-feature-list {
+.services-static__features {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 10px;
-  width: min(100%, 38rem);
-  margin: var(--service-content-gap) 0 0;
+  gap: 8px;
+  margin: 0;
   padding: 0;
   list-style: none;
-  color: rgba(10, 10, 20, 0.58);
-  font-size: clamp(0.9rem, 1.02vw, 1.04rem);
-  font-weight: 400;
-  line-height: 1.48;
+  color: rgba(232, 230, 255, 0.8);
+  font-size: 0.9rem;
+  line-height: 1.5;
 }
 
-.service-feature-list li {
+.services-static__features li {
   position: relative;
-  min-width: 0;
   padding-left: 16px;
 }
 
-.service-feature-list li::before {
+.services-static__features li::before {
   content: "";
   position: absolute;
   left: 0;
-  top: 0.56em;
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  background: #380FE9;
-  box-shadow: 0 0 10px rgba(56, 15, 233, 0.3);
+  top: 0.68em;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #F0FF1F;
+  box-shadow: 0 0 10px rgba(240, 255, 31, 0.28);
 }
 
-.service-row-aside .service-illustration {
-  display: block;
-  width: min(100%, 340px);
-  height: auto;
-  max-height: min(340px, 38vh);
-  align-self: center;
-  object-fit: contain;
-  object-position: bottom center;
-}
-
-.service-row-aside .service-illustration--preview {
-  width: min(100%, 500px);
-  max-height: min(560px, 62vh);
-  object-position: top center;
-}
-
-/* Panel CTA button */
-.services-cta-btn {
+.services-static__cta-row {
   display: flex;
-  align-items: center;
-  gap: 4px;
-  background: #111128;
-  color: #E8E6FF;
-  border: 1px solid rgba(56,15,233,0.14);
-  border-radius: 999px;
-  padding: 12px 20px 12px 24px;
-  font-size: var(--text-sm);
-  font-weight: 600;
-  font-family: inherit;
-  letter-spacing: 0.01em;
-  cursor: pointer;
-  transition: background 0.2s ease, transform 0.2s ease;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255,255,255,0.08);
 }
 
-.services-cta-btn:hover { background: #380FE9; transform: translateY(-2px); }
-.services-cta-btn:active { transform: scale(0.97); }
-
-.services-cta-arrow {
-  display: flex;
+.services-static__cta {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: rgba(56,15,233,0.1);
+  gap: 12px;
+  min-height: 56px;
+  border: 1px solid rgba(240, 255, 31, 0.38);
+  border-radius: 999px;
+  background: rgba(10, 10, 20, 0.76);
+  color: var(--accent-yellow);
+  padding: 14px 22px;
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.services-static__cta:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-yellow);
+  background: var(--accent-yellow);
   color: #380FE9;
+}
+
+.services-static__cta:active {
+  transform: scale(0.98);
+}
+
+.services-static__cta:focus-visible {
+  outline: 2px solid var(--accent-yellow);
+  outline-offset: 4px;
+}
+
+.services-static__cta-arrow {
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
 }
 
-.services-cta-btn:hover .services-cta-arrow {
-  background: #F0FF1F;
-  color: #380FE9;
+.services-static__mockup {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 200px;
+  height: 120px;
 }
 
+.services-static__phone {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 150px;
+  height: 110px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(79, 70, 229, 0.24), rgba(20, 18, 44, 0.9));
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+}
 
-/* ─── EXTRAS GRID ────────────────────────────────────────── */
+.services-static__phone-bezel {
+  width: 118px;
+  height: 92px;
+  border-radius: 12px;
+  background: #171827;
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+.services-static__phone-screen {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(18, 18, 34, 0.95), rgba(21, 20, 43, 1));
+  overflow: hidden;
+  position: relative;
+}
+
+.services-static__phone-screen--entrada,
+.services-static__phone-screen--profissional,
+.services-static__phone-screen--avancada {
+  background: linear-gradient(180deg, rgba(56, 15, 233, 0.24), #0D0A24);
+}
+
+.services-static__screen-bar {
+  position: absolute;
+  inset: 12px 12px auto 12px;
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.15), rgba(255,255,255,0.4), rgba(255,255,255,0.15));
+}
+
+.services-static__screen-lines {
+  position: absolute;
+  inset: 38px 12px 12px 12px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04)),
+    linear-gradient(90deg, rgba(255,255,255,0.16) 0 18%, transparent 18% 32%, rgba(255,255,255,0.16) 32% 50%, transparent 50% 100%);
+  border-radius: 8px;
+}
 
 .products-deco {
   width: min(100%, var(--section-max-width));
   margin: clamp(64px, 8vw, 108px) auto clamp(28px, 4vw, 48px);
   padding-inline: var(--services-panel-pad-x, 48px);
+}
+
+.services-static--compact .services-static__card-content {
+  gap: 14px;
+  padding: 16px 28px 24px;
+}
+
+.services-static--compact .services-static__decor { padding: 20px 28px 0; }
+.services-static--compact .services-static__meta { gap: 8px; }
+.services-static--compact .services-static__card-title {
+  font-size: clamp(2.25rem, 3.5vw, 3.25rem);
+  line-height: 1;
+}
+.services-static--compact .services-static__features { gap: 6px; }
+.services-static--compact .services-static__cta-row { padding-top: 14px; align-items: center; }
+.services-static--compact .services-static__cta {
+  min-height: 48px;
+  padding: 12px 20px;
+  font-size: 0.88rem;
+}
+.services-static--compact .services-static__mockup { height: 88px; }
+.services-static--compact .services-static__phone { transform: scale(0.8); }
+.services-static--compact .services-static__description { font-size: 0.98rem; }
+
+.services-static--dense .services-static__card-content { gap: 10px; padding-block: 12px 20px; }
+.services-static--dense .services-static__decor { padding-top: 16px; }
+.services-static--dense .services-static__card-title { font-size: clamp(2rem, 3.2vw, 3rem); }
+.services-static--dense .services-static__features { gap: 4px; }
+.services-static--dense .services-static__mockup { height: 64px; }
+.services-static--dense .services-static__phone { transform: scale(0.6); }
+
+@media (max-width: 920px) {
+  .services-static--compact .services-static__card-content { padding-inline: 20px; }
+  .services-static--compact .services-static__decor { padding-inline: 20px; }
+}
+
+.services-static--overflow .services-static__layout {
+  max-height: var(--services-available-height);
+  overflow-y: auto;
+  overscroll-behavior-y: auto;
+  scrollbar-width: thin;
 }
 
 .products-deco .section-deco-label {
