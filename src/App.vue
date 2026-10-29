@@ -73,7 +73,6 @@
 
 <!---------------------- SERVIÇOS -------------------------->  
   <section class="servicos" id="servicos">
-
     <div class="intro-wrapper">
 
       <div class="intro-decoracao esquerda">
@@ -140,6 +139,21 @@
     </div>
 
     <div ref="servicesRef" class="services-static" aria-label="Soluções disponíveis">
+      <div class="services-backdrop" aria-hidden="true">
+        <div class="services-backdrop__stage">
+          <img
+            class="services-backdrop__image"
+            src="/services-background.webp"
+            srcset="/services-background-mobile.webp 836w, /services-background.webp 1672w"
+            sizes="80vw"
+            width="1672"
+            height="941"
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+        </div>
+      </div>
       <div ref="servicesLayoutRef" class="services-static__layout">
         <nav class="services-static__list" aria-label="Etapas de solução">
           <button
@@ -907,7 +921,18 @@
       layout.toggleAttribute('data-lenis-prevent', needsInnerScroll)
       serviceSegment = Math.max(320, window.innerHeight * 0.7)
       layout.style.top = `${serviceStickyTop}px`
-      track.style.height = `${layout.offsetHeight + (services.length - 1 + 0.5) * serviceSegment}px`
+      track.style.setProperty('--services-panel-height', `${layout.offsetHeight}px`)
+      track.style.setProperty('--services-panel-top', `${serviceStickyTop}px`)
+      // Reserve only the two transitions; release the sticky panel after the last card.
+      track.style.height = `${layout.offsetHeight + (services.length - 1) * serviceSegment}px`
+      const imageHeight = track.clientWidth * 0.8 * 941 / 1672
+      const imageOffset = Math.max(0, layout.offsetHeight - imageHeight * 0.55)
+      const products = track.nextElementSibling
+      const existingGap = products
+        ? Math.max(0, products.getBoundingClientRect().top - track.getBoundingClientRect().bottom - 24)
+        : 0
+      track.style.setProperty('--services-image-offset', `${imageOffset}px`)
+      track.style.setProperty('--services-image-room', `${existingGap}px`)
       updateServiceFromViewport()
     }
 
@@ -1638,6 +1663,50 @@
   z-index: 0;
 }
 
+/* Clip only this layer, never the track or its sticky content. */
+.services-backdrop {
+  position: absolute;
+  inset: 0 0 auto;
+  height: calc(100% + var(--services-image-room, 0px));
+  padding-top: var(--services-image-offset, 0px);
+  box-sizing: border-box;
+  clip-path: inset(0);
+  mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 40px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 40px), transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.services-backdrop__stage {
+  position: sticky;
+  top: calc(var(--services-panel-top, 100px) + var(--services-image-offset, 0px));
+  height: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.services-backdrop__image {
+  display: block;
+  width: 80%;
+  height: auto;
+  /* Fade to the section color without blurring or cropping the source image. */
+  mask-image:
+    linear-gradient(to right, transparent, #000 8%, #000 92%, transparent),
+    linear-gradient(to bottom, transparent, #000 10%, #000 94%, transparent);
+  mask-composite: intersect;
+}
+
+.services-backdrop__stage::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  width: 80%;
+  aspect-ratio: 1672 / 941;
+  background: rgba(10, 10, 20, 0.18);
+}
+
 .servicos > * {
   position: relative;
   z-index: 1;
@@ -1939,6 +2008,7 @@
 
 .services-static {
   position: relative;
+  isolation: isolate;
   width: min(100%, 1280px);
   height: auto;
   margin: clamp(72px, 9vw, 120px) auto 0;
@@ -1947,6 +2017,7 @@
 
 .services-static__layout {
   position: sticky;
+  z-index: 1;
   top: 100px;
   display: grid;
   grid-template-columns: minmax(240px, 340px) minmax(0, 1fr);
@@ -2018,6 +2089,7 @@
 }
 
 .services-static__card {
+  --service-card-padding: 24px;
   position: relative;
   display: grid;
   grid-template-rows: auto 1fr;
@@ -2038,7 +2110,7 @@
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 20px 24px 0;
+  padding: var(--service-card-padding) var(--service-card-padding) 0;
   box-sizing: border-box;
 }
 
@@ -2052,7 +2124,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 20px 24px 28px;
+  padding: calc(64px - 2 * var(--service-card-padding)) var(--service-card-padding) var(--service-card-padding);
   box-sizing: border-box;
   background: transparent;
   transition: opacity 0.22s ease;
@@ -2068,8 +2140,7 @@
   .services-static__title { font-size: clamp(1.3rem, 4vw, 2rem); }
   .services-static__item { padding-block: 8px; }
   .services-static__card-title { font-size: clamp(2.2rem, 8vw, 3.5rem); }
-  .services-static__card-content { padding-inline: 20px; }
-  .services-static__decor { padding-inline: 20px; }
+  .services-static__card { --service-card-padding: 20px; }
   .services-static .services-static__mockup { width: 100px; }
   .services-static .services-static__cta-row { gap: 10px; flex-wrap: wrap; }
   .services-static__cta { padding: 12px; }
@@ -2078,7 +2149,7 @@
 .services-static__meta {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .services-static__number {
@@ -2158,10 +2229,10 @@
 .services-static__cta-row {
   display: flex;
   align-items: end;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 18px;
   margin-top: auto;
-  padding-top: 14px;
+  padding-top: 16px;
   border-top: 1px solid rgba(255,255,255,0.08);
 }
 
@@ -2277,12 +2348,12 @@
   padding-inline: var(--services-panel-pad-x, 48px);
 }
 
-.services-static--compact .services-static__card-content {
-  gap: 14px;
-  padding: 16px 28px 24px;
-}
+.services-static--compact .services-static__card { --service-card-padding: 28px; }
 
-.services-static--compact .services-static__decor { padding: 20px 28px 0; }
+.services-static--compact .services-static__card-content {
+  gap: 12px;
+  padding-top: calc(68px - 2 * var(--service-card-padding));
+}
 .services-static--compact .services-static__meta { gap: 8px; }
 .services-static--compact .services-static__card-title {
   font-size: clamp(2.25rem, 3.5vw, 3.25rem);
@@ -2299,16 +2370,17 @@
 .services-static--compact .services-static__phone { transform: scale(0.8); }
 .services-static--compact .services-static__description { font-size: 0.98rem; }
 
-.services-static--dense .services-static__card-content { gap: 10px; padding-block: 12px 20px; }
-.services-static--dense .services-static__decor { padding-top: 16px; }
+.services-static--dense .services-static__card-content {
+  gap: 6px;
+  padding-top: calc(64px - 2 * var(--service-card-padding));
+}
 .services-static--dense .services-static__card-title { font-size: clamp(2rem, 3.2vw, 3rem); }
 .services-static--dense .services-static__features { gap: 4px; }
 .services-static--dense .services-static__mockup { height: 64px; }
 .services-static--dense .services-static__phone { transform: scale(0.6); }
 
 @media (max-width: 920px) {
-  .services-static--compact .services-static__card-content { padding-inline: 20px; }
-  .services-static--compact .services-static__decor { padding-inline: 20px; }
+  .services-static--compact .services-static__card { --service-card-padding: 20px; }
 }
 
 .services-static--overflow .services-static__layout {
